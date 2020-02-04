@@ -99,6 +99,8 @@ public class World : Node
                     
 
                     Trigger_Door newEnt = GD.InstanceFromId(objId) as Trigger_Door;
+                    newEnt.SetProcess(true);
+                    newEnt.Notification(NotificationReady);
                     newEnt.Init(fields);
                 }
             }
