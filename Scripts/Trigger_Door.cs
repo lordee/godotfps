@@ -13,6 +13,7 @@ public class Trigger_Door : Area
     private Vector3 _destination;
     private bool _open = false;
     private float _damage = 0;
+    private World _world;
     // lip
     // sounds
     // team
@@ -24,7 +25,7 @@ public class Trigger_Door : Area
 
     public override void _Ready()
     {
-        GD.Print("door ready");
+        _world = GetNode("/root/Initial/World") as World;
     }
 
     public void Init(Godot.Collections.Dictionary fields)
@@ -86,38 +87,74 @@ public class Trigger_Door : Area
         }
         _speed = 10;
         AABB boundingBox = _mesh.GetAabb();
-        //float moveSize = 0;
         _closeLocation = GlobalTransform.origin;
         _destination = _closeLocation;
-
         _openLocation = _closeLocation;
-        _openLocation.x -= boundingBox.Size.x;
+
+        // -1 is up
+        // -2 is down
+        // 0 and above are horizontal
+        if (angle == -1)
+        {
+            _openLocation.y -= boundingBox.Size.y;
+        }
+        else if (angle == -2)
+        {
+            _openLocation.y += boundingBox.Size.y;
+        }
+        else
+        {
+            // fix for quake -> godot
+            angle -= 270;
+            angle = Mathf.Abs(angle);
+            _openLocation.x -= boundingBox.Size.x;
+            _openLocation = _openLocation.Rotated(_world.Up, angle);
+        }
+        
     }
 
     public override void _PhysicsProcess(float delta)
     {
-        if ((_open && GlobalTransform.origin != _openLocation)
+        if ((_open && GetGlobalTransform().origin != _openLocation)
             || (!_open && GlobalTransform.origin != _closeLocation))
         {
-            // move
-            Vector3 dir = (_destination - GlobalTransform.origin).Normalized();
-            dir *= _speed * delta;
-            SetTranslation(dir);
-            _mesh.SetTranslation(dir);
-            foreach(CollisionShape cs in _collisions)
+            float dist = (_destination - GlobalTransform.origin).Length();
+            Vector3 dest = new Vector3();
+            float snapLimit = 0.1f;//1f/64f;
+            if (dist < snapLimit)
             {
-                cs.SetTranslation(dir);
+                // snap
+                Transform glob = GlobalTransform;
+                glob.origin = _destination;
+                SetGlobalTransform(glob);
+            }
+            else
+            {
+                // move
+                dest = (_destination - GlobalTransform.origin).Normalized();
+                dest *= _speed * delta;
+                GlobalTranslate(dest);
+                _mesh.GlobalTranslate(dest);
+                foreach(CollisionShape cs in _collisions)
+                {
+                    cs.GlobalTranslate(dest);
+                }
             }
         }
         else if (_open)
         {
             // we're done moving
             _waitCount += delta;
-            if (_open && _waitCount >= _wait)
+            if (_waitCount >= _wait)
             {
                 ToggleOpen();
             }
         }
+    }
+
+    private void SetMove(Vector3 dest)
+    {
+
     }
 
     private void ToggleOpen()
@@ -149,6 +186,7 @@ public class Trigger_Door : Area
 
     private void Open()
     {
+        _waitCount = 0;
         // TODO play sound
         //sound(self, CHAN_VOICE, self.noise2, 1, ATTN_NORM);
         _destination = _openLocation;
