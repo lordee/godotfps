@@ -13,6 +13,7 @@ public class Trigger_Door : Area
     private Vector3 _destination;
     private bool _open = false;
     private float _damage = 0;
+    private float _angle = 0;
     private World _world;
     // lip
     // sounds
@@ -54,7 +55,6 @@ public class Trigger_Door : Area
         }
 
         // todo fields, open location
-        float angle = 0;
         foreach(KeyValuePair<object, object> kvp in fields)
         {
             switch (kvp.Key.ToString().ToLower())
@@ -66,7 +66,7 @@ public class Trigger_Door : Area
 
                     break;
                 case "angle":
-                    angle = (float)Convert.ToDouble(kvp.Value);
+                    _angle = (float)Convert.ToDouble(kvp.Value);
                     break;
                 case "team":
 
@@ -89,26 +89,61 @@ public class Trigger_Door : Area
         AABB boundingBox = _mesh.GetAabb();
         _closeLocation = GlobalTransform.origin;
         _destination = _closeLocation;
-        _openLocation = _closeLocation;
+        _openLocation = GlobalTransform.origin;
 
         // -1 is up
         // -2 is down
         // 0 and above are horizontal
-        if (angle == -1)
+        if (_angle == -1)
         {
             _openLocation.y -= boundingBox.Size.y;
         }
-        else if (angle == -2)
+        else if (_angle == -2)
         {
             _openLocation.y += boundingBox.Size.y;
         }
         else
         {
+
+            float moveDist = boundingBox.Size.x;
+            _openLocation.x -= moveDist;
+            this.LookAt(_openLocation, _world.Up);
+            this.Rotate(_world.Up, Mathf.Deg2Rad(_angle));
+            Vector3 forward = GetGlobalTransform().basis.z;
+            _openLocation = forward * moveDist;
+            
+            
+            
+            
+            /*float rads = Mathf.Deg2Rad(_angle);
+            float x = Mathf.Cos(rads) * moveDist;
+            float z = Mathf.Sin(rads) * moveDist;
+            _openLocation.x = x;*/
+            //_openLocation.z = z;
+
+
+            //_angle = 90;
+
+
             // fix for quake -> godot
-            angle -= 270;
-            angle = Mathf.Abs(angle);
-            _openLocation.x -= boundingBox.Size.x;
-            _openLocation = _openLocation.Rotated(_world.Up, angle);
+            //_angle = 90;
+            //_openLocation.x -= boundingBox.Size.x;
+            //float dist = (_openLocation - GlobalTransform.origin).Length();
+            //this.Rotate(_world.Up, Mathf.Deg2Rad(_angle));
+            //this.GlobalTransform.basis.Row0.Rotated(_world.Up, Mathf.Deg2Rad(_angle));
+            //_angle = 90;
+            /*float rads = Mathf.Deg2Rad(_angle);
+            float x = Mathf.Cos(rads);
+            float y = _openLocation.y;
+            float z = Mathf.Sin(rads);
+            _openLocation = new Vector3(x,0,z) * dist;
+            _openLocation.y = y;*/
+
+            /*_angle = 90;
+            Vector3 dest = (_openLocation - _closeLocation);
+            dest = dest.Rotated(_world.Up, Mathf.Deg2Rad(_angle));
+            _openLocation = dest;*/
+
         }
         
     }
@@ -150,11 +185,6 @@ public class Trigger_Door : Area
                 ToggleOpen();
             }
         }
-    }
-
-    private void SetMove(Vector3 dest)
-    {
-
     }
 
     private void ToggleOpen()
