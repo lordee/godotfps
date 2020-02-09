@@ -23,6 +23,7 @@ public class Trigger_Door : Area
     private float _health = 0;
     MeshInstance _mesh;
     List<CollisionShape> _collisions = new List<CollisionShape>();
+    List<Trigger_Door> _linkedDoors = new List<Trigger_Door>();
 
     public override void _Ready()
     {
@@ -41,7 +42,6 @@ public class Trigger_Door : Area
         entityName = entityName.Substring(("entity_").Length);
         entityName = "entity_" + entityName.Substring(0, entityName.Find("_", 0));
 
-        // TODO link doors to each other
         // link doors to mesh
         _mesh = GetNode("/root/Initial/Map/QodotMap/Meshes/" + entityName) as MeshInstance;
         // link doors to collision
@@ -158,12 +158,31 @@ public class Trigger_Door : Area
             _waitCount += delta;
             if (_waitCount >= _wait)
             {
-                ToggleOpen();
+                ToggleOpenNoLinked();
             }
         }
     }
 
-    private void ToggleOpen()
+    public void AddLinkedDoor(Trigger_Door door)
+    {
+        _linkedDoors.Add(door);
+    }
+
+    public AABB GetAABB()
+    {
+        return _mesh.GetAabb();
+    }
+
+    public void ToggleOpen()
+    {
+        foreach (Trigger_Door door in _linkedDoors)
+        {
+            door.ToggleOpenNoLinked();
+        }
+        ToggleOpenNoLinked();
+    }
+    
+    public void ToggleOpenNoLinked()
     {
         if (_open)
         {
@@ -198,11 +217,6 @@ public class Trigger_Door : Area
         _destination = _openLocation;
         // toggle open state
         _open = !_open;
-        /*_mesh.Visible = false;
-        foreach(CollisionShape cs in _collisions)
-        {
-            cs.SetDisabled(true);
-        }*/
 
         if (_speed <= 0)
         {

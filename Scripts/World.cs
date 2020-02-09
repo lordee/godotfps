@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 
 public class World : Node
 {
@@ -26,7 +27,6 @@ public class World : Node
             Player p = GetNodeOrNull(peer.ToString()) as Player;
             if (p != null)
             {
-                //p.ProcessMovement(delta);
                 p.ProcessMovement(delta);
             }
         }
@@ -80,6 +80,7 @@ public class World : Node
 
         Spatial triggers = GetNode("/root/Initial/Map/QodotMap/Triggers") as Spatial;
         Godot.Collections.Array triggerents = triggers.GetChildren();
+        List<Trigger_Door> doors = new List<Trigger_Door>();
 
         foreach (Area ent in triggerents)
         {
@@ -102,9 +103,33 @@ public class World : Node
                     newEnt.SetProcess(true);
                     newEnt.Notification(NotificationReady);
                     newEnt.Init(fields);
+
+                    doors.Add(newEnt);
                 }
             }
-            
+        }
+
+        this.LinkDoors(doors);
+    }
+
+    private void LinkDoors(List<Trigger_Door> doors)
+    {
+        foreach (Trigger_Door door in doors)
+        {
+            AABB bbox = door.GetAABB();
+            bbox = bbox.Grow(0.2f);
+
+            foreach (Trigger_Door dtest in doors)
+            {
+                if (dtest != door)
+                {
+                    AABB testBbox = dtest.GetAABB();
+                    if (bbox.Intersects(testBbox))
+                    {
+                        door.AddLinkedDoor(dtest);
+                    }
+                }
+            }
         }
     }
 
