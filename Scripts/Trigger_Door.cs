@@ -104,46 +104,22 @@ public class Trigger_Door : Area
         }
         else
         {
-
-            float moveDist = boundingBox.Size.x;
-            _openLocation.x -= moveDist;
-            this.LookAt(_openLocation, _world.Up);
-            this.Rotate(_world.Up, Mathf.Deg2Rad(_angle));
-            Vector3 forward = GetGlobalTransform().basis.z;
-            _openLocation = forward * moveDist;
+            // FIXME until we run into something that uses it, we just assume full x or z bounding box
+            float moveDist = 0f;
+            if (_angle == 90f || _angle == 270f)
+            {
+                moveDist = boundingBox.Size.x;
+            }
+            else
+            {
+                moveDist = boundingBox.Size.z;
+            }
             
-            
-            
-            
-            /*float rads = Mathf.Deg2Rad(_angle);
-            float x = Mathf.Cos(rads) * moveDist;
-            float z = Mathf.Sin(rads) * moveDist;
-            _openLocation.x = x;*/
-            //_openLocation.z = z;
-
-
-            //_angle = 90;
-
-
-            // fix for quake -> godot
-            //_angle = 90;
-            //_openLocation.x -= boundingBox.Size.x;
-            //float dist = (_openLocation - GlobalTransform.origin).Length();
-            //this.Rotate(_world.Up, Mathf.Deg2Rad(_angle));
-            //this.GlobalTransform.basis.Row0.Rotated(_world.Up, Mathf.Deg2Rad(_angle));
-            //_angle = 90;
-            /*float rads = Mathf.Deg2Rad(_angle);
-            float x = Mathf.Cos(rads);
-            float y = _openLocation.y;
-            float z = Mathf.Sin(rads);
-            _openLocation = new Vector3(x,0,z) * dist;
-            _openLocation.y = y;*/
-
-            /*_angle = 90;
-            Vector3 dest = (_openLocation - _closeLocation);
-            dest = dest.Rotated(_world.Up, Mathf.Deg2Rad(_angle));
-            _openLocation = dest;*/
-
+            Spatial moveNode = new Spatial();
+            AddChild(moveNode);
+            moveNode.RotateY(Mathf.Deg2Rad(_angle));
+            moveNode.Translate(new Vector3(0,0,moveDist));
+            _openLocation = moveNode.GetGlobalTransform().origin;
         }
         
     }
@@ -247,6 +223,5 @@ public class Trigger_Door : Area
     
     private void _on_area_exited(Area body)
     {
-        GD.Print("door area exited");
     }
 }
