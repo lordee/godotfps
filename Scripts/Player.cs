@@ -9,6 +9,7 @@ public class Player : KinematicBody
     Spatial _head;
     World _world;
     RayCast _stairCatcher;
+    MeshInstance _mesh;
 
     // fields
     public int Team;
@@ -84,11 +85,13 @@ public class Player : KinematicBody
         _head = (Spatial)GetNode("Head");
         _world = GetNode("/root/Initial/World") as World;
         _stairCatcher = (RayCast)GetNode("StairCatcher");
+        _mesh = GetNode("MeshInstance") as MeshInstance;
     }
 
     public void RotateHead(float rad)
     {
         _head.RotateY(rad);
+        _mesh.RotateY(rad);
     }
 
     public void SetMovement(float move_forward, float move_right, float move_up, float look_right, float look_up, Basis aim, float camAngle)
