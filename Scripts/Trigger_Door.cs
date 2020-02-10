@@ -17,6 +17,8 @@ public class Trigger_Door : Area
     private World _world;
     // lip
     // sounds
+    AudioStreamPlayer3D _sndOpen = null;
+    AudioStreamPlayer3D _sndClose = null;
     // team
     // allowteams
     private float _maxHealth = 0;
@@ -78,7 +80,8 @@ public class Trigger_Door : Area
                     _speed = (float)Convert.ToDouble(kvp.Value);
                     break;
                 case "sounds":
-
+                    int type = Convert.ToInt16(kvp.Value);
+                    SetupSound(type);
                     break;
                 case "wait":
                     _wait = (float)Convert.ToDouble(kvp.Value);
@@ -129,6 +132,15 @@ public class Trigger_Door : Area
         if ((_open && GetGlobalTransform().origin != _openLocation)
             || (!_open && GlobalTransform.origin != _closeLocation))
         {
+            if (_open && _sndOpen != null && !_sndOpen.Playing)
+            {
+                _sndOpen.Play();
+            }
+            else if (!_open && _sndClose != null && !_sndClose.Playing)
+            {
+                _sndClose.Play();
+            }
+
             float dist = (_destination - GlobalTransform.origin).Length();
             Vector3 dest = new Vector3();
             float snapLimit = 0.1f;//1f/64f;
@@ -160,6 +172,48 @@ public class Trigger_Door : Area
             {
                 ToggleOpenNoLinked();
             }
+        }
+    }
+
+    private void SetupSound(int type)
+    {
+        AudioStream open = null;
+        AudioStream close = null;
+        switch (type)
+        {
+            case 1:
+                open = ResourceLoader.Load<AudioStream>("res://Assets/Sounds/doors/doormv1.wav");
+                close = ResourceLoader.Load<AudioStream>("res://Assets/Sounds/doors/drclos4.wav");
+                break;
+            case 2:
+                open = ResourceLoader.Load<AudioStream>("res://Assets/Sounds/doors/hydro1.wav");
+                close = ResourceLoader.Load<AudioStream>("res://Assets/Sounds/doors/hydro2.wav");
+                break;
+            case 3:
+                open = ResourceLoader.Load<AudioStream>("res://Assets/Sounds/doors/stndr1.wav");
+                close = ResourceLoader.Load<AudioStream>("res://Assets/Sounds/doors/stndr2.wav");
+                break;
+            case 4:
+                open = ResourceLoader.Load<AudioStream>("res://Assets/Sounds/doors/ddoor1.wav");
+                close = ResourceLoader.Load<AudioStream>("res://Assets/Sounds/doors/ddoor2.wav");
+                break;
+            default:
+                // FIXME test
+                open = ResourceLoader.Load<AudioStream>("res://Assets/Sounds/doors/doormv1.wav");
+                close = ResourceLoader.Load<AudioStream>("res://Assets/Sounds/doors/drclos4.wav");
+                break;
+        }
+
+        if (open != null && close != null)
+        {
+            _sndOpen = new AudioStreamPlayer3D();
+            _sndClose = new AudioStreamPlayer3D();
+            _sndOpen.SetStream(open);
+            _sndClose.SetStream(close);
+            _sndOpen.Name = "sndOpen";
+            _sndClose.Name = "sndClose";
+            AddChild(_sndOpen);
+            AddChild(_sndClose);
         }
     }
 
