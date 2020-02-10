@@ -181,6 +181,14 @@ public class Trigger_Door : Area
                 {
                     cs.GlobalTranslate(dest);
                 }
+
+                // TODO
+                // if object inside doors new position
+                    // if the object can be moved
+                        // move the object
+                    // can't be moved
+                        // do damage
+                        // move back to last position
             }
         }
         else if (_open)
