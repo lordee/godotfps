@@ -12,8 +12,9 @@ public class Trigger_Door : Area
     private Vector3 _openLocation;
     private Vector3 _destination;
     private bool _open = false;
-    private float _damage = 0;
+    private float _damage = 2;
     private float _angle = 0;
+    private float _lip = .8f;
     private World _world;
     // lip
     // sounds
@@ -21,11 +22,14 @@ public class Trigger_Door : Area
     AudioStreamPlayer3D _sndClose = null;
     // team
     // allowteams
+    // FIXME should use bitmask
+    List<int> _allowTeams = new List<int>();
     private float _maxHealth = 0;
     private float _health = 0;
     MeshInstance _mesh;
     List<CollisionShape> _collisions = new List<CollisionShape>();
     List<Trigger_Door> _linkedDoors = new List<Trigger_Door>();
+
 
     public override void _Ready()
     {
@@ -56,28 +60,45 @@ public class Trigger_Door : Area
             }
         }
 
-        // todo fields, open location
         foreach(KeyValuePair<object, object> kvp in fields)
         {
             switch (kvp.Key.ToString().ToLower())
             {
                 case "allowteams":
-
+                    string teamVal = kvp.Value.ToString();
+                    if (teamVal.Contains("blue"))
+                    {
+                        _allowTeams.Add(1);
+                    }
+                    if (teamVal.Contains("red"))
+                    {
+                        _allowTeams.Add(2);
+                    }
+                    if (teamVal.Contains("yellow"))
+                    {
+                        _allowTeams.Add(3);
+                    }
+                    if (teamVal.Contains("green"))
+                    {
+                        _allowTeams.Add(4);
+                    }
+                    break;
+                case "team_no":
+                        _allowTeams.Add(Convert.ToInt16(kvp.Value));
                     break;
                 case "lip":
-
+                    _lip = (float)Convert.ToDouble(kvp.Value);
+                    _lip = _lip / 10;
                     break;
                 case "angle":
                     _angle = (float)Convert.ToDouble(kvp.Value);
-                    break;
-                case "team":
-
                     break;
                 case "dmg":
                     _damage = (float)Convert.ToDouble(kvp.Value);
                     break;
                 case "speed":
                     _speed = (float)Convert.ToDouble(kvp.Value);
+                    _speed = _speed / 10;
                     break;
                 case "sounds":
                     int type = Convert.ToInt16(kvp.Value);
@@ -88,7 +109,6 @@ public class Trigger_Door : Area
                     break;
             }
         }
-        _speed = 10;
         AABB boundingBox = _mesh.GetAabb();
         _closeLocation = GlobalTransform.origin;
         _destination = _closeLocation;
@@ -99,11 +119,11 @@ public class Trigger_Door : Area
         // 0 and above are horizontal
         if (_angle == -1)
         {
-            _openLocation.y -= boundingBox.Size.y;
+            _openLocation.y -= (boundingBox.Size.y - _lip);
         }
         else if (_angle == -2)
         {
-            _openLocation.y += boundingBox.Size.y;
+            _openLocation.y += (boundingBox.Size.y - _lip);
         }
         else
         {
@@ -111,11 +131,11 @@ public class Trigger_Door : Area
             float moveDist = 0f;
             if (_angle == 90f || _angle == 270f)
             {
-                moveDist = boundingBox.Size.x;
+                moveDist = boundingBox.Size.x - _lip;
             }
             else
             {
-                moveDist = boundingBox.Size.z;
+                moveDist = boundingBox.Size.z - _lip;
             }
             
             Spatial moveNode = new Spatial();
@@ -124,7 +144,6 @@ public class Trigger_Door : Area
             moveNode.Translate(new Vector3(0,0,moveDist));
             _openLocation = moveNode.GetGlobalTransform().origin;
         }
-        
     }
 
     public override void _PhysicsProcess(float delta)
@@ -143,7 +162,7 @@ public class Trigger_Door : Area
 
             float dist = (_destination - GlobalTransform.origin).Length();
             Vector3 dest = new Vector3();
-            float snapLimit = 0.1f;//1f/64f;
+            float snapLimit = 0.2f;//1f/64f;
             if (dist < snapLimit)
             {
                 // snap
@@ -251,7 +270,6 @@ public class Trigger_Door : Area
     private void Close()
     {
         _open = !_open;
-        // TODO play sound
         if (_maxHealth > 0)
         {
             _health = _maxHealth;
@@ -266,10 +284,7 @@ public class Trigger_Door : Area
     private void Open()
     {
         _waitCount = 0;
-        // TODO play sound
-        //sound(self, CHAN_VOICE, self.noise2, 1, ATTN_NORM);
         _destination = _openLocation;
-        // toggle open state
         _open = !_open;
 
         if (_speed <= 0)
@@ -282,9 +297,25 @@ public class Trigger_Door : Area
     {
         if (body.GetParent() is Player p)
         {
+            bool openDoor = false;
             if (!_open)
             {
-                ToggleOpen();
+                if (_allowTeams.Count > 0)
+                {
+                    if (_allowTeams.Contains(p.Team))
+                    {
+                        openDoor = true;
+                    }
+                }
+                else
+                {
+                    openDoor = true;
+                }
+
+                if (openDoor)
+                {
+                    ToggleOpen();
+                }
             }
         }
     }
