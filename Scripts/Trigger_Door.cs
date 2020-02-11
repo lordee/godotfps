@@ -11,7 +11,6 @@ public class Trigger_Door : Area
     private Vector3 _closeLocation;
     private Vector3 _openLocation;
     private Vector3 _destination;
-    private bool _open = false;
     private float _damage = 2;
     private float _angle = 0;
     private float _lip = .8f;
@@ -29,6 +28,8 @@ public class Trigger_Door : Area
     MeshInstance _mesh;
     List<CollisionShape> _collisions = new List<CollisionShape>();
     List<Trigger_Door> _linkedDoors = new List<Trigger_Door>();
+    private STATE _open = STATE.CLOSE;
+    Vector3 _lastPos;
 
 
     public override void _Ready()
@@ -111,6 +112,7 @@ public class Trigger_Door : Area
         }
         AABB boundingBox = _mesh.GetAabb();
         _closeLocation = GlobalTransform.origin;
+        _lastPos = _closeLocation;
         _destination = _closeLocation;
         _openLocation = GlobalTransform.origin;
 
@@ -148,58 +150,88 @@ public class Trigger_Door : Area
 
     public override void _PhysicsProcess(float delta)
     {
-        if ((_open && GetGlobalTransform().origin != _openLocation)
-            || (!_open && GlobalTransform.origin != _closeLocation))
+        switch (_open)
         {
-            if (_open && _sndOpen != null && !_sndOpen.Playing)
+            case STATE.OPEN:
+                _waitCount += delta;
+                if (_waitCount >= _wait)
+                {
+                    ToggleOpenNoLinked();
+                }
+                break;
+            case STATE.OPENING:
+            case STATE.CLOSING:
+                PlaySound();
+                _lastPos = GlobalTransform.origin;
+                Move(delta);               
+                break;
+        }
+    }
+    // FIXME - change body entered to generic node to process pipes, flags etc
+    private void ProcessBlockers(Area body)
+    {
+        // TODO
+        // if object inside doors new position
+            // if the object can be moved
+                // move the object
+            // can't be moved
+                // do damage
+                // move back to last position
+
+        // physics handles this already and automoves, need to test large square blocks that would squish
+    }
+
+    private void Move(float delta)
+    {
+        float dist = (_destination - GlobalTransform.origin).Length();
+        Vector3 dest = new Vector3();
+        float snapLimit = 0.2f;//1f/64f;
+        if (dist < snapLimit)
+        {
+            // snap
+            Transform glob = GlobalTransform;
+            glob.origin = _destination;
+            SetGlobalTransform(glob);
+
+            if (_open == STATE.OPENING)
+            {
+                _open = STATE.OPEN;
+            }
+            else if (_open == STATE.CLOSING)
+            {
+                _open = STATE.CLOSE;
+            }
+        }
+        else
+        {
+            // move
+            dest = (_destination - GlobalTransform.origin).Normalized();
+            dest *= _speed * delta;
+            GlobalTranslate(dest);
+            _mesh.GlobalTranslate(dest);
+            foreach(CollisionShape cs in _collisions)
+            {
+                cs.GlobalTranslate(dest);
+            }
+        }
+    }
+
+    private void PlaySound()
+    {
+        if (_open == STATE.OPENING)
+        {
+            if (_sndOpen != null && !_sndOpen.Playing)
             {
                 _sndOpen.Play();
             }
-            else if (!_open && _sndClose != null && !_sndClose.Playing)
+        }
+        else if (_open == STATE.CLOSING)
+        {
+            if (_sndClose != null && !_sndClose.Playing)
             {
                 _sndClose.Play();
             }
-
-            float dist = (_destination - GlobalTransform.origin).Length();
-            Vector3 dest = new Vector3();
-            float snapLimit = 0.2f;//1f/64f;
-            if (dist < snapLimit)
-            {
-                // snap
-                Transform glob = GlobalTransform;
-                glob.origin = _destination;
-                SetGlobalTransform(glob);
-            }
-            else
-            {
-                // move
-                dest = (_destination - GlobalTransform.origin).Normalized();
-                dest *= _speed * delta;
-                GlobalTranslate(dest);
-                _mesh.GlobalTranslate(dest);
-                foreach(CollisionShape cs in _collisions)
-                {
-                    cs.GlobalTranslate(dest);
-                }
-
-                // TODO
-                // if object inside doors new position
-                    // if the object can be moved
-                        // move the object
-                    // can't be moved
-                        // do damage
-                        // move back to last position
-            }
-        }
-        else if (_open)
-        {
-            // we're done moving
-            _waitCount += delta;
-            if (_waitCount >= _wait)
-            {
-                ToggleOpenNoLinked();
-            }
-        }
+        }   
     }
 
     private void SetupSound(int type)
@@ -265,11 +297,11 @@ public class Trigger_Door : Area
     
     public void ToggleOpenNoLinked()
     {
-        if (_open)
+        if (_open == STATE.OPEN)
         {
             Close();
         }
-        else
+        else if (_open == STATE.CLOSE)
         {
             Open();
         }
@@ -277,7 +309,7 @@ public class Trigger_Door : Area
 
     private void Close()
     {
-        _open = !_open;
+        _open = STATE.CLOSING;
         if (_maxHealth > 0)
         {
             _health = _maxHealth;
@@ -293,7 +325,7 @@ public class Trigger_Door : Area
     {
         _waitCount = 0;
         _destination = _openLocation;
-        _open = !_open;
+        _open = STATE.OPENING;
 
         if (_speed <= 0)
         {
@@ -301,26 +333,36 @@ public class Trigger_Door : Area
         }
     }
 
+    private bool CanOpen(Player p)
+    {
+        bool canOpen = false;
+        if (_allowTeams.Count > 0)
+        {
+            if (_allowTeams.Contains(p.Team))
+            {
+                canOpen = true;
+            }
+        }
+        else
+        {
+            canOpen = true;
+        }
+
+        return canOpen;
+    }
+
     private void _on_area_entered(Area body)
     {
+        if (_open == STATE.OPENING || _open == STATE.CLOSING)
+        {
+            ProcessBlockers(body);
+        }
+
         if (body.GetParent() is Player p)
         {
-            bool openDoor = false;
-            if (!_open)
+            if (_open == STATE.CLOSE)
             {
-                if (_allowTeams.Count > 0)
-                {
-                    if (_allowTeams.Contains(p.Team))
-                    {
-                        openDoor = true;
-                    }
-                }
-                else
-                {
-                    openDoor = true;
-                }
-
-                if (openDoor)
+                if (CanOpen(p))
                 {
                     ToggleOpen();
                 }
