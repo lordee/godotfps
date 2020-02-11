@@ -22,8 +22,8 @@ public class Player : KinematicBody
     private bool _touchingGround = false;
     private Vector3 _playerVelocity = new Vector3();
     private Vector3 _moveDirectionNorm = new Vector3();
-    private float _gravity = 27f;
-    private float _jumpSpeed = 8.0f;                // The speed at which the character's up axis gains when hitting jump
+    private float _gravity = 80f;
+    private float _jumpSpeed = 27.0f;                // The speed at which the character's up axis gains when hitting jump
     private float _moveSpeed = 15.0f;               // Ground move speed
     private float _runAcceleration = 14.0f;         // Ground accel
     private float _runDeacceleration = 10.0f;       // Deacceleration that occurs when running on the ground
@@ -39,47 +39,6 @@ public class Player : KinematicBody
     public float _sideStrafeSpeed = 1.0f;          // What the max speed to generate when side strafing
     public float _airControl = 0.3f;               // How precise air control is
     
-
-    // SS movement
-    /*
-    public const float JumpStartForce = 22f;
-    public const float JumpContinueForce = 0.41f;
-    public const float MovementSpeed = 36;
-    public const float FlySprintMultiplier = 5; //Speed while sprint flying is base speed times this value
-    public const float MaxJumpLength = 0.22f;
-    public const float Gravity = 55f;
-    public const float MaxVerticalSpeed = 100f;
-    public const float FlyDecelerateTime = 0.15f; //How many seconds needed to stop from full speed
-    public const float FlyFriction = MovementSpeed * FlySprintMultiplier / FlyDecelerateTime;
-    public const float SfxMinLandMomentumY = 3;
-    public const float AdsMultiplierMovementEffect = 1.66f;
-    public const float CrouchMovementDivisor = 2.8f;
-    public const float Friction = MovementSpeed / DecelerateTime;
-    public const float SlideFrictionDivisor = 13;
-    public const float DecelerateTime = 0.1f; //How many seconds needed to stop from full speed
-    public const float Height = 10;
-    public const float RequiredUncrouchHeight = 11;
-    public const float AirAcceleration = 25; //How many units per second to accelerate
-
-    public int ForwardAxis = 0;
-	public int RightAxis = 0;
-	public int JumpAxis = 0;
-	public int CrouchAxis = 0;
-    public float JumpSens = 0;
-    public bool FlyMode { get; private set;} = false;
-    public bool IsFlySprinting = false;
-    public bool IsJumping = false;
-    public bool WasOnFloor = false;
-    public bool IsCrouching = false;
-    public float LastMomentumY = 0;
-    public float JumpTimer = 0f;
-    public Vector3 Momentum = new Vector3(0,0,0);
-    public bool Ads = false;
-	public float AdsMultiplier = 1;  
-    
-    public bool OnFloor = false;
-    */
-
     public override void _Ready()
     {
         _head = (Spatial)GetNode("Head");
