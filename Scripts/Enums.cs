@@ -19,3 +19,8 @@ public enum MT // movetype
     NONE,
     LOCK,
 }
+
+public enum ET // entity type
+{
+    PLAYER = 1,
+}

@@ -10,13 +10,13 @@ public class PlayerController : Camera
     public float move_forward = 0;
     public float move_right = 0;
     public float move_up = 0;
-    public float look_right = 0;
-    public float look_up = 0;
 
     private float _cameraAngle = 0f;
 
     // settings
     float mouseSensitivity = 0.2f;
+
+    public PlayerCmd pCmd;
 
     public override void _Ready()
     {
@@ -30,8 +30,11 @@ public class PlayerController : Camera
 
     public override void _PhysicsProcess(float delta)
     {
-        Basis aim = this.GetGlobalTransform().basis;
-        _network.SendPMovement(1, _player.ID, move_forward, move_right, move_up, look_right, look_up, aim, _cameraAngle);
+        pCmd.move_forward = move_forward;
+        pCmd.move_right = move_right;
+        pCmd.move_up = move_up;
+        pCmd.aim = this.GetGlobalTransform().basis;
+        pCmd.cam_angle = _cameraAngle;
 
         if (Input.IsActionJustPressed("jump"))
             {
@@ -70,8 +73,8 @@ public class PlayerController : Camera
             {
                 if (em.Relative.Length() > 0)
                 {          
-                    look_right = em.Relative.x;
-                    look_up = em.Relative.y;
+                    float look_right = em.Relative.x;
+                    float look_up = em.Relative.y;
 
                     // limit how far up/down we look
                     // invert mouse

@@ -29,8 +29,9 @@ public class World : Node
 
     private float _accelerate = 1f; // qw 10f
     public float Accelerate { get { return _accelerate; }}
-    
 
+    private List<string> _playerNodeNames = new List<string>();
+    
     private Network _network;
 
     public override void _Ready()
@@ -151,23 +152,29 @@ public class World : Node
         }
     }
 
-    public Player AddPlayer(int networkID, bool playerControlled)
+    public PlayerController AddPlayer(int networkID, bool playerControlled)
     {
+        PlayerController pc = null;
         PackedScene playerScene = (PackedScene)ResourceLoader.Load("res://Scenes/Player.tscn");
         Player player = (Player)playerScene.Instance();
         this.AddChild(player);
         player.SetName(networkID.ToString());
         player.ID = networkID;
+        _playerNodeNames.Add(player.Name);
 
         if (playerControlled)
         {
             PackedScene controller = ResourceLoader.Load("res://Scenes/PlayerController.tscn") as PackedScene;
-            PlayerController pc = controller.Instance() as PlayerController;
+            pc = controller.Instance() as PlayerController;
             player.GetNode("Head").AddChild(pc);
             pc.Init(player);
+            Input.SetMouseMode(Input.MouseMode.Captured);
         }
-        
-        return player;
+
+        player.Team = 1;
+        Spawn(player);
+
+        return pc;
     }
 
     public void Spawn(Player p)

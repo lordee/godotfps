@@ -6,7 +6,8 @@ public class Network : Node
 {
     private int maxPlayers = 8;
     Initial initial;
-    World world;
+    World _world;
+    PlayerController _pc;
     private int _id;
     public List<int> PeerList = new List<int>();
 
@@ -19,12 +20,41 @@ public class Network : Node
         GetTree().Connect("server_disconnected", this, "ConnectionRemoved");
 
         initial = GetNode("/root/Initial") as Initial;
-        world = GetNode("/root/Initial/World") as World;
+        _world = GetNode("/root/Initial/World") as World;
     }
 
-    public void ClientConnected(string id)
+    public override void _PhysicsProcess(float delta)
     {
-        GD.Print("Client connected - ID: " +  id);
+        if (IsNetworkMaster())
+        {
+            // send updates to each peer
+            foreach(int id in PeerList)
+            {
+                foreach(int id2 in PeerList)
+                {
+                    SendPMovement(id, id2, )
+                }
+            }
+        }
+        else
+        {
+            // send update to network master
+            SendPMovement(1, _id, _pc.pCmd);
+        }
+    }
+
+    public void ClientConnected(string ids)
+    {
+        GD.Print("Client connected - ID: " +  ids);
+        int id = Convert.ToInt32(ids);
+
+        // client connects, event on client and server
+        if (IsNetworkMaster())
+        {
+            AddPlayer(id, false);
+
+            SyncWorld(id);
+        }
     }
 
     public void ClientDisconnected(string id)
@@ -35,6 +65,8 @@ public class Network : Node
     public void ConnectionSuccess()
     {
         GD.Print("ConnectionSuccess");
+
+        // client connects, event on client
         
         //_game.InstantiatePlayer(GetTree().GetNetworkUniqueId().ToString(), true);        
     }
@@ -65,33 +97,77 @@ public class Network : Node
 		GD.Print($"Started hosting on port '{port}'");
         GetTree().SetNetworkPeer(Peer);
         _id = GetTree().GetNetworkUniqueId();
+        _world.StartWorld();
 
-		PeerList.Add(_id);
-		//Nicknames[ServerId] = Game.Nickname;
-        world.StartWorld();
-        Player p = world.AddPlayer(_id, true);
-        p.Team = 1;
-        world.Spawn(p);
-        Input.SetMouseMode(Input.MouseMode.Captured);
+        AddPlayer(_id, true);
 	}
 
+    private void AddPlayer(int id, bool playerControlled)
+    {
+        PeerList.Add(id);
+        PlayerController c = _world.AddPlayer(_id, playerControlled);
+
+        if (c != null)
+        {
+            _pc = c;
+        }
+    }
+    
+    private void SyncWorld(int id)
+    {
+        // TODO - send over all ents to new player?
+        foreach(int pid in PeerList)
+        {
+            RpcId(id, nameof(SyncWorldReceive), ET.PLAYER, pid.ToString());
+        }
+    }
+
+    // only clients receive this, only on first connect?
     [Remote]
-    public void ReceivePMovement(int playerID, float move_forward, float move_right, float move_up, float look_right, float look_up, Vector3 aimx, Vector3 aimy, Vector3 aimz, float camAngle)
+    public void SyncWorldReceive(ET entType, string nodeName)
+    {
+        switch (entType)
+        {
+            case ET.PLAYER:
+                int id = Convert.ToInt32(nodeName);
+                if (id == GetTree().GetNetworkUniqueId())
+                {
+                    _id = id;
+                    AddPlayer(id, true);
+                }
+                else
+                {
+                    AddPlayer(id, false);
+                }
+                break;
+        }
+    }
+
+    [Remote]
+    public void ReceivePMovement(int playerID, float move_forward, float move_right, float move_up, Vector3 aimx, Vector3 aimy, Vector3 aimz, float camAngle)
     {
         Basis aim = new Basis(aimx, aimy, aimz);
         Player p = GetNode("/root/Initial/World/" + playerID.ToString()) as Player;
-        p.SetMovement(move_forward, move_right, move_up, look_right, look_up, aim, camAngle);
+        PlayerCmd pCmd;
+        pCmd.aim = aim;
+        pCmd.move_forward = move_forward;
+        pCmd.move_right = move_right;
+        pCmd.move_up = move_up;
+        pCmd.cam_angle = camAngle;
+        p.SetMovement(pCmd);
     }
 
-    public void SendPMovement(int RecID, int id, float move_forward, float move_right, float move_up, float look_right, float look_up, Basis aim, float camAngle)
+    public void SendPMovement(int RecID, int id, PlayerCmd pCmd)
     {
         if (IsNetworkMaster())
         {
-            ReceivePMovement(id, move_forward, move_right, move_up, look_right, look_up, aim.x, aim.y, aim.z, camAngle);
+            if (id == _id)
+            {
+                ReceivePMovement(id, pCmd.move_forward, pCmd.move_right, pCmd.move_up, pCmd.aim.x, pCmd.aim.y, pCmd.aim.z, pCmd.cam_angle);
+                return;
+            }
         }
-        else
-        {
-            RpcUnreliableId(RecID, nameof(ReceivePMovement), id, move_forward, move_right, move_up, look_right, look_up, aim.x, aim.y, aim.z, camAngle);
-        }
+        
+        RpcUnreliableId(RecID, nameof(ReceivePMovement), id, pCmd.move_forward, pCmd.move_right, pCmd.move_up, pCmd.aim.x, pCmd.aim.y, pCmd.aim.z, pCmd.cam_angle);
     }
 }

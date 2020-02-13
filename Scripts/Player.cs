@@ -52,15 +52,9 @@ public class Player : KinematicBody
         _mesh.RotateY(rad);
     }
 
-    public void SetMovement(float move_forward, float move_right, float move_up, float look_right, float look_up, Basis aim, float camAngle)
+    public void SetMovement(PlayerCmd pCmd)
     {
-        _pCmd.move_forward = move_forward;
-        _pCmd.move_right = move_right;
-        _pCmd.move_up = move_up;
-        _pCmd.look_right = look_right;
-        _pCmd.look_up = look_up;
-        _pCmd.cam_angle = camAngle;
-        _pCmd.aim = aim;
+        _pCmd = pCmd;
     }
 
     public void ProcessMovement(float delta)
@@ -326,13 +320,11 @@ public class Player : KinematicBody
     
 }
 
-struct PlayerCmd
+public struct PlayerCmd
 {
     public float move_forward;
     public float move_right;
     public float move_up;
-    public float look_right;
-    public float look_up;
     public Basis aim;
     public float cam_angle;
 }
