@@ -9,3 +9,13 @@ public enum STATE
     OPENING = 6,
     CLOSING = 7
 }
+
+public enum MT // movetype
+{
+    FLY,
+    NORMAL,
+    SPECTATOR,
+    DEAD,
+    NONE,
+    LOCK,
+}

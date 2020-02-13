@@ -1,0 +1,432 @@
+using Godot;
+using static Godot.Mathf;
+using static FMath;
+using System;
+
+public class Player : KinematicBody
+{
+    // Nodes
+    Spatial _head;
+    World _world;
+    RayCast _stairCatcher;
+    MeshInstance _mesh;
+
+    // fields
+    public int Team;
+    public int ID;
+    
+
+    // movement
+    PlayerCmd _pCmd = new PlayerCmd();
+    private bool _wishJump;
+    private bool _touchingGround = false;
+    private Vector3 _playerVelocity = new Vector3();
+    private Vector3 _moveDirectionNorm = new Vector3();
+    private float _jumpSpeed = 27.0f;                // The speed at which the character's up axis gains when hitting jump
+    private float _moveSpeed = 15.0f;               // Ground move speed
+    private float _runAcceleration = 14.0f;         // Ground accel
+    private float _runDeacceleration = 10.0f;       // Deacceleration that occurs when running on the ground
+    private float _friction = 6;
+    private float _moveScale = 1.0f;
+    private bool _climbLadder = false;
+    private float _cameraAngle = 0F;
+    private float _maxStairAngle = 20f;
+    private float _stairJumpHeight = 9F;
+    public float _airAcceleration = 2.0f;          // Air accel
+    public float _airDecceleration = 2.0f;         // Deacceleration experienced when opposite strafing
+    public float _sideStrafeAcceleration = 50.0f;  // How fast acceleration occurs to get up to sideStrafeSpeed
+    public float _sideStrafeSpeed = 1.0f;          // What the max speed to generate when side strafing
+    public float _airControl = 0.3f;               // How precise air control is
+
+    private float _waterLevel = 0;
+    private bool _inWater = false; // can't we use water level?
+    private float _waterSwimSpeed = 10f;
+    private float _slimeSwimSpeed = 8f;
+    private float _otherSwimSpeed = 5f;
+
+    private MT _moveType = MT.NORMAL;
+    
+    public override void _Ready()
+    {
+        _head = (Spatial)GetNode("Head");
+        _world = GetNode("/root/Initial/World") as World;
+        _stairCatcher = (RayCast)GetNode("StairCatcher");
+        _mesh = GetNode("MeshInstance") as MeshInstance;
+    }
+
+    public void RotateHead(float rad)
+    {
+        _head.RotateY(rad);
+        _mesh.RotateY(rad);
+    }
+
+    public void SetMovement(float move_forward, float move_right, float move_up, float look_right, float look_up, Basis aim, float camAngle)
+    {
+        _pCmd.move_forward = move_forward;
+        _pCmd.move_right = move_right;
+        _pCmd.move_up = move_up;
+        _pCmd.look_right = look_right;
+        _pCmd.look_up = look_up;
+        _pCmd.cam_angle = camAngle;
+        _pCmd.aim = aim;
+    }
+
+    public void ProcessMovement(float delta)
+    {
+        // TODO - CategorisePosition
+	    // set watertype, and waterlevel
+        SetWaterLevel();
+        
+        if (_waterLevel == 2)
+            CheckWaterJump();
+       
+
+        CheckJump();
+
+        if (!_inWater)
+        {
+            ApplyFriction(delta);
+        }
+        
+
+        if (_waterLevel >= 2)
+            WaterMove();
+        else if (_moveType == MT.FLY)
+            FlyMove();
+        else
+            AirMove(delta);
+
+        // set watertype, and waterlevel for final spot
+        SetWaterLevel();
+
+        _touchingGround = IsOnFloor();
+
+
+
+
+
+        
+
+        _playerVelocity = this.MoveAndSlide(_playerVelocity, _world.Up);
+
+
+        _pCmd.move_forward = 0f;
+        _pCmd.move_right = 0f;
+        _pCmd.move_up = 0f;
+        _pCmd.aim = new Basis();
+    }
+
+    private void SetWaterLevel()
+    {
+        // get waterlevel
+        /*pmove.waterlevel = 0;
+        pmove.watertype = CONTENTS_EMPTY;
+
+        point[2] = pmove.origin[2] + player_mins[2] + 1;
+        cont = PM_PointContents (point);
+        if (cont <= CONTENTS_WATER) {
+            pmove.watertype = cont;
+            pmove.waterlevel = 1;
+            point[2] = pmove.origin[2] + (player_mins[2] + player_maxs[2]) * 0.5;
+            cont = PM_PointContents (point);
+            if (cont <= CONTENTS_WATER) {
+                pmove.waterlevel = 2;
+                point[2] = pmove.origin[2] + 22;
+                cont = PM_PointContents (point);
+                if (cont <= CONTENTS_WATER) {
+                    pmove.waterlevel = 3;
+                }
+            }
+        }*/
+    }
+
+    void CheckWaterJump()
+    {
+        /*vec3_t flatforward;
+        vec3_t spot;
+        int cont;
+
+        if (pmove.waterjumptime)
+            return;
+
+        // don't hop out if we just jumped in
+        if (pmove.velocity[2] < -180)
+            return;
+
+        // see if near an edge
+        flatforward[0] = pm_forward[0];
+        flatforward[1] = pm_forward[1];
+        flatforward[2] = 0;
+        VectorNormalize (flatforward);
+
+        VectorMA (pmove.origin, 24, flatforward, spot);
+        spot[2] += 8;
+        cont = PM_PointContents_AllBSPs (spot);
+        if (cont != CONTENTS_SOLID)
+            return;
+        spot[2] += 24;
+        cont = PM_PointContents_AllBSPs (spot);
+        if (cont != CONTENTS_EMPTY)
+            return;
+        // jump out of water
+        VectorScale (flatforward, 50, pmove.velocity);
+        pmove.velocity[2] = 310;
+        pmove.waterjumptime = 2; // safety net
+        pmove.jump_held = true; // don't jump again until released
+        */
+    }
+
+    private void AirMove(float delta)
+    {
+        Vector3 wishDir = new Vector3();
+        wishDir += _pCmd.aim.x * _pCmd.move_right;
+        wishDir -= _pCmd.aim.z * _pCmd.move_forward;
+
+        float wishSpeed = wishDir.Length();
+
+        if (_touchingGround) {
+            _playerVelocity.y = 0;
+            Accelerate(wishDir, wishSpeed, _world.Accelerate, delta);
+
+            if (_playerVelocity.x == 0 && _playerVelocity.y == 0)
+            {
+                _playerVelocity.z = 0;
+                // stopped
+            }
+
+            //return PM_StepSlideMove(false);
+        }
+        else {
+            // not on ground, so little effect on velocity
+            AirAccelerate(wishDir, wishSpeed, _world.Accelerate, delta);
+
+            // add gravity
+            _playerVelocity.y -= _world.Gravity * delta;
+
+            //if (movevars.airstep)
+            //    PM_StepSlideMove(true);
+            //else
+            //PM_SlideMove();
+        }
+    }
+
+    void AirAccelerate(Vector3 wishdir, float wishspeed, float accel, float delta)
+    {
+        float accelspeed, currentspeed, wishspd = wishspeed;
+
+        /*
+        if (pmove.pm_type == PM_DEAD)
+            return;
+        if (pmove.waterjumptime)
+            return;
+        */
+
+        wishspd = wishspd < 3 ? wishspd : 3;
+        currentspeed = _playerVelocity.Dot(wishdir);
+        float addspeed = wishspd - currentspeed;
+
+        if (addspeed <= 0)
+            return;
+        accelspeed = accel * wishspeed * delta;
+        accelspeed = accelspeed < addspeed ? accelspeed : addspeed;
+        _playerVelocity.x += accelspeed * wishdir.x;
+        _playerVelocity.y += accelspeed * wishdir.y;
+        _playerVelocity.z += accelspeed * wishdir.z;
+    }
+
+    private void FlyMove()
+    {
+        /*
+        vec3_t wishvel, wishdir;
+        float wishspeed;
+        int i;
+
+        for (i = 0; i < 3; i++)
+            wishvel[i] = pm_forward[i] * pmove.cmd.forwardmove + pm_right[i] * pmove.cmd.sidemove;
+
+        wishvel[2] += pmove.cmd.upmove;
+
+        VectorCopy(wishvel, wishdir);
+        wishspeed = VectorNormalize(wishdir);
+
+        if (wishspeed > movevars.maxspeed) {
+            VectorScale(wishvel, movevars.maxspeed / wishspeed, wishvel);
+            wishspeed = movevars.maxspeed;
+        }
+
+        Accelerate(wishdir, wishspeed, movevars.accelerate);
+        return PM_StepSlideMove(false);
+        */
+    }
+
+    private void WaterMove()
+    {
+        /*
+        vec3_t wishvel, wishdir;
+        float wishspeed;
+        int i;
+
+        // user intentions
+        for (i = 0; i < 3; i++)
+            wishvel[i] = pm_forward[i] * pmove.cmd.forwardmove + pm_right[i] * pmove.cmd.sidemove;
+
+        if (pmove.pm_type != PM_FLY && !pmove.cmd.forwardmove && !pmove.cmd.sidemove && !pmove.cmd.upmove)
+            wishvel[2] -= 60; // drift towards bottom
+        else
+            wishvel[2] += pmove.cmd.upmove;
+
+        VectorCopy(wishvel, wishdir);
+        wishspeed = VectorNormalize(wishdir);
+
+        if (wishspeed > movevars.maxspeed) {
+            VectorScale(wishvel, movevars.maxspeed / wishspeed, wishvel);
+            wishspeed = movevars.maxspeed;
+        }
+        wishspeed *= 0.7;
+
+        // water acceleration
+        Accelerate(wishdir, wishspeed, movevars.wateraccelerate);
+
+        return PM_StepSlideMove(false);
+        */
+    }
+
+    private void ApplyFriction(float delta)
+    {
+        float drop = 0f;
+        float speed = _playerVelocity.Length();
+        if (speed < .1f)
+        {
+            _playerVelocity.x = 0;
+            _playerVelocity.z = 0;
+            return;
+        }
+
+        if (_waterLevel >= 2)
+        {
+            // apply water friction
+            drop = speed * _world.WaterFriction * _waterLevel * delta;
+        }
+        else if (_moveType == MT.FLY)
+        {
+            // apply flymode friction
+            drop = speed * _world.FlyFriction * delta;
+        }
+        else if (_touchingGround)
+        {
+            // apply ground friction
+            float friction = _world.GroundFriction;
+
+            /*
+            Vector3 start = new Vector3();
+            Vector3 stop = new Vector3();
+
+            // if the leading edge is over a dropoff, increase friction
+            start.x = stop.x = GlobalTransform.origin.x + _playerVelocity.x / speed * 1.6f;
+            start.y = stop.y = GlobalTransform.origin.y + _playerVelocity.y / speed * 1.6f;
+            start.z = GlobalTransform.origin.z; // should be adding player mins too, but nfi in godot
+            stop.z = start.z - 3.4f;
+            
+            trace = PM_PlayerTrace(start, stop);
+            if (trace.fraction == 1) {
+                friction *= 2;
+            }
+            */
+
+            float control = speed < _world.StopSpeed ? _world.StopSpeed : speed;
+            drop = control * friction * delta;
+        }
+        else
+        {
+            // air, no friction
+            return;
+        }
+
+        // scale the velocity
+        float newSpeed = speed - drop;
+        newSpeed = Mathf.Max(newSpeed, 0);
+        newSpeed /= speed;
+
+        _playerVelocity *= newSpeed;
+    }
+
+    void CheckJump()
+    {
+        if (_waterLevel >= 2) {
+            // swimming, not jumping
+            /*if (pmove.watertype == CONTENTS_WATER)
+                pmove.velocity[2] = _waterSwimSpeed;
+            else if (pmove.watertype == CONTENTS_SLIME)
+                pmove.velocity[2] = _slimeSwimSpeed;
+            else
+                pmove.velocity[2] = _otherSwimSpeed;
+            return;*/
+        }
+
+        if (!_touchingGround)
+            return; // in air, so no effect
+
+        _touchingGround = false;
+        _playerVelocity.y += 270;
+    }
+
+    private void Accelerate(Vector3 wishdir, float wishspeed, float accel, float delta)
+    {
+        float addspeed;
+        float accelspeed;
+        float currentspeed;
+        
+        currentspeed = _playerVelocity.Dot(wishdir);
+        addspeed = wishspeed - currentspeed;
+        if(addspeed <= 0)
+            return;
+        accelspeed = accel * delta * wishspeed;
+        if(accelspeed > addspeed)
+            accelspeed = addspeed;
+        _playerVelocity.x += accelspeed * wishdir.x;
+        _playerVelocity.y += accelspeed * wishdir.y;
+        _playerVelocity.z += accelspeed * wishdir.z;
+    }
+
+    private void ApplyFriction(float t, float delta)
+    {
+        Vector3 vec = _playerVelocity;
+        float speed;
+        float newspeed;
+        float control;
+        float drop;
+
+        vec.y = 0.0f;
+        speed = vec.Length();
+        drop = 0.0f;
+
+        // Only if the player is on the ground then apply friction
+        if (_touchingGround)
+        {
+            control = speed < _runDeacceleration ? _runDeacceleration : speed;
+            drop = control * _friction * delta * t;
+        }
+
+        newspeed = speed - drop;
+        if(newspeed < 0)
+            newspeed = 0;
+        if(speed > 0)
+            newspeed /= speed;
+
+        _playerVelocity.x *= newspeed;
+        _playerVelocity.z *= newspeed;
+    }
+
+    
+}
+
+struct PlayerCmd
+{
+    public float move_forward;
+    public float move_right;
+    public float move_up;
+    public float look_right;
+    public float look_up;
+    public Basis aim;
+    public float cam_angle;
+}

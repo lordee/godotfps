@@ -11,6 +11,24 @@ public class World : Node
 
     private Vector3 _up = new Vector3(0,1,0);
     public Vector3 Up { get { return _up; }}
+
+    private float _gravity = 80f;
+    public float Gravity { get { return _gravity; }}
+
+    private float _waterFriction = 0.4f;
+    public float WaterFriction { get { return _waterFriction; }}
+
+    private float _flyFriction = 0.4f;
+    public float FlyFriction { get { return _flyFriction; }}
+
+    private float _groundFriction = 0.6f;
+    public float GroundFriction { get { return _groundFriction; }}
+
+    private float _stopSpeed = 10f;
+    public float StopSpeed { get { return _stopSpeed; }}
+
+    private float _accelerate = 1f; // qw 10f
+    public float Accelerate { get { return _accelerate; }}
     
 
     private Network _network;

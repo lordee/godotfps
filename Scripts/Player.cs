@@ -22,7 +22,6 @@ public class Player : KinematicBody
     private bool _touchingGround = false;
     private Vector3 _playerVelocity = new Vector3();
     private Vector3 _moveDirectionNorm = new Vector3();
-    private float _gravity = 80f;
     private float _jumpSpeed = 27.0f;                // The speed at which the character's up axis gains when hitting jump
     private float _moveSpeed = 15.0f;               // Ground move speed
     private float _runAcceleration = 14.0f;         // Ground accel
@@ -36,7 +35,7 @@ public class Player : KinematicBody
     public float _airAcceleration = 2.0f;          // Air accel
     public float _airDecceleration = 2.0f;         // Deacceleration experienced when opposite strafing
     public float _sideStrafeAcceleration = 50.0f;  // How fast acceleration occurs to get up to sideStrafeSpeed
-    public float _sideStrafeSpeed = 1.0f;          // What the max speed to generate when side strafing
+    public float _sideStrafeSpeed = 3.0f;          // What the max speed to generate when side strafing
     public float _airControl = 0.3f;               // How precise air control is
     
     public override void _Ready()
@@ -195,7 +194,7 @@ public class Player : KinematicBody
         // Apply gravity
         if (!_climbLadder)
         {
-            _playerVelocity.y -= _gravity * delta;
+            _playerVelocity.y -= _world.Gravity * delta;
         }
     }
 
