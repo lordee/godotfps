@@ -168,11 +168,16 @@ public class World : Node
             pc = controller.Instance() as PlayerController;
             player.GetNode("Head").AddChild(pc);
             pc.Init(player);
+            pc.SetProcess(true);
+            pc.Notification(NotificationReady);
             Input.SetMouseMode(Input.MouseMode.Captured);
         }
-
         player.Team = 1;
-        Spawn(player);
+
+        if (IsNetworkMaster())
+        {
+            Spawn(player);
+        }
 
         return pc;
     }

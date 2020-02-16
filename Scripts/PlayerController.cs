@@ -30,38 +30,38 @@ public class PlayerController : Camera
 
     public override void _PhysicsProcess(float delta)
     {
+        if (Input.IsActionJustPressed("jump"))
+        {
+            move_up = 1;
+        }
+        if (Input.IsActionJustReleased("jump"))
+        {
+            move_up = -1;
+        }
+        move_forward = 0;
+        if (Input.IsActionPressed("move_forward"))
+        {
+            move_forward += 1;
+        }
+        if (Input.IsActionPressed("move_back"))
+        {
+            move_forward += -1;
+        }
+        move_right = 0;
+        if (Input.IsActionPressed("move_right"))
+        {
+            move_right += 1;
+        }
+        if (Input.IsActionPressed("move_left"))
+        {
+            move_right += -1;
+        }
+
         pCmd.move_forward = move_forward;
         pCmd.move_right = move_right;
         pCmd.move_up = move_up;
         pCmd.aim = this.GetGlobalTransform().basis;
         pCmd.cam_angle = _cameraAngle;
-
-        if (Input.IsActionJustPressed("jump"))
-            {
-                move_up = 1;
-            }
-            if (Input.IsActionJustReleased("jump"))
-            {
-                move_up = -1;
-            }
-            move_forward = 0;
-            if (Input.IsActionPressed("move_forward"))
-            {
-                move_forward += 1;
-            }
-            if (Input.IsActionPressed("move_back"))
-            {
-                move_forward += -1;
-            }
-            move_right = 0;
-            if (Input.IsActionPressed("move_right"))
-            {
-                move_right += 1;
-            }
-            if (Input.IsActionPressed("move_left"))
-            {
-                move_right += -1;
-            }
     }
 
     public override void _Input(InputEvent e)

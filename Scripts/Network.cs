@@ -10,6 +10,9 @@ public class Network : Node
     PlayerController _pc;
     private int _id;
     public List<int> PeerList = new List<int>();
+    public List<Player> PlayerList = new List<Player>();
+
+    private bool _active = false;
 
     public override void _Ready()
     {
@@ -25,21 +28,21 @@ public class Network : Node
 
     public override void _PhysicsProcess(float delta)
     {
-        if (IsNetworkMaster())
+        if (_active)
         {
-            // send updates to each peer
-            foreach(int id in PeerList)
+            if (IsNetworkMaster())
             {
-                foreach(int id2 in PeerList)
+                // send updates to each peer
+                foreach(int id in PeerList)
                 {
-                    SendPMovement(id, id2, )
+                    foreach (Player p in PlayerList)
+                    {
+                        RpcUnreliable(nameof(ReceivePMovementClient), p.ID, p.GlobalTransform);
+                    }
                 }
             }
-        }
-        else
-        {
             // send update to network master
-            SendPMovement(1, _id, _pc.pCmd);
+            SendPMovementServer(1, _id, _pc.pCmd);
         }
     }
 
@@ -100,17 +103,21 @@ public class Network : Node
         _world.StartWorld();
 
         AddPlayer(_id, true);
+        _active = true;
 	}
 
     private void AddPlayer(int id, bool playerControlled)
     {
         PeerList.Add(id);
-        PlayerController c = _world.AddPlayer(_id, playerControlled);
+        PlayerController c = _world.AddPlayer(id, playerControlled);
 
         if (c != null)
         {
             _pc = c;
         }
+
+        Player p = GetNode("/root/Initial/World/" + id) as Player;
+        PlayerList.Add(p);
     }
     
     private void SyncWorld(int id)
@@ -132,8 +139,10 @@ public class Network : Node
                 int id = Convert.ToInt32(nodeName);
                 if (id == GetTree().GetNetworkUniqueId())
                 {
+                    _world.StartWorld();
                     _id = id;
                     AddPlayer(id, true);
+                    _active = true;
                 }
                 else
                 {
@@ -144,10 +153,10 @@ public class Network : Node
     }
 
     [Remote]
-    public void ReceivePMovement(int playerID, float move_forward, float move_right, float move_up, Vector3 aimx, Vector3 aimy, Vector3 aimz, float camAngle)
+    public void ReceivePMovementServer(int id, float move_forward, float move_right, float move_up, Vector3 aimx, Vector3 aimy, Vector3 aimz, float camAngle)
     {
         Basis aim = new Basis(aimx, aimy, aimz);
-        Player p = GetNode("/root/Initial/World/" + playerID.ToString()) as Player;
+        Player p = GetNode("/root/Initial/World/" + id.ToString()) as Player;
         PlayerCmd pCmd;
         pCmd.aim = aim;
         pCmd.move_forward = move_forward;
@@ -157,17 +166,24 @@ public class Network : Node
         p.SetMovement(pCmd);
     }
 
-    public void SendPMovement(int RecID, int id, PlayerCmd pCmd)
+    [Remote]
+    public void ReceivePMovementClient(int id, Transform t)
+    {
+        Player p = GetNode("/root/Initial/World/" + id.ToString()) as Player;
+        p.GlobalTransform = t;
+    }
+
+    public void SendPMovementServer(int RecID, int id, PlayerCmd pCmd)
     {
         if (IsNetworkMaster())
         {
             if (id == _id)
             {
-                ReceivePMovement(id, pCmd.move_forward, pCmd.move_right, pCmd.move_up, pCmd.aim.x, pCmd.aim.y, pCmd.aim.z, pCmd.cam_angle);
+                ReceivePMovementServer(id, pCmd.move_forward, pCmd.move_right, pCmd.move_up, pCmd.aim.x, pCmd.aim.y, pCmd.aim.z, pCmd.cam_angle);
                 return;
             }
         }
         
-        RpcUnreliableId(RecID, nameof(ReceivePMovement), id, pCmd.move_forward, pCmd.move_right, pCmd.move_up, pCmd.aim.x, pCmd.aim.y, pCmd.aim.z, pCmd.cam_angle);
+        RpcUnreliableId(RecID, nameof(ReceivePMovementServer), id, pCmd.move_forward, pCmd.move_right, pCmd.move_up, pCmd.aim.x, pCmd.aim.y, pCmd.aim.z, pCmd.cam_angle);
     }
 }
