@@ -89,7 +89,7 @@ public class Network : Node
 		//Set static string Ip
 		NetworkedMultiplayerENet Peer = new NetworkedMultiplayerENet();
 		Peer.CreateClient(InIp, port);
-        GetTree().SetNetworkPeer(Peer);
+        GetTree().NetworkPeer = Peer;
 	}
 
     public void Host(int port)
@@ -98,7 +98,7 @@ public class Network : Node
 		Peer.CreateServer(port, maxPlayers);
 
 		GD.Print($"Started hosting on port '{port}'");
-        GetTree().SetNetworkPeer(Peer);
+        GetTree().NetworkPeer = Peer;
         _id = GetTree().GetNetworkUniqueId();
         _world.StartWorld();
 
@@ -174,7 +174,7 @@ public class Network : Node
         if ((p.GlobalTransform.origin - t.origin).Length() > 10) // randomnumber()
         {
             GD.Print("correcting origin");
-            p.SetGlobalTransform(t);
+            p.GlobalTransform = t;
         }
         /*else
         {

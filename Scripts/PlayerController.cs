@@ -60,7 +60,7 @@ public class PlayerController : Camera
         pCmd.move_forward = move_forward;
         pCmd.move_right = move_right;
         pCmd.move_up = move_up;
-        pCmd.aim = this.GetGlobalTransform().basis;
+        pCmd.aim = this.GlobalTransform.basis;
         pCmd.cam_angle = _cameraAngle;
     }
 

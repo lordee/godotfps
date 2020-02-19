@@ -29,7 +29,6 @@ public class Player : KinematicBody
     private float _friction = 6;
     private float _moveScale = 1.0f;
     private bool _climbLadder = false;
-    private float _cameraAngle = 0F;
     private float _maxStairAngle = 20f;
     private float _stairJumpHeight = 9F;
     public float _airAcceleration = 2.0f;          // Air accel

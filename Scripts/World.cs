@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Collections;
 
 public class World : Node
 {
@@ -53,6 +54,7 @@ public class World : Node
 
     public void StartWorld()
     {
+        Input.SetMouseMode(Input.MouseMode.Visible);
         PackedScene main = (PackedScene)ResourceLoader.Load("res://Maps/lastresort_b5.tscn");
         Spatial inst = (Spatial)main.Instance();
         Initial of = GetNode("/root/Initial") as Initial;
@@ -65,36 +67,39 @@ public class World : Node
         foreach(Spatial ent in ents)
         {
             Godot.Collections.Dictionary fields = ent.Get("properties") as Godot.Collections.Dictionary;
-            object classname;
-            try
+
+            if (fields != null)
             {
-                if (fields != null)
+                foreach (DictionaryEntry kvp in fields)
                 {
-                    if (fields.ContainsKey("classname"))
+                    if (kvp.Key.ToString().ToLower().Contains("classname"))
                     {
-                        fields.TryGetValue("classname", out classname);
-                        switch (classname.ToString())
+                        switch (kvp.Value.ToString().ToLower())
                         {
                             case "info_player_start":
-                                object team;
-                                fields.TryGetValue("allowteams", out team);
-                                if (team.ToString().Contains("blue"))
+                                foreach(DictionaryEntry kvp2 in fields)
                                 {
-                                    spawnsTeam1.Add(ent);
-                                }
-                                if (team.ToString().Contains("red"))
-                                {
-                                    spawnsTeam2.Add(ent);
+                                    switch(kvp2.Key.ToString().ToLower())
+                                    {
+                                        case "allowteams":
+                                            string team = kvp2.Value.ToString().ToLower();
+                                            if (team.Contains("blue"))
+                                            {
+                                                spawnsTeam1.Add(ent);
+                                            }
+                                            if (team.Contains("red"))
+                                            {
+                                                spawnsTeam2.Add(ent);
+                                            }
+                                            break;
+                                    }
                                 }
                                 break;
                         }
                     }
                 }
             }
-            catch (Exception ex)
-            {
-                GD.Print("Error: " + ex.ToString());
-            }
+            
         }
 
         Spatial triggers = GetNode("/root/Initial/Map/QodotMap/Triggers") as Spatial;
@@ -104,26 +109,24 @@ public class World : Node
         foreach (Area ent in triggerents)
         {
             Godot.Collections.Dictionary fields = ent.Get("properties") as Godot.Collections.Dictionary;
-            object classname = null;
-            if (fields != null)
+
+            foreach(DictionaryEntry kvp in fields)
             {
-                if (fields.ContainsKey("classname"))
+                if (kvp.Key.ToString().ToLower() == "classname")
                 {
-                    fields.TryGetValue("classname", out classname);
-                }
-                if (classname != null && classname.ToString() == "trigger_door")
-                {
-                    // https://github.com/godotengine/godot/issues/31994#issuecomment-570073343
-                    ulong objId = Convert.ToUInt64(ent.GetInstanceId());
-                    ent.SetScript(ResourceLoader.Load("Scripts/Trigger_Door.cs"));
-                    
+                    if (kvp.Value.ToString().ToLower() == "trigger_door")
+                    {
+                        // https://github.com/godotengine/godot/issues/31994#issuecomment-570073343
+                        ulong objId = Convert.ToUInt64(ent.GetInstanceId());
+                        ent.SetScript(ResourceLoader.Load("Scripts/Trigger_Door.cs"));
+                        
+                        Trigger_Door newEnt = GD.InstanceFromId(objId) as Trigger_Door;
+                        newEnt.SetProcess(true);
+                        newEnt.Notification(NotificationReady);
+                        newEnt.Init(fields);
 
-                    Trigger_Door newEnt = GD.InstanceFromId(objId) as Trigger_Door;
-                    newEnt.SetProcess(true);
-                    newEnt.Notification(NotificationReady);
-                    newEnt.Init(fields);
-
-                    doors.Add(newEnt);
+                        doors.Add(newEnt);
+                    }
                 }
             }
         }
@@ -158,7 +161,7 @@ public class World : Node
         PackedScene playerScene = (PackedScene)ResourceLoader.Load("res://Scenes/Player.tscn");
         Player player = (Player)playerScene.Instance();
         this.AddChild(player);
-        player.SetName(networkID.ToString());
+        player.Name = networkID.ToString();
         player.ID = networkID;
         _playerNodeNames.Add(player.Name);
 
@@ -184,7 +187,7 @@ public class World : Node
 
     public void Spawn(Player p)
     {
-        p.SetTranslation(GetNextSpawn(p.Team));
+        p.Translation = GetNextSpawn(p.Team);
     }
 
     public Vector3 GetNextSpawn(int teamID)
@@ -213,6 +216,6 @@ public class World : Node
                     
                 break;
             }
-            return teamID == 9 ? new Vector3(0,10,0) : spawn.GetTranslation();
+            return teamID == 9 ? new Vector3(0,10,0) : spawn.Translation;
     }
 }

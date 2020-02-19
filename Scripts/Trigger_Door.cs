@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Collections;
 
 public class Trigger_Door : Area
 {
@@ -43,7 +44,7 @@ public class Trigger_Door : Area
         Connect("area_entered", this, "_on_area_entered");
         Connect("area_exited", this, "_on_area_exited");
 
-        string nodeName = this.GetName();
+        string nodeName = this.Name;
         // example: entity_entity_316_brush_brush_0_trigger
         string entityName = nodeName.Substring(("entity_").Length);
         entityName = entityName.Substring(("entity_").Length);
@@ -61,12 +62,13 @@ public class Trigger_Door : Area
             }
         }
 
-        foreach(KeyValuePair<object, object> kvp in fields)
+        foreach (DictionaryEntry kvp in fields)
         {
+            string val = kvp.Value.ToString();
             switch (kvp.Key.ToString().ToLower())
             {
                 case "allowteams":
-                    string teamVal = kvp.Value.ToString();
+                    string teamVal = val;
                     if (teamVal.Contains("blue"))
                     {
                         _allowTeams.Add(1);
@@ -85,28 +87,28 @@ public class Trigger_Door : Area
                     }
                     break;
                 case "team_no":
-                        _allowTeams.Add(Convert.ToInt16(kvp.Value));
+                        _allowTeams.Add(Convert.ToInt16(val));
                     break;
                 case "lip":
-                    _lip = (float)Convert.ToDouble(kvp.Value);
+                    _lip = (float)Convert.ToDouble(val);
                     _lip = _lip / 10;
                     break;
                 case "angle":
-                    _angle = (float)Convert.ToDouble(kvp.Value);
+                    _angle = (float)Convert.ToDouble(val);
                     break;
                 case "dmg":
-                    _damage = (float)Convert.ToDouble(kvp.Value);
+                    _damage = (float)Convert.ToDouble(val);
                     break;
                 case "speed":
-                    _speed = (float)Convert.ToDouble(kvp.Value);
+                    _speed = (float)Convert.ToDouble(val);
                     _speed = _speed / 10;
                     break;
                 case "sounds":
-                    int type = Convert.ToInt16(kvp.Value);
+                    int type = Convert.ToInt16(val);
                     SetupSound(type);
                     break;
                 case "wait":
-                    _wait = (float)Convert.ToDouble(kvp.Value);
+                    _wait = (float)Convert.ToDouble(val);
                     break;
             }
         }
@@ -144,7 +146,7 @@ public class Trigger_Door : Area
             AddChild(moveNode);
             moveNode.RotateY(Mathf.Deg2Rad(_angle));
             moveNode.Translate(new Vector3(0,0,moveDist));
-            _openLocation = moveNode.GetGlobalTransform().origin;
+            _openLocation = moveNode.GlobalTransform.origin;
         }
     }
 
@@ -191,7 +193,7 @@ public class Trigger_Door : Area
             // snap
             Transform glob = GlobalTransform;
             glob.origin = _destination;
-            SetGlobalTransform(glob);
+            this.GlobalTransform = glob;
 
             if (_open == STATE.OPENING)
             {
@@ -267,8 +269,8 @@ public class Trigger_Door : Area
         {
             _sndOpen = new AudioStreamPlayer3D();
             _sndClose = new AudioStreamPlayer3D();
-            _sndOpen.SetStream(open);
-            _sndClose.SetStream(close);
+            _sndOpen.Stream = open;
+            _sndClose.Stream = close;
             _sndOpen.Name = "sndOpen";
             _sndClose.Name = "sndClose";
             AddChild(_sndOpen);
