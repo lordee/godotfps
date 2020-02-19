@@ -170,20 +170,29 @@ public class Network : Node
     public void ReceivePMovementClient(int id, Transform t)
     {
         Player p = GetNode("/root/Initial/World/" + id.ToString()) as Player;
-        p.GlobalTransform = t;
+        
+        if ((p.GlobalTransform.origin - t.origin).Length() > 10) // randomnumber()
+        {
+            GD.Print("correcting origin");
+            p.SetGlobalTransform(t);
+        }
+        /*else
+        {
+            p.GlobalTransform.basis = t.basis;
+        }*/
     }
 
     public void SendPMovementServer(int RecID, int id, PlayerCmd pCmd)
     {
-        if (IsNetworkMaster())
+        // FIXME this is obviously bad
+        if (_id == id)
         {
-            if (id == _id)
-            {
-                ReceivePMovementServer(id, pCmd.move_forward, pCmd.move_right, pCmd.move_up, pCmd.aim.x, pCmd.aim.y, pCmd.aim.z, pCmd.cam_angle);
-                return;
-            }
+            ReceivePMovementServer(id, pCmd.move_forward, pCmd.move_right, pCmd.move_up, pCmd.aim.x, pCmd.aim.y, pCmd.aim.z, pCmd.cam_angle);
         }
         
-        RpcUnreliableId(RecID, nameof(ReceivePMovementServer), id, pCmd.move_forward, pCmd.move_right, pCmd.move_up, pCmd.aim.x, pCmd.aim.y, pCmd.aim.z, pCmd.cam_angle);
+        if (!IsNetworkMaster())
+        {
+            RpcUnreliableId(RecID, nameof(ReceivePMovementServer), id, pCmd.move_forward, pCmd.move_right, pCmd.move_up, pCmd.aim.x, pCmd.aim.y, pCmd.aim.z, pCmd.cam_angle);
+        }
     }
 }
