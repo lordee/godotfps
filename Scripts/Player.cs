@@ -10,6 +10,7 @@ public class Player : KinematicBody
     World _world;
     RayCast _stairCatcher;
     MeshInstance _mesh;
+    public MeshInstance Mesh {get { return _mesh; }}
 
     // fields
     public int Team;
@@ -58,6 +59,11 @@ public class Player : KinematicBody
 
     public void ProcessMovement(float delta)
     {
+        // FIXME store these calls once...
+        if (this.ID != GetTree().GetNetworkUniqueId())
+        {
+            _mesh.Rotation = _pCmd.rotation;
+        }
         QueueJump();
 
         // do air move which does gravity
@@ -76,6 +82,7 @@ public class Player : KinematicBody
         _pCmd.move_forward = 0f;
         _pCmd.move_right = 0f;
         _pCmd.move_up = 0f;
+        _pCmd.rotation = new Vector3();
         _pCmd.aim = new Basis();
     }
 
@@ -326,4 +333,5 @@ public struct PlayerCmd
     public float move_up;
     public Basis aim;
     public float cam_angle;
+    public Vector3 rotation;
 }

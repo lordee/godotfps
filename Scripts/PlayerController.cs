@@ -62,6 +62,7 @@ public class PlayerController : Camera
         pCmd.move_up = move_up;
         pCmd.aim = this.GlobalTransform.basis;
         pCmd.cam_angle = _cameraAngle;
+        pCmd.rotation = _player.Mesh.Rotation;
     }
 
     public override void _Input(InputEvent e)

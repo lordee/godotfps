@@ -147,7 +147,8 @@ public class Network : Node
     }
 
     [Remote]
-    public void ReceivePMovementServer(int id, float move_forward, float move_right, float move_up, Vector3 aimx, Vector3 aimy, Vector3 aimz, float camAngle)
+    public void ReceivePMovementServer(int id, float move_forward, float move_right, float move_up, Vector3 aimx
+    , Vector3 aimy, Vector3 aimz, float camAngle, float rotX, float rotY, float rotZ)
     {
         Basis aim = new Basis(aimx, aimy, aimz);
         Player p = GetNode("/root/Initial/World/" + id.ToString()) as Player;
@@ -157,6 +158,7 @@ public class Network : Node
         pCmd.move_right = move_right;
         pCmd.move_up = move_up;
         pCmd.cam_angle = camAngle;
+        pCmd.rotation = new Vector3(rotX, rotY, rotZ);
         p.SetMovement(pCmd);
     }
 
@@ -177,11 +179,6 @@ public class Network : Node
         {
             p.GlobalTransform = t;
         }
-        
-        /*else
-        {
-            p.GlobalTransform.basis = t.basis;
-        }*/
     }
 
     public void SendPMovementServer(int RecID, int id, PlayerCmd pCmd)
@@ -189,12 +186,12 @@ public class Network : Node
         // FIXME this is obviously bad
         if (_id == id)
         {
-            ReceivePMovementServer(id, pCmd.move_forward, pCmd.move_right, pCmd.move_up, pCmd.aim.x, pCmd.aim.y, pCmd.aim.z, pCmd.cam_angle);
+            ReceivePMovementServer(id, pCmd.move_forward, pCmd.move_right, pCmd.move_up, pCmd.aim.x, pCmd.aim.y, pCmd.aim.z, pCmd.cam_angle, pCmd.rotation.x, pCmd.rotation.y, pCmd.rotation.z);
         }
         
         if (!IsNetworkMaster())
         {
-            RpcUnreliableId(RecID, nameof(ReceivePMovementServer), id, pCmd.move_forward, pCmd.move_right, pCmd.move_up, pCmd.aim.x, pCmd.aim.y, pCmd.aim.z, pCmd.cam_angle);
+            RpcUnreliableId(RecID, nameof(ReceivePMovementServer), id, pCmd.move_forward, pCmd.move_right, pCmd.move_up, pCmd.aim.x, pCmd.aim.y, pCmd.aim.z, pCmd.cam_angle, pCmd.rotation.x, pCmd.rotation.y, pCmd.rotation.z);
         }
     }
 }
