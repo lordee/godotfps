@@ -33,12 +33,9 @@ public class Network : Node
             if (IsNetworkMaster())
             {
                 // send updates to each peer
-                foreach(int id in PeerList)
+                foreach (Player p in PlayerList)
                 {
-                    foreach (Player p in PlayerList)
-                    {
-                        RpcUnreliable(nameof(ReceivePMovementClient), p.ID, p.GlobalTransform);
-                    }
+                    RpcUnreliable(nameof(ReceivePMovementClient), p.ID, p.GlobalTransform);
                 }
             }
             // send update to network master
@@ -67,11 +64,7 @@ public class Network : Node
 
     public void ConnectionSuccess()
     {
-        GD.Print("ConnectionSuccess");
-
-        // client connects, event on client
-        
-        //_game.InstantiatePlayer(GetTree().GetNetworkUniqueId().ToString(), true);        
+        GD.Print("ConnectionSuccess");    
     }
 
     public void ConnectionFailed()
@@ -109,6 +102,7 @@ public class Network : Node
     private void AddPlayer(int id, bool playerControlled)
     {
         PeerList.Add(id);
+        
         PlayerController c = _world.AddPlayer(id, playerControlled);
 
         if (c != null)
@@ -166,16 +160,24 @@ public class Network : Node
         p.SetMovement(pCmd);
     }
 
-    [Remote]
+    [Slave]
     public void ReceivePMovementClient(int id, Transform t)
     {
         Player p = GetNode("/root/Initial/World/" + id.ToString()) as Player;
         
-        if ((p.GlobalTransform.origin - t.origin).Length() > 10) // randomnumber()
+        if (id == _id)
         {
-            GD.Print("correcting origin");
+            if ((p.GlobalTransform.origin - t.origin).Length() > 35) // randomnumber()
+            {
+                GD.Print("correcting origin");
+                p.GlobalTransform = t;
+            }
+        }
+        else
+        {
             p.GlobalTransform = t;
         }
+        
         /*else
         {
             p.GlobalTransform.basis = t.basis;
