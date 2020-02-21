@@ -187,7 +187,7 @@ public class Trigger_Door : Area
     {
         float dist = (_destination - GlobalTransform.origin).Length();
         Vector3 dest = new Vector3();
-        float snapLimit = 0.2f;//1f/64f;
+        float snapLimit = 0.5f;//1f/64f;
         if (dist < snapLimit)
         {
             // snap
