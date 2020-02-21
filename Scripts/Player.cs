@@ -38,6 +38,8 @@ public class Player : KinematicBody
     public float _sideStrafeSpeed = 3.0f;          // What the max speed to generate when side strafing
     public float _airControl = 0.3f;               // How precise air control is
     
+    private bool _newRotation = false;
+
     public override void _Ready()
     {
         _head = (Spatial)GetNode("Head");
@@ -55,6 +57,7 @@ public class Player : KinematicBody
     public void SetMovement(PlayerCmd pCmd)
     {
         _pCmd = pCmd;
+        _newRotation = true;
     }
 
     public void ProcessMovement(float delta)
@@ -62,7 +65,11 @@ public class Player : KinematicBody
         // FIXME store these calls once...
         if (this.ID != GetTree().GetNetworkUniqueId())
         {
-            _mesh.Rotation = _pCmd.rotation;
+            if (_newRotation)
+            {
+                 _mesh.Rotation = _pCmd.rotation;
+                _newRotation = false;
+            }     
         }
         QueueJump();
 
