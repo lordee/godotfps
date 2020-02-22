@@ -22,6 +22,10 @@ public class Player : KinematicBody
     private bool _wishJump;
     private bool _touchingGround = false;
     private Vector3 _playerVelocity = new Vector3();
+    public Vector3 PlayerVelocity { 
+                                    get { return _playerVelocity; }
+                                    set { _playerVelocity = value; }
+                                    }
     private Vector3 _moveDirectionNorm = new Vector3();
     private float _jumpSpeed = 27.0f;                // The speed at which the character's up axis gains when hitting jump
     private float _moveSpeed = 15.0f;               // Ground move speed

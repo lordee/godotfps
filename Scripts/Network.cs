@@ -14,6 +14,8 @@ public class Network : Node
 
     private bool _active = false;
 
+    private float _gameTime = 0f;
+
     public override void _Ready()
     {
         GetTree().Connect("network_peer_connected", this, "ClientConnected");
@@ -30,16 +32,20 @@ public class Network : Node
     {
         if (_active)
         {
+            _gameTime += delta;
             if (IsNetworkMaster())
             {
                 // send updates to each peer
                 foreach (Player p in PlayerList)
                 {
-                    RpcUnreliable(nameof(ReceivePMovementClient), p.ID, p.GlobalTransform);
+                    Vector3 org = p.GlobalTransform.origin;
+                    Vector3 velo = p.PlayerVelocity;
+                    Vector3 rot = p.Mesh.Rotation;
+                    RpcUnreliable(nameof(ReceivePMovementClient), p.ID, org.x, org.y, org.z, velo.x, velo.y, velo.z, rot.x, rot.y, rot.z);
                 }
             }
             // send update to network master
-            SendPMovementServer(1, _id, _pc.pCmd);
+            SendPMovement(1, _id, _pc.pCmd);
         }
     }
 
@@ -162,28 +168,36 @@ public class Network : Node
         p.SetMovement(pCmd);
     }
 
+    // extrapolate instead
     [Slave]
-    public void ReceivePMovementClient(int id, Transform t)
+    public void ReceivePMovementClient(int id, float orgX, float orgY, float orgZ, float veloX, float veloY, float veloZ
+        , float rotX, float rotY, float rotZ)
     {
+        Vector3 org = new Vector3(orgX, orgY, orgZ);
         Player p = GetNode("/root/Initial/World/" + id.ToString()) as Player;
-        
+        Transform t = p.GlobalTransform;
+        t.origin = org;
+
         if (id == _id)
         {
-            if ((p.GlobalTransform.origin - t.origin).Length() > 35) // randomnumber()
+            if ((p.GlobalTransform.origin - org).Length() > 35) // randomnumber()
             {
                 GD.Print("correcting origin");
+                
                 p.GlobalTransform = t;
             }
         }
         else
         {
             p.GlobalTransform = t;
+            p.PlayerVelocity = new Vector3(veloX, veloY, veloZ);
+            p.Rotation = new Vector3(rotX, rotY, rotZ);
         }
     }
 
-    public void SendPMovementServer(int RecID, int id, PlayerCmd pCmd)
+    public void SendPMovement(int RecID, int id, PlayerCmd pCmd)
     {
-        // FIXME this is obviously bad
+        // FIXME this is obviously bad - I can't remember why this was bad now... more detail next time
         if (_id == id)
         {
             ReceivePMovementServer(id, pCmd.move_forward, pCmd.move_right, pCmd.move_up, pCmd.aim.x, pCmd.aim.y, pCmd.aim.z, pCmd.cam_angle, pCmd.rotation.x, pCmd.rotation.y, pCmd.rotation.z);
