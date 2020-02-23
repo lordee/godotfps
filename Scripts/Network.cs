@@ -1,6 +1,8 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 
 public class Network : Node
 {
@@ -9,12 +11,13 @@ public class Network : Node
     World _world;
     PlayerController _pc;
     private int _id;
-    public List<int> PeerList = new List<int>();
-    public List<Player> PlayerList = new List<Player>();
+    public List<Peer> PeerList = new List<Peer>();
 
     private bool _active = false;
 
     private float _gameTime = 0f;
+    private float _lastPingSent = 0f;
+    private float _lastPingGT = 0f;
 
     public override void _Ready()
     {
@@ -33,15 +36,34 @@ public class Network : Node
         if (_active)
         {
             _gameTime += delta;
+            _lastPingSent += delta;
             if (IsNetworkMaster())
             {
+                string pingString = "";
                 // send updates to each peer
-                foreach (Player p in PlayerList)
+                foreach (Peer p in PeerList)
                 {
-                    Vector3 org = p.GlobalTransform.origin;
-                    Vector3 velo = p.PlayerVelocity;
-                    Vector3 rot = p.Mesh.Rotation;
+                    Vector3 org = p.Player.GlobalTransform.origin;
+                    Vector3 velo = p.Player.PlayerVelocity;
+                    Vector3 rot = p.Player.Mesh.Rotation;
                     RpcUnreliable(nameof(ReceivePMovementClient), p.ID, org.x, org.y, org.z, velo.x, velo.y, velo.z, rot.x, rot.y, rot.z);
+
+                    if (p.ID != 1)
+                    {
+                        pingString += "," + p.ID.ToString() + "," + p.Ping.ToString();
+                    }
+                }
+                
+                if (_lastPingSent > 3f)
+                {
+                    _lastPingSent = 0f;
+                    _lastPingGT = _gameTime;
+                    if (pingString.Length > 0)
+                    {
+                        pingString = pingString.Substr(1, pingString.Length);
+                    }
+                    byte[] pingBytes = Encoding.UTF8.GetBytes(pingString);
+                    RpcUnreliable(nameof(Ping), pingBytes);
                 }
             }
             // send update to network master
@@ -107,8 +129,6 @@ public class Network : Node
 
     private void AddPlayer(int id, bool playerControlled)
     {
-        PeerList.Add(id);
-        
         PlayerController c = _world.AddPlayer(id, playerControlled);
 
         if (c != null)
@@ -117,15 +137,15 @@ public class Network : Node
         }
 
         Player p = GetNode("/root/Initial/World/" + id) as Player;
-        PlayerList.Add(p);
+        PeerList.Add(new Peer(id, 0, p));
     }
     
     private void SyncWorld(int id)
     {
         // TODO - send over all ents to new player?
-        foreach(int pid in PeerList)
+        foreach(Peer p in PeerList)
         {
-            RpcId(id, nameof(SyncWorldReceive), ET.PLAYER, pid.ToString());
+            RpcId(id, nameof(SyncWorldReceive), ET.PLAYER, p.ID.ToString());
         }
     }
 
@@ -168,7 +188,6 @@ public class Network : Node
         p.SetMovement(pCmd);
     }
 
-    // extrapolate instead
     [Slave]
     public void ReceivePMovementClient(int id, float orgX, float orgY, float orgZ, float veloX, float veloY, float veloZ
         , float rotX, float rotY, float rotZ)
@@ -193,6 +212,42 @@ public class Network : Node
             p.PlayerVelocity = new Vector3(veloX, veloY, veloZ);
             p.Rotation = new Vector3(rotX, rotY, rotZ);
         }
+    }
+
+    // clients
+    [Slave]
+    public void Ping(byte[] pingBytes)
+    {
+        string pingString = Encoding.UTF8.GetString(pingBytes);
+        string[] split = pingString.Split(",");
+        for(int i = 0; i < split.Length; i++)
+        {
+            int id = 0;
+            int ping = 0;
+            if (i % 2 == 0)
+            {
+                id = Convert.ToInt32(split[i++]);
+                ping = Convert.ToInt32(split[i]);
+                if (id == _id)
+                {
+                    // it's actually ping to server
+                    id = 1;
+                }
+                Peer p = PeerList.Where(p2 => p2.ID == id).First();
+                p.Ping = ping;
+            }
+        }
+
+        RpcUnreliable(nameof(PingServer), _id);
+    }
+
+    // server receives and notes
+    [Remote]
+    public void PingServer(int id)
+    {
+        // note response time against client
+        Peer p = PeerList.Where(p2 => p2.ID == id).First();
+        p.Ping = Convert.ToInt16(_gameTime - _lastPingGT);
     }
 
     public void SendPMovement(int RecID, int id, PlayerCmd pCmd)
