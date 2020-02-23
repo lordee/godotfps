@@ -62,6 +62,7 @@
     <Compile Include="Scripts\Math.cs" />
     <Compile Include="Scripts\Trigger_Door.cs" />
     <Compile Include="Scripts\Enums.cs" />
+    <Compile Include="Scripts\Peer.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>
