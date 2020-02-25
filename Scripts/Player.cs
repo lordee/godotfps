@@ -2,6 +2,7 @@ using Godot;
 using static Godot.Mathf;
 using static FMath;
 using System;
+using System.Collections.Generic;
 
 public class Player : KinematicBody
 {
@@ -11,6 +12,7 @@ public class Player : KinematicBody
     RayCast _stairCatcher;
     MeshInstance _mesh;
     public MeshInstance Mesh {get { return _mesh; }}
+    public bool PlayerControlled = false;
 
     // fields
     public int Team;
@@ -18,7 +20,7 @@ public class Player : KinematicBody
     
 
     // movement
-    PlayerCmd _pCmd = new PlayerCmd();
+    //PlayerCmd _pCmd = new PlayerCmd();
     private bool _wishJump;
     private bool _touchingGround = false;
     private Vector3 _playerVelocity = new Vector3();
@@ -43,6 +45,14 @@ public class Player : KinematicBody
     public float _airControl = 0.3f;               // How precise air control is
     
     private bool _newRotation = false;
+    //private int _lastState = 0;
+    //public int LastState { get { return _lastState; }}
+
+    public Queue<PlayerCmd> pCmdQueue = new Queue<PlayerCmd>();
+    private State _serverState;
+    public State ServerState { get { return _serverState; }}
+    private State _predictedState;
+    public State PredictedState { get { return _predictedState; }}
 
     public override void _Ready()
     {
@@ -58,46 +68,96 @@ public class Player : KinematicBody
         _mesh.RotateY(rad);
     }
 
-    public void SetMovement(PlayerCmd pCmd)
+    public void StartMovement(float delta)
     {
-        _pCmd = pCmd;
-        _newRotation = true;
+        State predictedState = _serverState;
+        if (pCmdQueue.Count > 0)
+        {
+            foreach(PlayerCmd pCmd in pCmdQueue)
+            {
+                predictedState = ProcessMovement(predictedState, pCmd, delta);
+            }
+        }
+        else
+        {
+            PlayerCmd pCmd = new PlayerCmd {
+                move_forward = 0,
+                move_right = 0,
+                move_up = 0,
+                aim = new Basis(),
+                cam_angle = 0,
+                rotation = _mesh.Rotation
+            };
+            predictedState = ProcessMovement(predictedState, pCmd, delta);
+        }
+
+        if (IsNetworkMaster())
+        {
+            //_serverState = predictedState;
+            SetServerState(predictedState.StateNum, predictedState.Origin, predictedState.Velocity, _mesh.Rotation);
+        }
     }
 
-    public void ProcessMovement(float delta)
+    public State ProcessMovement(State predState, PlayerCmd pCmd, float delta)
     {
+        _playerVelocity = predState.Velocity;
+        Transform t = new Transform();
+        t = GlobalTransform;
+        t.origin = predState.Origin;
+        GlobalTransform = t;
+
         // FIXME store these calls once...
         if (this.ID != GetTree().GetNetworkUniqueId())
         {
             if (_newRotation)
             {
-                 _mesh.Rotation = _pCmd.rotation;
+                 _mesh.Rotation = pCmd.rotation;
                 _newRotation = false;
             }     
         }
-        QueueJump();
+        QueueJump(pCmd);
 
         // do air move which does gravity
         if (_touchingGround || _climbLadder)
         {
-            GroundMove(delta);
+            GroundMove(delta, pCmd);
         }
         else
         {
-            AirMove(delta);
+            AirMove(delta, pCmd);
         }
 
         _playerVelocity = this.MoveAndSlide(_playerVelocity, _world.Up);
         _touchingGround = IsOnFloor();
 
-        _pCmd.move_forward = 0f;
-        _pCmd.move_right = 0f;
-        _pCmd.move_up = 0f;
-        _pCmd.rotation = new Vector3();
-        _pCmd.aim = new Basis();
+        _predictedState = new State {
+            StateNum = _predictedState.StateNum + 1,
+            Origin = GlobalTransform.origin,
+            Velocity = _playerVelocity
+        };
+        return _predictedState;
     }
 
-    public void GroundMove(float delta)
+    public void SetServerState(int stateNum, Vector3 org, Vector3 velo, Vector3 rot)
+    {
+        _serverState.StateNum = stateNum;
+        _serverState.Origin = org;
+        _serverState.Velocity = velo;
+        if (!PlayerControlled)
+        {
+            this._mesh.Rotation = rot;
+        }
+
+        if (pCmdQueue.Count > 0)
+        {
+            while (pCmdQueue.Count > (_predictedState.StateNum - stateNum))
+            {
+                pCmdQueue.Dequeue();
+            }
+        }
+    }
+
+    public void GroundMove(float delta, PlayerCmd pCmd)
     {
         Vector3 wishDir = new Vector3();
 
@@ -110,10 +170,10 @@ public class Player : KinematicBody
             ApplyFriction(0, delta);
         }
 
-        float scale = CmdScale();
+        float scale = CmdScale(pCmd);
 
-        wishDir += _pCmd.aim.x * _pCmd.move_right;
-        wishDir -= _pCmd.aim.z * _pCmd.move_forward;
+        wishDir += pCmd.aim.x * pCmd.move_right;
+        wishDir -= pCmd.aim.z * pCmd.move_forward;
         wishDir = wishDir.Normalized();
         _moveDirectionNorm = wishDir;
 
@@ -123,15 +183,15 @@ public class Player : KinematicBody
        
         if (_climbLadder)
         {
-            if (_pCmd.move_forward != 0f)
+            if (pCmd.move_forward != 0f)
             {
-                _playerVelocity.y = _moveSpeed * (_pCmd.cam_angle / 90) * _pCmd.move_forward;
+                _playerVelocity.y = _moveSpeed * (pCmd.cam_angle / 90) * pCmd.move_forward;
             }
             else
             {
                 _playerVelocity.y = 0;
             }
-            if (_pCmd.move_right == 0f)
+            if (pCmd.move_right == 0f)
             {
                 _playerVelocity.x = 0;
                 _playerVelocity.z = 0;
@@ -160,17 +220,17 @@ public class Player : KinematicBody
         }
     }
 
-    private void AirMove(float delta)
+    private void AirMove(float delta, PlayerCmd pCmd)
     {
         Vector3 wishdir = new Vector3();
         
         float wishvel = _airAcceleration;
         float accel;
         
-        float scale = CmdScale();
+        float scale = CmdScale(pCmd);
 
-        wishdir += _pCmd.aim.x * _pCmd.move_right;
-        wishdir -= _pCmd.aim.z * _pCmd.move_forward;
+        wishdir += pCmd.aim.x * pCmd.move_right;
+        wishdir -= pCmd.aim.z * pCmd.move_forward;
 
         float wishspeed = wishdir.Length();
         wishspeed *= _moveSpeed;
@@ -185,7 +245,7 @@ public class Player : KinematicBody
         else
             accel = _airAcceleration;
         // If the player is ONLY strafing left or right
-        if(_pCmd.move_forward == 0 && _pCmd.move_right != 0)
+        if(pCmd.move_forward == 0 && pCmd.move_right != 0)
         {
             if(wishspeed > _sideStrafeSpeed)
             {
@@ -209,13 +269,13 @@ public class Player : KinematicBody
         }
     }
 
-    private void QueueJump()
+    private void QueueJump(PlayerCmd pCmd)
     {
-        if (_pCmd.move_up == 1 && !_wishJump)
+        if (pCmd.move_up == 1 && !_wishJump)
         {
             _wishJump = true;
         }
-        if (_pCmd.move_up == -1)
+        if (pCmd.move_up == -1)
         {
             _wishJump = false;
         }
@@ -272,7 +332,7 @@ public class Player : KinematicBody
      * players to move side to side much faster rather than being
      * 'sluggish' when it comes to cornering.
      */
-    private void AirControl(Vector3 wishdir, float wishspeed, float delta)
+    private void AirControl(Vector3 wishdir, float wishspeed, float delta, PlayerCmd pCmd)
     {
         float zspeed;
         float speed;
@@ -280,7 +340,7 @@ public class Player : KinematicBody
         float k;
 
         // Can't control movement if not moving forward or backward
-        if(Mathf.Abs(_pCmd.move_forward) < 0.001 || Mathf.Abs(wishspeed) < 0.001)
+        if(Mathf.Abs(pCmd.move_forward) < 0.001 || Mathf.Abs(wishspeed) < 0.001)
             return;
         zspeed = _playerVelocity.y;
         _playerVelocity.y = 0;
@@ -317,32 +377,21 @@ public class Player : KinematicBody
     ============
     */
     
-     private float CmdScale()
+     private float CmdScale(PlayerCmd pCmd)
     {
         int max;
         float total;
         float scale;
 
-        max = (int)Mathf.Abs(_pCmd.move_forward);
-        if(Mathf.Abs(_pCmd.move_right) > max)
-            max = (int)Mathf.Abs(_pCmd.move_right);
+        max = (int)Mathf.Abs(pCmd.move_forward);
+        if(Mathf.Abs(pCmd.move_right) > max)
+            max = (int)Mathf.Abs(pCmd.move_right);
         if(max <= 0)
             return 0;
 
-        total = Mathf.Sqrt(_pCmd.move_forward * _pCmd.move_forward + _pCmd.move_right * _pCmd.move_right);
+        total = Mathf.Sqrt(pCmd.move_forward * pCmd.move_forward + pCmd.move_right * pCmd.move_right);
         scale = _moveSpeed * max / (_moveScale * total);
 
         return scale;
     }
-    
-}
-
-public struct PlayerCmd
-{
-    public float move_forward;
-    public float move_right;
-    public float move_up;
-    public Basis aim;
-    public float cam_angle;
-    public Vector3 rotation;
 }

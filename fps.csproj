@@ -63,6 +63,8 @@
     <Compile Include="Scripts\Trigger_Door.cs" />
     <Compile Include="Scripts\Enums.cs" />
     <Compile Include="Scripts\Peer.cs" />
+    <Compile Include="Scripts\State.cs" />
+    <Compile Include="Scripts\PlayerCmd.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

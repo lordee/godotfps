@@ -13,6 +13,9 @@ public class World : Node
     private Vector3 _up = new Vector3(0,1,0);
     public Vector3 Up { get { return _up; }}
 
+    private float _backRecTime = 80f;
+    public float BackRecTime { get { return _backRecTime; }}
+
     private float _gravity = 80f;
     public float Gravity { get { return _gravity; }}
 
@@ -42,12 +45,12 @@ public class World : Node
 
     public override void _PhysicsProcess(float delta)
     {
-        foreach (int peer in _network.PeerList)
+        foreach (Peer peer in _network.PeerList)
         {
-            Player p = GetNodeOrNull(peer.ToString()) as Player;
+            Player p = GetNodeOrNull(peer.ID.ToString()) as Player;
             if (p != null)
             {
-                p.ProcessMovement(delta);
+                p.StartMovement(delta);
             }
         }
     }
@@ -99,7 +102,6 @@ public class World : Node
                     }
                 }
             }
-            
         }
 
         Spatial triggers = GetNode("/root/Initial/Map/QodotMap/Triggers") as Spatial;
@@ -173,7 +175,7 @@ public class World : Node
             pc.Init(player);
             pc.SetProcess(true);
             pc.Notification(NotificationReady);
-            Input.SetMouseMode(Input.MouseMode.Captured);
+            //Input.SetMouseMode(Input.MouseMode.Captured);
         }
         player.Team = 1;
 
@@ -188,6 +190,7 @@ public class World : Node
     public void Spawn(Player p)
     {
         p.Translation = GetNextSpawn(p.Team);
+        p.SetServerState(p.ServerState.StateNum + 1, p.GlobalTransform.origin, p.PlayerVelocity, p.Mesh.Rotation);
     }
 
     public Vector3 GetNextSpawn(int teamID)

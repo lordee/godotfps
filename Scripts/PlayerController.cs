@@ -1,22 +1,21 @@
 using Godot;
 using System;
 
+
 public class PlayerController : Camera
 {
     Player _player;
+    public Player Player { get { return _player; }}
     Network _network;
 
     // Player commands, stores wish commands that the player asks for (Forward, back, jump, etc)
-    public float move_forward = 0;
-    public float move_right = 0;
-    public float move_up = 0;
-
+    private float move_forward = 0;
+    private float move_right = 0;
+    private float move_up = 0;
     private float _cameraAngle = 0f;
 
     // settings
-    float mouseSensitivity = 0.2f;
-
-    public PlayerCmd pCmd;
+    private float mouseSensitivity = 0.2f;
 
     public override void _Ready()
     {
@@ -26,6 +25,7 @@ public class PlayerController : Camera
     public void Init(Player p)
     {
         _player = p;
+        p.Mesh.Visible = false;
     }
 
     public override void _PhysicsProcess(float delta)
@@ -57,12 +57,14 @@ public class PlayerController : Camera
             move_right += -1;
         }
 
+        PlayerCmd pCmd;
         pCmd.move_forward = move_forward;
         pCmd.move_right = move_right;
         pCmd.move_up = move_up;
         pCmd.aim = this.GlobalTransform.basis;
         pCmd.cam_angle = _cameraAngle;
         pCmd.rotation = _player.Mesh.Rotation;
+        _player.pCmdQueue.Enqueue(pCmd);
     }
 
     public override void _Input(InputEvent e)
@@ -91,41 +93,6 @@ public class PlayerController : Camera
                     }
                 }
             }
-
-            // is this best way to check actions?
-            /*if (Input.IsActionJustPressed("slot1")) 
-            {
-                Impulses.Add(Impulse.Slot1);
-            } 
-            else if (Input.IsActionJustPressed("slot2"))
-            {
-                Impulses.Add(Impulse.Slot2);
-            }
-            else if (Input.IsActionJustPressed("slot3"))
-            {
-                Impulses.Add(Impulse.Slot3);
-            }
-            else if (Input.IsActionJustPressed("slot4"))
-            {
-                Impulses.Add(Impulse.Slot4);
-            }
-            if (Input.IsActionJustPressed("detpipe"))
-            {
-                Impulses.Add(Impulse.Detpipe);
-            }
-            if (Input.IsActionJustPressed("gren1"))
-            {
-                Impulses.Add(Impulse.Gren1);
-            }
-            if (Input.IsActionJustPressed("gren2"))
-            {
-                Impulses.Add(Impulse.Gren2);
-            }
-            if (Input.IsActionPressed("attack"))
-            {
-                Impulses.Add(Impulse.Attack);
-            }*/
-            
         }
     }    
 }

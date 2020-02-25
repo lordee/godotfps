@@ -43,10 +43,12 @@ public class Network : Node
                 // send updates to each peer
                 foreach (Peer p in PeerList)
                 {
-                    Vector3 org = p.Player.GlobalTransform.origin;
-                    Vector3 velo = p.Player.PlayerVelocity;
+                    Vector3 org = p.Player.ServerState.Origin;
+                    Vector3 velo = p.Player.ServerState.Velocity;
                     Vector3 rot = p.Player.Mesh.Rotation;
-                    RpcUnreliable(nameof(ReceivePMovementClient), p.ID, org.x, org.y, org.z, velo.x, velo.y, velo.z, rot.x, rot.y, rot.z);
+                    //p.Player.SetServerState(p.Player.PredictedState.StateNum, org, velo, rot);
+                    
+                    RpcUnreliable(nameof(ReceivePMovementClient), p.Player.ServerState.StateNum, p.ID, org.x, org.y, org.z, velo.x, velo.y, velo.z, rot.x, rot.y, rot.z);
 
                     if (p.ID != 1)
                     {
@@ -66,8 +68,12 @@ public class Network : Node
                     RpcUnreliable(nameof(Ping), pingBytes);
                 }
             }
+
             // send update to network master
-            SendPMovement(1, _id, _pc.pCmd);
+            foreach(PlayerCmd pcmd in _pc.Player.pCmdQueue)
+            {
+                SendPMovement(1, _id, pcmd);
+            }
         }
     }
 
@@ -137,6 +143,7 @@ public class Network : Node
         }
 
         Player p = GetNode("/root/Initial/World/" + id) as Player;
+        p.PlayerControlled = playerControlled;
         PeerList.Add(new Peer(id, 0, p));
     }
     
@@ -185,33 +192,19 @@ public class Network : Node
         pCmd.move_up = move_up;
         pCmd.cam_angle = camAngle;
         pCmd.rotation = new Vector3(rotX, rotY, rotZ);
-        p.SetMovement(pCmd);
+        p.pCmdQueue.Enqueue(pCmd);
     }
 
     [Slave]
-    public void ReceivePMovementClient(int id, float orgX, float orgY, float orgZ, float veloX, float veloY, float veloZ
+    public void ReceivePMovementClient(int stateNum, int id, float orgX, float orgY, float orgZ, float veloX, float veloY, float veloZ
         , float rotX, float rotY, float rotZ)
     {
         Vector3 org = new Vector3(orgX, orgY, orgZ);
-        Player p = GetNode("/root/Initial/World/" + id.ToString()) as Player;
-        Transform t = p.GlobalTransform;
-        t.origin = org;
+        Vector3 velo = new Vector3(veloX, veloY, veloZ);
+        Vector3 rot = new Vector3(rotX, rotY, rotZ);
 
-        if (id == _id)
-        {
-            if ((p.GlobalTransform.origin - org).Length() > 35) // randomnumber()
-            {
-                GD.Print("correcting origin");
-                
-                p.GlobalTransform = t;
-            }
-        }
-        else
-        {
-            p.GlobalTransform = t;
-            p.PlayerVelocity = new Vector3(veloX, veloY, veloZ);
-            p.Rotation = new Vector3(rotX, rotY, rotZ);
-        }
+        Player p = PeerList.Where(p2 => p2.ID == id).First().Player;
+        p.SetServerState(stateNum, org, velo, rot);
     }
 
     // clients
@@ -253,10 +246,10 @@ public class Network : Node
     public void SendPMovement(int RecID, int id, PlayerCmd pCmd)
     {
         // FIXME this is obviously bad - I can't remember why this was bad now... more detail next time
-        if (_id == id)
-        {
-            ReceivePMovementServer(id, pCmd.move_forward, pCmd.move_right, pCmd.move_up, pCmd.aim.x, pCmd.aim.y, pCmd.aim.z, pCmd.cam_angle, pCmd.rotation.x, pCmd.rotation.y, pCmd.rotation.z);
-        }
+        //if (_id == id)
+        //{
+        //    ReceivePMovementServer(id, pCmd.move_forward, pCmd.move_right, pCmd.move_up, pCmd.aim.x, pCmd.aim.y, pCmd.aim.z, pCmd.cam_angle, pCmd.rotation.x, pCmd.rotation.y, pCmd.rotation.z);
+        //}
         
         if (!IsNetworkMaster())
         {
