@@ -175,7 +175,7 @@ public class World : Node
             pc.Init(player);
             pc.SetProcess(true);
             pc.Notification(NotificationReady);
-            //Input.SetMouseMode(Input.MouseMode.Captured);
+            Input.SetMouseMode(Input.MouseMode.Captured);
         }
         player.Team = 1;
 
