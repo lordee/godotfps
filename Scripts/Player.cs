@@ -150,7 +150,9 @@ public class Player : KinematicBody
 
         if (pCmdQueue.Count > 0)
         {
-            while (pCmdQueue.Count > (_predictedState.StateNum - stateNum))
+            int count = (stateNum > _predictedState.StateNum) ? pCmdQueue.Count - 1 : pCmdQueue.Count - (_predictedState.StateNum - stateNum);
+            
+            for (int i = 0; i < count; i++)
             {
                 pCmdQueue.Dequeue();
             }
