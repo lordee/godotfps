@@ -1,0 +1,367 @@
+using Godot;
+using System.Collections.Generic;
+using System;
+
+abstract public class Weapon : MeshInstance
+{
+    protected int _damage;
+    public int Damage 
+    {
+        get { return _damage; }
+    }
+    protected string _weaponResource;
+    protected MeshInstance _weaponMesh;
+    protected string _scene;
+    protected int _minAmmoRequired;
+    protected Ammunition _ammoType;
+    protected int _clipSize;
+    protected int _clipLeft;
+    protected float _timeSinceLastShot;
+    protected float _coolDown;
+    protected float _timeSinceReloaded;
+    protected float _reloadTime;
+    protected string _projectileResource;
+    protected Projectile _projectileMesh;
+    protected PackedScene _projectileScene;
+    protected int _projectileSpeed;
+    protected WeaponType _weaponType;
+    protected float _shootRange = 10000f;
+    protected float _inflictLength = 0f;
+    public float InflictLength {
+        get { return _inflictLength; }
+    }
+    
+    protected Vector3 _spread; 
+    protected float _pelletCount = 1;
+    
+    private Sprite3D muzzleFlash;
+    private AudioStreamPlayer3D shootSound;
+    private AudioStreamPlayer3D reloadSound;
+
+    string puffResource = "res://Scenes/Weapons/Puff.tscn";
+    string bloodResource = "res://Scenes/Weapons/BloodPuff.tscn";
+    PackedScene puffScene;
+    PackedScene bloodScene;
+    
+    public Weapon() {
+        puffScene = (PackedScene)ResourceLoader.Load(puffResource);
+        bloodScene = (PackedScene)ResourceLoader.Load(bloodResource);
+    }
+
+    // make our own physics process because we do everything via script
+    virtual public void PhysicsProcess(float delta)
+    {
+        this.TimeSinceLastShot += delta;
+        this.TimeSinceReloaded += delta;
+    }
+
+    public Vector3 SpawnTranslation
+    {
+        get {
+            return new Vector3(.5f, -.5f, -.9f);
+        }
+    }
+
+    public int ClipLeft
+    {
+        get {
+            return _clipLeft;
+        }
+        set {
+            _clipLeft = _clipSize == -1 ? 999 : value;
+        }
+    }
+
+    public int AmmoLeft;
+    public Ammunition AmmoType {
+        get { return _ammoType; }
+    }
+    public int MinAmmoRequired {
+        get { return _minAmmoRequired; }
+    }
+
+    public MeshInstance WeaponMesh {
+        get { return _weaponMesh; }
+    }
+
+    public float TimeSinceLastShot
+    {
+        get {
+            return _timeSinceLastShot;
+        }
+        set {
+            if (value > 0.1f && muzzleFlash != null)
+            {
+                muzzleFlash.Hide();
+            }
+            _timeSinceLastShot = value;
+        }
+    }
+
+    public float TimeSinceReloaded
+    {
+        get {
+            return _timeSinceReloaded;
+        }
+        set {
+            _timeSinceReloaded = value;
+            if (_timeSinceReloaded > _reloadTime && this.Reloading)
+            {
+                this.Reload(true);
+            }
+        }
+    }
+
+    public bool Reloading = false;
+
+    virtual public bool Shoot(Camera camera, Vector2 aimAt, Player shooter) 
+    {
+        bool shot = false;
+        // if enough ammunition in clip
+        if (ClipLeft >= _minAmmoRequired)
+        {
+            // if weapon has hit cooldown
+            if (TimeSinceLastShot >= _coolDown)
+            {
+                this.TimeSinceLastShot = 0f;
+                ClipLeft -= _minAmmoRequired;
+                GD.Print("ClipSize: " + _clipSize);
+                GD.Print("ClipLeft: " + ClipLeft);
+                // fire either hitscan or projectile
+                if (muzzleFlash != null)
+                {
+                    muzzleFlash.Show();
+                }
+                shootSound.Play();
+                
+                Vector3 shootOrigin = camera.ProjectRayOrigin(new Vector2(aimAt.x, aimAt.y));
+                Vector3 shootTo = camera.ProjectRayNormal(new Vector2(aimAt.x, aimAt.y)) * _shootRange;
+                Vector3 newTo = shootTo + shootOrigin;
+
+                GD.Print("orig: " + shootOrigin);
+                GD.Print("dest: " + shootTo);
+                GD.Print("newTo: " + newTo);
+                
+                switch (_weaponType)
+                {
+                    case WeaponType.Hitscan:
+                    case WeaponType.Melee:
+                    case WeaponType.Spread:
+                        List<Tuple<Vector3, PuffType, Node>> puffList = new List<Tuple<Vector3, PuffType, Node>>();
+                        Dictionary<KinematicBody, float> hitList = new Dictionary<KinematicBody, float>();
+                        PhysicsDirectSpaceState spaceState = shooter.GetWorld().DirectSpaceState;
+                        
+                        if (_weaponType == WeaponType.Spread)
+                        {
+                            float pc = _pelletCount;
+                            Random ran = new Random();
+                            float random = 0f;
+                            while (pc > 0)
+                            {
+                                random = (float)ran.Next(0,100);
+                                newTo = new Vector3((shootOrigin.x + shootTo.x) + random * _spread.x, (shootOrigin.y + shootTo.y) + random * _spread.y, shootOrigin.z + shootTo.z);
+                                GD.Print("random: " + random);
+                                GD.Print("dir: " + newTo);
+
+                                Tuple<Vector3, PuffType, Node, KinematicBody, float> data = this.DoHit(spaceState, shootOrigin, newTo, shooter);
+                                if (data != null)
+                                {
+                                    if (data.Item1 != null)
+                                    {
+                                        puffList.Add(new Tuple<Vector3, PuffType, Node>(data.Item1, data.Item2, data.Item3));
+                                    }
+                                    
+                                    if (data.Item4 != null)
+                                    {
+                                        hitList.Add(data.Item4, data.Item5);
+                                    }
+                                }
+                                
+                                pc -= 1;
+                            }
+                        }
+                        else
+                        {
+                            Tuple<Vector3, PuffType, Node, KinematicBody, float> data = this.DoHit(spaceState, shootOrigin, newTo, shooter);
+
+                            if (data != null)
+                            {
+                                if (data.Item1 != null)
+                                {
+                                    puffList.Add(new Tuple<Vector3, PuffType, Node>(data.Item1, data.Item2, data.Item3));
+                                }
+                                
+                                if (data.Item4 != null)
+                                {
+                                    hitList.Add(data.Item4, data.Item5);
+                                }
+                            }
+                        }
+
+                        // apply damage
+                        foreach(KinematicBody kb in hitList.Keys)
+                        {
+                            Player hit = (Player)kb;
+                            if (hit.Team == shooter.Team)
+                            {
+                                if (this.GetType().ToString().ToLower() == "syringe"
+                                || this.GetType().ToString().ToLower() == "spanner")
+                                {
+                                    //hit.Heal(shooter, this);
+                                }
+                            }
+                            else
+                            {
+                                //hit.TakeDamage(shooter.Transform, this.GetType().ToString().ToLower(), this.InflictLength, shooter, hitList[kb]);
+                            }
+                        }
+
+                        // do puff particles and blood particles
+                        foreach (Tuple<Vector3, PuffType, Node> puff in puffList)
+                        {
+                            Particles puffPart = null;
+                            switch (puff.Item2)
+                            {
+                                case PuffType.Blood:
+                                    puffPart = (Particles)bloodScene.Instance();
+                                break;
+                                case PuffType.Puff:
+                                    puffPart = (Particles)puffScene.Instance();
+                                break;
+                            }
+
+                            puffPart.Translation = puff.Item1;
+                            if (puff.Item3 != null)
+                            {
+                                puff.Item3.AddChild(puffPart);
+                            }
+                            else
+                            {
+                                _weaponMesh.GetNode("/root/OpenFortress/Main").AddChild(puffPart);
+                            }
+                            
+                            puffPart.Emitting = true;
+                        }
+                    break;
+                    case WeaponType.Projectile:
+                    case WeaponType.Grenade:
+                        // spawn projectile, set it moving
+                        _projectileMesh = (Projectile)_projectileScene.Instance();
+                        
+                        // add to scene
+                        _weaponMesh.GetNode("/root/OpenFortress/Main").AddChild(_projectileMesh);
+                        
+                        Transform t = camera.GlobalTransform;
+                        
+                        _projectileMesh.Init(t, newTo, shooter, this, this.GetType().ToString().ToLower(), 0, _projectileSpeed, _damage);
+
+                        /*if (_projectileMesh is Pipebomb p)
+                        {
+                            // track against player
+                            shooter.AddActivePipebomb(p);
+                        }*/
+                    break;
+                }
+
+                shot = true;
+            }
+            else
+            {
+                shot = false;
+            }
+        }
+        else
+        {
+            // force a reload
+            this.Reload(false);
+            shot = false;
+        }
+        return shot;
+    }
+
+    private Tuple<Vector3, PuffType, Node, KinematicBody, float> DoHit(PhysicsDirectSpaceState spaceState, Vector3 shootOrigin, Vector3 shootTo, Player shooter)
+    {
+        Tuple<Vector3, PuffType, Node, KinematicBody, float> hitData = null;
+        Godot.Collections.Dictionary res = spaceState.IntersectRay(shootOrigin, shootTo, new Godot.Collections.Array { this, shooter }, 1);
+        if (res.Count > 0)
+        {
+            Vector3 pos = (Vector3)res["position"];
+            PuffType puff;
+            Node colNode = null;
+            KinematicBody hit = null;
+            float dam = 0;
+            // track if collides, track puff counts
+            // leave this for fun
+            if (res["collider"] is RigidBody rb)
+            {           
+                Vector3 impulse = (pos - shooter.GlobalTransform.origin).Normalized();
+                Vector3 position = pos - rb.GlobalTransform.origin;
+                rb.ApplyImpulse(position, impulse * 10);
+
+                puff = PuffType.Puff;
+                colNode = (Node)rb;
+            } 
+            else if (res["collider"] is KinematicBody kb)
+            {
+                hit = kb;
+                dam = _damage / _pelletCount;
+                puff = PuffType.Blood;
+                colNode = (Node)kb;
+            }
+            else
+            {
+                puff = PuffType.Puff;
+            }
+            
+            hitData = new Tuple<Vector3, PuffType, Node, KinematicBody, float>(pos, puff, colNode, hit, dam);
+        }
+
+        return hitData;
+    }
+
+    public void Reload(bool reloadFinished)
+    {
+        if (reloadFinished)
+        {
+            GD.Print("Reloaded");
+            _weaponMesh.Visible = true;
+            _clipLeft = this.AmmoLeft < _clipSize ? this.AmmoLeft : _clipSize;
+            this.Reloading = false;
+        } 
+        else if (!this.Reloading)
+        {
+            GD.Print("Reloading...");
+            reloadSound.Play();
+            _weaponMesh.Visible = false;
+            this.TimeSinceReloaded = 0f;
+            this.Reloading = true;
+        }
+    }
+
+    public void Spawn(Node camera, string Name)
+    {
+        PackedScene PackedScene = (PackedScene)ResourceLoader.Load(_weaponResource);
+        _weaponMesh = (MeshInstance)PackedScene.Instance();
+        camera.AddChild(_weaponMesh);
+        _weaponMesh.Translation = this.SpawnTranslation;
+        _weaponMesh.Name = Name;
+        _weaponMesh.Visible = false;
+        shootSound = (AudioStreamPlayer3D)_weaponMesh.GetNode("ShootSound");
+        if (_weaponMesh.HasNode("MuzzleFlash"))
+        {
+            muzzleFlash = (Sprite3D)_weaponMesh.GetNode("MuzzleFlash");
+        }
+        if (_weaponMesh.HasNode("ReloadSound"))
+        {
+            reloadSound = (AudioStreamPlayer3D)_weaponMesh.GetNode("ReloadSound");
+        }
+        
+        // projectile mesh
+        if (_weaponType == WeaponType.Projectile || _weaponType == WeaponType.Grenade)
+        {
+            _projectileScene = (PackedScene)ResourceLoader.Load(_projectileResource);
+        }
+        
+        GD.Print("Loaded " + Name);
+    }
+}

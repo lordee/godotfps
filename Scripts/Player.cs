@@ -54,6 +54,9 @@ public class Player : KinematicBody
     private State _predictedState;
     public State PredictedState { get { return _predictedState; }}
 
+    // tf
+    private TFClass _playerClass = new Soldier();
+
     public override void _Ready()
     {
         _head = (Spatial)GetNode("Head");

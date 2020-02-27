@@ -24,3 +24,37 @@ public enum ET // entity type
 {
     PLAYER = 1,
 }
+
+public enum Ammunition 
+{
+    Shells,
+    Nails,
+    Rockets,
+    Cells,
+    FragGrenade,
+    MFTGrenade,
+    ConcussionGrenade,
+    MIRVGrenade,
+    NapalmGrenade,
+    NailGrenade,
+    GasGrenade,
+    EMPGrenade,
+    Flare,
+    Axe,
+    None
+}
+
+public enum WeaponType
+{
+    Melee,
+    Spread,
+    Hitscan,
+    Projectile,
+    Grenade
+}
+
+public enum PuffType
+{
+    Blood,
+    Puff
+}
