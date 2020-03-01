@@ -36,11 +36,14 @@ public class World : Node
 
     private List<string> _playerNodeNames = new List<string>();
     
+    // nodes
     private Network _network;
+    private ProjectileManager _projectileManager;
 
     public override void _Ready()
     {
         _network = GetNode("/root/Initial/Network") as Network;
+        _projectileManager = GetNode("/root/Initial/World/ProjectileManager") as ProjectileManager;
     }
 
     public override void _PhysicsProcess(float delta)
@@ -50,9 +53,11 @@ public class World : Node
             Player p = GetNodeOrNull(peer.ID.ToString()) as Player;
             if (p != null)
             {
-                p.StartMovement(delta);
+                p.ProcessCommands(delta);
             }
         }
+
+        _projectileManager.ProcessProjectiles(delta);
     }
 
     public void StartWorld()
@@ -175,7 +180,7 @@ public class World : Node
             pc.Init(player);
             pc.SetProcess(true);
             pc.Notification(NotificationReady);
-            //Input.SetMouseMode(Input.MouseMode.Captured);
+            Input.SetMouseMode(Input.MouseMode.Captured);
         }
         player.Team = 1;
 

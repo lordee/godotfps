@@ -7,7 +7,7 @@ using System.Text;
 public class Network : Node
 {
     private int maxPlayers = 8;
-    Initial initial;
+    Initial _initial;
     World _world;
     PlayerController _pc;
     private int _id;
@@ -27,7 +27,7 @@ public class Network : Node
         GetTree().Connect("connection_failed", this, "ConnectionFailed");
         GetTree().Connect("server_disconnected", this, "ConnectionRemoved");
 
-        initial = GetNode("/root/Initial") as Initial;
+        _initial = GetNode("/root/Initial") as Initial;
         _world = GetNode("/root/Initial/World") as World;
     }
 
@@ -46,7 +46,6 @@ public class Network : Node
                     Vector3 org = p.Player.ServerState.Origin;
                     Vector3 velo = p.Player.ServerState.Velocity;
                     Vector3 rot = p.Player.Mesh.Rotation;
-                    //p.Player.SetServerState(p.Player.PredictedState.StateNum, org, velo, rot);
                     
                     RpcUnreliable(nameof(ReceivePMovementClient), p.Player.ServerState.StateNum, p.ID, org.x, org.y, org.z, velo.x, velo.y, velo.z, rot.x, rot.y, rot.z);
 
@@ -89,6 +88,10 @@ public class Network : Node
 
             SyncWorld(id);
         }
+        else
+        {
+            LoadUI();
+        }
     }
 
     public void ClientDisconnected(string id)
@@ -130,8 +133,18 @@ public class Network : Node
         _world.StartWorld();
 
         AddPlayer(_id, true);
+        LoadUI();
+        
         _active = true;
 	}
+
+    // FIXME - move to a different node
+    private void LoadUI()
+    {
+        PackedScene uips = ResourceLoader.Load("res://Scenes/UI.tscn") as PackedScene;
+        CanvasLayer ui = uips.Instance() as CanvasLayer;
+        _initial.AddChild(ui);
+    }
 
     private void AddPlayer(int id, bool playerControlled)
     {
@@ -181,7 +194,8 @@ public class Network : Node
 
     [Remote]
     public void ReceivePMovementServer(int id, float move_forward, float move_right, float move_up, Vector3 aimx
-    , Vector3 aimy, Vector3 aimz, float camAngle, float rotX, float rotY, float rotZ)
+    , Vector3 aimy, Vector3 aimz, float camAngle, float rotX, float rotY, float rotZ, float att, float attDirX
+    , float attDirY, float attDirZ)
     {
         Basis aim = new Basis(aimx, aimy, aimz);
         Player p = GetNode("/root/Initial/World/" + id.ToString()) as Player;
@@ -192,6 +206,8 @@ public class Network : Node
         pCmd.move_up = move_up;
         pCmd.cam_angle = camAngle;
         pCmd.rotation = new Vector3(rotX, rotY, rotZ);
+        pCmd.attack = att;
+        pCmd.attackDir = new Vector3(attDirX, attDirY, attDirZ);
         p.pCmdQueue.Enqueue(pCmd);
     }
 
@@ -244,16 +260,12 @@ public class Network : Node
     }
 
     public void SendPMovement(int RecID, int id, PlayerCmd pCmd)
-    {
-        // FIXME this is obviously bad - I can't remember why this was bad now... more detail next time
-        //if (_id == id)
-        //{
-        //    ReceivePMovementServer(id, pCmd.move_forward, pCmd.move_right, pCmd.move_up, pCmd.aim.x, pCmd.aim.y, pCmd.aim.z, pCmd.cam_angle, pCmd.rotation.x, pCmd.rotation.y, pCmd.rotation.z);
-        //}
-        
+    {       
         if (!IsNetworkMaster())
         {
-            RpcUnreliableId(RecID, nameof(ReceivePMovementServer), id, pCmd.move_forward, pCmd.move_right, pCmd.move_up, pCmd.aim.x, pCmd.aim.y, pCmd.aim.z, pCmd.cam_angle, pCmd.rotation.x, pCmd.rotation.y, pCmd.rotation.z);
+            RpcUnreliableId(RecID, nameof(ReceivePMovementServer), id, pCmd.move_forward, pCmd.move_right
+            , pCmd.move_up, pCmd.aim.x, pCmd.aim.y, pCmd.aim.z, pCmd.cam_angle, pCmd.rotation.x, pCmd.rotation.y
+            , pCmd.rotation.z, pCmd.attack);
         }
     }
 }

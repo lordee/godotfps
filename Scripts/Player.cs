@@ -12,6 +12,9 @@ public class Player : KinematicBody
     RayCast _stairCatcher;
     MeshInstance _mesh;
     public MeshInstance Mesh {get { return _mesh; }}
+    ProjectileManager _projectileManager;
+
+
     public bool PlayerControlled = false;
 
     // fields
@@ -54,12 +57,21 @@ public class Player : KinematicBody
     private State _predictedState;
     public State PredictedState { get { return _predictedState; }}
 
+    // test rocket stuff
+    PackedScene _rocketScene;
+    float _lastRocketShot = 0f;
+    float _rocketCD = .5f;
+    float _shootRange = 1000f;
+
     public override void _Ready()
     {
         _head = (Spatial)GetNode("Head");
         _world = GetNode("/root/Initial/World") as World;
         _stairCatcher = (RayCast)GetNode("StairCatcher");
         _mesh = GetNode("MeshInstance") as MeshInstance;
+        _projectileManager = GetNode("/root/Initial/World/ProjectileManager") as ProjectileManager;
+
+        _rocketScene = ResourceLoader.Load("res://Scenes/Weapons/Rocket.tscn") as PackedScene;
     }
 
     public void RotateHead(float rad)
@@ -68,33 +80,51 @@ public class Player : KinematicBody
         _mesh.RotateY(rad);
     }
 
-    public void StartMovement(float delta)
+    public void ProcessCommands(float delta)
     {
         State predictedState = _serverState;
-        if (pCmdQueue.Count > 0)
+        bool addedCmd = false;
+        if (pCmdQueue.Count == 0)
         {
-            foreach(PlayerCmd pCmd in pCmdQueue)
-            {
-                predictedState = ProcessMovement(predictedState, pCmd, delta);
-            }
-        }
-        else
-        {
-            PlayerCmd pCmd = new PlayerCmd {
+            pCmdQueue.Enqueue(new PlayerCmd{
                 move_forward = 0,
                 move_right = 0,
                 move_up = 0,
                 aim = new Basis(),
                 cam_angle = 0,
-                rotation = _mesh.Rotation
-            };
+                rotation = _mesh.Rotation,
+                attack = 0
+            });
+            addedCmd = true;
+        }
+
+        foreach(PlayerCmd pCmd in pCmdQueue)
+        {
+            ProcessAttack(pCmd, delta);
             predictedState = ProcessMovement(predictedState, pCmd, delta);
+        }
+
+        if (addedCmd)
+        {
+            pCmdQueue.Dequeue();
         }
 
         if (IsNetworkMaster())
         {
-            //_serverState = predictedState;
             SetServerState(predictedState.StateNum, predictedState.Origin, predictedState.Velocity, _mesh.Rotation);
+        }
+    }
+
+    public void ProcessAttack(PlayerCmd pCmd, float delta)
+    {
+        _lastRocketShot += delta;
+
+        if (pCmd.attack == 1 && _lastRocketShot >= _rocketCD)
+        {           
+            Rocket proj = _rocketScene.Instance() as Rocket;
+            _projectileManager.AddProjectile(proj, this, pCmd.attackDir);
+
+            _lastRocketShot = 0f;
         }
     }
 
@@ -395,5 +425,14 @@ public class Player : KinematicBody
         scale = _moveSpeed * max / (_moveScale * total);
 
         return scale;
+    }
+
+    private void Die(string inflictorType, Player attacker)
+    {
+        throw new NotImplementedException();
+        // death sound
+        // orientation change
+        // respawn on input
+        // log the death
     }
 }

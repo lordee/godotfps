@@ -12,7 +12,21 @@ public class PlayerController : Camera
     private float move_forward = 0;
     private float move_right = 0;
     private float move_up = 0;
+    private float attack = 0;
     private float _cameraAngle = 0f;
+    private Vector3 shootTo = new Vector3();
+    private float _shootRange = 1000f;
+
+    private Sprite _crosshair;
+    public Sprite Crosshair {
+        get {
+            if (_crosshair == null)
+            {
+                _crosshair = (Sprite)GetNode("/root/Initial/UI/Crosshair");
+            }
+            return _crosshair;
+        }
+    }
 
     // settings
     private float mouseSensitivity = 0.2f;
@@ -57,6 +71,18 @@ public class PlayerController : Camera
             move_right += -1;
         }
 
+        attack = 0;
+        shootTo = new Vector3();
+        if (Input.IsActionPressed("attack"))
+        {
+            attack = 1;
+            Input.SetMouseMode(Input.MouseMode.Visible);
+            Vector3 origin = ProjectRayOrigin(new Vector2(Crosshair.Position.x, Crosshair.Position.y));
+            Vector3 to = ProjectRayNormal(new Vector2(Crosshair.Position.x, Crosshair.Position.y)) * _shootRange;
+            shootTo = to + origin;
+            Input.SetMouseMode(Input.MouseMode.Captured);
+        }
+
         PlayerCmd pCmd;
         pCmd.move_forward = move_forward;
         pCmd.move_right = move_right;
@@ -64,6 +90,8 @@ public class PlayerController : Camera
         pCmd.aim = this.GlobalTransform.basis;
         pCmd.cam_angle = _cameraAngle;
         pCmd.rotation = _player.Mesh.Rotation;
+        pCmd.attack = attack;
+        pCmd.attackDir = shootTo;
         _player.pCmdQueue.Enqueue(pCmd);
     }
 

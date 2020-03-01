@@ -58,6 +58,9 @@
     <Compile Include="Scripts\Main.cs" />
     <Compile Include="Scripts\Player.cs" />
     <Compile Include="Scripts\PlayerController.cs" />
+    <Compile Include="Scripts\ProjectileManager.cs" />
+    <Compile Include="Scripts\Weapons\Rocket.cs" />
+    <Compile Include="Scripts\Weapons\RocketExplosion.cs" />
     <Compile Include="Scripts\World.cs" />
     <Compile Include="Scripts\Math.cs" />
     <Compile Include="Scripts\Trigger_Door.cs" />
