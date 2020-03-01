@@ -16,7 +16,7 @@ margin_right = 430.0
 margin_bottom = 80.0
 size_flags_horizontal = 2
 size_flags_vertical = 0
-text = "OpenFortress Lobby"
+text = "Lobby"
 align = 1
 valign = 1
 

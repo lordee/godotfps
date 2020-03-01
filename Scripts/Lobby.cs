@@ -32,8 +32,6 @@ public class Lobby : Control
 
         of.AddChild(inst);
 	
-        //_network = (Network)GetNode("/root/OpenFortress/Network");
-        //_network.Active = true;
         this.Hide();
     }
 	
@@ -67,22 +65,4 @@ public class Lobby : Control
         
         this.Hide();
     }
-	
-    /*private void _On_Join_Pressed()
-    {
-        LineEdit add = (LineEdit)GetNode("panel/address");
-        string ip = add.Text;
-        System.Net.IPAddress IPadd;
-
-        if (!System.Net.IPAddress.TryParse(ip, out IPadd))
-        {
-            _Set_Status("IP address is invalid", false);
-            return;
-        }
-
-        _network = (Network)GetNode("/root/OpenFortress/Network");
-        _network.OFClientConnect(ip, DEFAULT_PORT);
-        
-        _Set_Status("Connecting..", true);
-    }*/
 }
