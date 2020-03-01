@@ -65,14 +65,6 @@
     <Compile Include="Scripts\Peer.cs" />
     <Compile Include="Scripts\State.cs" />
     <Compile Include="Scripts\PlayerCmd.cs" />
-    <Compile Include="Scripts\Classes\Soldier.cs" />
-    <Compile Include="Scripts\Classes\TFClass.cs" />
-    <Compile Include="Scripts\Weapons\Weapon.cs" />
-    <Compile Include="Scripts\Weapons\Axe.cs" />
-    <Compile Include="Scripts\Weapons\Shotgun.cs" />
-    <Compile Include="Scripts\Weapons\SuperShotgun.cs" />
-    <Compile Include="Scripts\Weapons\RocketLauncher.cs" />
-    <Compile Include="Scripts\Weapons\Projectile.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>
