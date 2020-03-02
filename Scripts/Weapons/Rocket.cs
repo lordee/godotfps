@@ -26,7 +26,7 @@ public class Rocket : KinematicBody
         this.AddCollisionExceptionWith(shooter);
         this.GlobalTransform = shooter.GlobalTransform;
         this.Direction = dest.Normalized();
-        this.LookAt(Direction, _world.Up);
+        this.LookAt(dest, _world.Up);
         _playerOwner = shooter;
     }
 

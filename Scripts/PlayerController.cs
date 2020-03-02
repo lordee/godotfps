@@ -15,7 +15,7 @@ public class PlayerController : Camera
     private float attack = 0;
     private float _cameraAngle = 0f;
     private Vector3 shootTo = new Vector3();
-    private float _shootRange = 1000f;
+    private float _shootRange = 100000f;
 
     private Sprite _crosshair;
     public Sprite Crosshair {
@@ -76,11 +76,9 @@ public class PlayerController : Camera
         if (Input.IsActionPressed("attack"))
         {
             attack = 1;
-            Input.SetMouseMode(Input.MouseMode.Visible);
             Vector3 origin = ProjectRayOrigin(new Vector2(Crosshair.Position.x, Crosshair.Position.y));
             Vector3 to = ProjectRayNormal(new Vector2(Crosshair.Position.x, Crosshair.Position.y)) * _shootRange;
             shootTo = to + origin;
-            Input.SetMouseMode(Input.MouseMode.Captured);
         }
 
         PlayerCmd pCmd;
