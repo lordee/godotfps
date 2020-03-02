@@ -1,28 +1,29 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 public class ProjectileManager : Node
 {
-    private List<Rocket> projectiles = new List<Rocket>();
+    private List<Rocket> _projectiles = new List<Rocket>();
+    HashSet<Rocket> _remove = new HashSet<Rocket>();
+    private World _world;
 
     public override void _Ready()
     {
-        
+        _world = GetNode("/root/Initial/World") as World;
     }
 
     public void AddProjectile(Rocket proj, Player shooter, Vector3 dest)
     {
-        proj.Init(shooter, dest);
-
-        projectiles.Add(proj);
+        _projectiles.Add(proj);
         this.AddChild(proj);
-
+        proj.Init(shooter, dest);
     }
 
     public void ProcessProjectiles(float delta)
     {
-        foreach (Rocket proj in projectiles)
+        foreach (Rocket proj in _projectiles)
         {
             Vector3 vel = proj.Direction * proj.Speed;
             Vector3 motion = vel * delta;
@@ -40,10 +41,10 @@ public class ProjectileManager : Node
                 else {
                     proj.Explode(null, damage);
                 }
-                projectiles.Remove(proj);
+                _remove.Add(proj);
             }
         }
+        _projectiles.RemoveAll(p => _remove.Contains(p));
+        _remove.Clear();
     }
-
-
 }
