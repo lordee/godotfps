@@ -58,7 +58,7 @@ public class Player : KinematicBody
     public State PredictedState { get { return _predictedState; }}
 
     // test rocket stuff
-    PackedScene _rocketScene;
+    
     float _lastRocketShot = 0f;
     float _rocketCD = .5f;
     float _shootRange = 1000f;
@@ -70,8 +70,6 @@ public class Player : KinematicBody
         _stairCatcher = (RayCast)GetNode("StairCatcher");
         _mesh = GetNode("MeshInstance") as MeshInstance;
         _projectileManager = GetNode("/root/Initial/World/ProjectileManager") as ProjectileManager;
-
-        _rocketScene = ResourceLoader.Load("res://Scenes/Weapons/Rocket.tscn") as PackedScene;
     }
 
     public void RotateHead(float rad)
@@ -121,8 +119,7 @@ public class Player : KinematicBody
 
         if (pCmd.attack == 1 && _lastRocketShot >= _rocketCD)
         {           
-            Rocket proj = _rocketScene.Instance() as Rocket;
-            _projectileManager.AddProjectile(proj, this, pCmd.attackDir);
+            _projectileManager.AddProjectile(this, pCmd.attackDir);
 
             _lastRocketShot = 0f;
         }
@@ -139,11 +136,7 @@ public class Player : KinematicBody
         // FIXME store these calls once...
         if (this.ID != GetTree().GetNetworkUniqueId())
         {
-            if (_newRotation)
-            {
-                 _mesh.Rotation = pCmd.rotation;
-                _newRotation = false;
-            }     
+            _mesh.Rotation = pCmd.rotation;
         }
         QueueJump(pCmd);
 

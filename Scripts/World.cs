@@ -39,6 +39,9 @@ public class World : Node
     // nodes
     private Network _network;
     private ProjectileManager _projectileManager;
+    public ProjectileManager ProjectileManager {
+        get { return _projectileManager; }
+    }
 
     public override void _Ready()
     {
@@ -50,11 +53,8 @@ public class World : Node
     {
         foreach (Peer peer in _network.PeerList)
         {
-            Player p = GetNodeOrNull(peer.ID.ToString()) as Player;
-            if (p != null)
-            {
-                p.ProcessCommands(delta);
-            }
+            Player p = peer.Player;
+            p.ProcessCommands(delta);
         }
 
         _projectileManager.ProcessProjectiles(delta);

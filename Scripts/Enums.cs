@@ -23,4 +23,5 @@ public enum MT // movetype
 public enum ET // entity type
 {
     PLAYER = 1,
+    PROJECTILE = 2,
 }

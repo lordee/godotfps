@@ -8,11 +8,17 @@ public class Rocket : KinematicBody
     public float Speed = 90;
     public float Damage = 100;
     private float _areaOfEffectRadius = 0;
-    public Vector3 Direction = new Vector3();
     PackedScene _particleScene;
     private World _world;
 
+    public Vector3 Velocity = new Vector3();
+
     private Player _playerOwner;
+    public Player PlayerOwner { get { return _playerOwner; }}
+    private State _serverState;
+    public State ServerState { get { return _serverState; }}
+
+    public State PredictedState;
 
     public override void _Ready()
     {
@@ -21,12 +27,12 @@ public class Rocket : KinematicBody
         _areaOfEffectRadius = Damage / 10;
     }
 
-    public void Init(Player shooter, Vector3 dest)
+    public void Init(Player shooter, Vector3 vel)
     {
         this.AddCollisionExceptionWith(shooter);
         this.GlobalTransform = shooter.GlobalTransform;
-        this.Direction = dest.Normalized();
-        this.LookAt(dest, _world.Up);
+        Velocity = vel;
+        this.LookAt(vel * 1000, _world.Up);
         _playerOwner = shooter;
     }
 
@@ -86,5 +92,13 @@ public class Rocket : KinematicBody
                 }
             }
         }
+    }
+
+    public void SetServerState(int stateNum, Vector3 org, Vector3 velo, Vector3 rot)
+    {
+        _serverState.StateNum = stateNum;
+        _serverState.Origin = org;
+        _serverState.Velocity = velo;
+        this.Rotation = rot;
     }
 }

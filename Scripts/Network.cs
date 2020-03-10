@@ -6,9 +6,12 @@ using System.Text;
 
 public class Network : Node
 {
-    private int maxPlayers = 8;
     Initial _initial;
     World _world;
+    ProjectileManager _projectileManager;
+    
+    private int maxPlayers = 8;
+    
     PlayerController _pc;
     private int _id;
     public List<Peer> PeerList = new List<Peer>();
@@ -18,6 +21,8 @@ public class Network : Node
     private float _gameTime = 0f;
     private float _lastPingSent = 0f;
     private float _lastPingGT = 0f;
+
+    StringBuilder sb = new StringBuilder();
 
     public override void _Ready()
     {
@@ -29,6 +34,8 @@ public class Network : Node
 
         _initial = GetNode("/root/Initial") as Initial;
         _world = GetNode("/root/Initial/World") as World;
+        _projectileManager = GetNode("/root/Initial/World/ProjectileManager") as ProjectileManager;
+
     }
 
     public override void _PhysicsProcess(float delta)
@@ -41,12 +48,21 @@ public class Network : Node
             {
                 string pingString = "";
                 // send updates to each peer
+
+                string projectiles = "";
+                if (GetProjectileString(ref projectiles))
+                {
+                    byte[] projectilesBytes = Encoding.UTF8.GetBytes(projectiles);
+                    RpcUnreliable(nameof(ReceiveProjectilesClient), projectilesBytes);
+                }
+
                 foreach (Peer p in PeerList)
                 {
                     Vector3 org = p.Player.ServerState.Origin;
                     Vector3 velo = p.Player.ServerState.Velocity;
                     Vector3 rot = p.Player.Mesh.Rotation;
                     
+                    // FIXME - change statenum to rotating int to save bytes, change to bytes of all players
                     RpcUnreliable(nameof(ReceivePMovementClient), p.Player.ServerState.StateNum, p.ID, org.x, org.y, org.z, velo.x, velo.y, velo.z, rot.x, rot.y, rot.z);
 
                     if (p.ID != 1)
@@ -74,6 +90,45 @@ public class Network : Node
                 SendPMovement(1, _id, pcmd);
             }
         }
+    }
+
+    public bool GetProjectileString(ref string projectiles)
+    {
+        sb.Clear();
+        foreach(Rocket p in _projectileManager.Projectiles)
+        {
+            sb.Append(p.ServerState.StateNum);
+            sb.Append(",");
+            sb.Append(p.Name);
+            sb.Append(",");
+            sb.Append(p.PlayerOwner.ID);
+            sb.Append(",");
+            sb.Append(p.GlobalTransform.origin.x);
+            sb.Append(",");
+            sb.Append(p.GlobalTransform.origin.y);
+            sb.Append(",");
+            sb.Append(p.GlobalTransform.origin.z);
+            sb.Append(",");
+            sb.Append(p.Velocity.x);
+            sb.Append(",");
+            sb.Append(p.Velocity.y);
+            sb.Append(",");
+            sb.Append(p.Velocity.z);
+            sb.Append(",");
+            sb.Append(p.Rotation.x);
+            sb.Append(",");
+            sb.Append(p.Rotation.y);
+            sb.Append(",");
+            sb.Append(p.Rotation.z);
+            sb.Append(",");
+        }
+        if (sb.Length > 0)
+        {
+            sb.Remove(sb.Length - 1, 1);
+            projectiles = sb.ToString();
+            return true;
+        }
+        return false;
     }
 
     public void ClientConnected(string ids)
@@ -223,6 +278,39 @@ public class Network : Node
         p.SetServerState(stateNum, org, velo, rot);
     }
 
+    [Slave]
+    public void ReceiveProjectilesClient(byte[] projData)
+    {
+        string projString = Encoding.UTF8.GetString(projData);
+        string[] split = projString.Split(",");
+        for (int i = 0; i < split.Length; i++)
+        {
+            if (i % 2 == 0)
+            {
+                int stateNum = Convert.ToInt32(split[i++]);
+                string pName = split[i++];
+                string pID = split[i++];
+                Vector3 org = new Vector3(
+                    float.Parse(split[i++],  System.Globalization.CultureInfo.InvariantCulture)
+                    , float.Parse(split[i++],  System.Globalization.CultureInfo.InvariantCulture)
+                    , float.Parse(split[i++],  System.Globalization.CultureInfo.InvariantCulture)
+                );
+                Vector3 vel = new Vector3(
+                    float.Parse(split[i++],  System.Globalization.CultureInfo.InvariantCulture)
+                    , float.Parse(split[i++],  System.Globalization.CultureInfo.InvariantCulture)
+                    , float.Parse(split[i++],  System.Globalization.CultureInfo.InvariantCulture)
+                );
+
+                Vector3 rot = new Vector3(
+                    float.Parse(split[i++],  System.Globalization.CultureInfo.InvariantCulture)
+                    , float.Parse(split[i++],  System.Globalization.CultureInfo.InvariantCulture)
+                    , float.Parse(split[i++],  System.Globalization.CultureInfo.InvariantCulture)
+                );
+                _projectileManager.AddNetworkedProjectile(stateNum, pName, pID, org, vel, rot);
+            }
+        }
+    }
+
     // clients
     [Slave]
     public void Ping(byte[] pingBytes)
@@ -265,7 +353,7 @@ public class Network : Node
         {
             RpcUnreliableId(RecID, nameof(ReceivePMovementServer), id, pCmd.move_forward, pCmd.move_right
             , pCmd.move_up, pCmd.aim.x, pCmd.aim.y, pCmd.aim.z, pCmd.cam_angle, pCmd.rotation.x, pCmd.rotation.y
-            , pCmd.rotation.z, pCmd.attack);
+            , pCmd.rotation.z, pCmd.attack, pCmd.attackDir.x, pCmd.attackDir.y, pCmd.attackDir.z);
         }
     }
 }
