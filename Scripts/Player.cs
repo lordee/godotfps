@@ -44,8 +44,6 @@ public class Player : KinematicBody
     public float _sideStrafeSpeed = 3.0f;          // What the max speed to generate when side strafing
     public float _airControl = 0.3f;               // How precise air control is
     
-    private bool _newRotation = false;
-
     public Queue<PlayerCmd> pCmdQueue = new Queue<PlayerCmd>();
     private State _serverState;
     public State ServerState { get { return _serverState; }}
@@ -53,16 +51,16 @@ public class Player : KinematicBody
     public State PredictedState { get { return _predictedState; }}
 
     private int _maxArmour = 200;
-    private int _currentArmour;
-    public int CurrentArmour { get { return _currentArmour; }}
+    private float _currentArmour;
+    public float CurrentArmour { get { return _currentArmour; }}
     private int _maxHealth = 100;
-    private int _currentHealth;
-    public int CurrentHealth { get { return _currentHealth; }}
+    private float _currentHealth;
+    public float CurrentHealth { get { return _currentHealth; }}
 
     // test rocket stuff
     float _lastRocketShot = 0f;
     float _rocketCD = .5f;
-    float _shootRange = 1000f;
+    //float _shootRange = 1000f;
 
     public override void _Ready()
     {
@@ -110,7 +108,7 @@ public class Player : KinematicBody
 
         if (IsNetworkMaster())
         {
-            SetServerState(predictedState.StateNum, predictedState.Origin, predictedState.Velocity, _mesh.Rotation);
+            SetServerState(predictedState.StateNum, predictedState.Origin, predictedState.Velocity, _mesh.Rotation, _currentHealth, _currentArmour);
         }
     }
 
@@ -161,14 +159,20 @@ public class Player : KinematicBody
         return _predictedState;
     }
 
-    public void SetServerState(int stateNum, Vector3 org, Vector3 velo, Vector3 rot)
+    public void SetServerState(int stateNum, Vector3 org, Vector3 velo, Vector3 rot, float health, float armour)
     {
         _serverState.StateNum = stateNum;
         _serverState.Origin = org;
         _serverState.Velocity = velo;
+
         if (!PlayerControlled)
         {
             this._mesh.Rotation = rot;
+        }
+        else
+        {
+            _currentHealth = health;
+            _currentArmour = armour;
         }
 
         if (pCmdQueue.Count > 0)
@@ -419,15 +423,15 @@ public class Player : KinematicBody
 
         return scale;
     }
-/*
+
     public void TakeDamage(Rocket inflictor, float damage)
     {       
         float vel = damage;
-        damage = inflictor.Owner == this ? damage * .5f : damage;
+        damage = inflictor.PlayerOwner == this ? damage * .5f : damage;
 
         // take from armour and health
-        int a = CurrentArmour;
-        int h = CurrentHealth;
+        float a = _currentArmour;
+        float h = _currentHealth;
         // calc max a used (4 armour to every 1 health of damage)
         float aUsed = damage / 5 * 4;
 
@@ -435,35 +439,43 @@ public class Player : KinematicBody
         {
             aUsed = a;
         }
-        CurrentArmour -= Convert.ToInt16(aUsed);
+        _currentArmour -= Convert.ToInt16(aUsed);
 
         float hUsed = damage - aUsed;
 
         if (h > hUsed)
         {
             // they survive
-            CurrentHealth -= Convert.ToInt16(hUsed);
+            _currentHealth -= Convert.ToInt16(hUsed);
         }
         else
         {
-            this.Die(inflictorType, attacker);
+            this.Die();
             return;
         }
 
         // add velocity
-        AddVelocity(inflictorTransform.origin, damage);
+        AddVelocity(inflictor.GlobalTransform.origin, vel);
     }
-*/
+
+    private void AddVelocity(Vector3 org, float velocity)
+    {
+        Vector3 dir = this.Transform.origin - org;
+        dir = dir.Normalized();
+        dir = dir * (velocity / 2); // random magic divisor number, i thought it was 10:1...
+        _serverState.Velocity += dir;
+    }
 
     public void Spawn(Vector3 spawnPoint)
     {
         this.Translation = spawnPoint;
         // FIXME - this is ugly, it should just be sent on next network update?
-        this.SetServerState(this.ServerState.StateNum + 1, this.GlobalTransform.origin, this._playerVelocity, this._mesh.Rotation);
+        this.SetServerState(this.ServerState.StateNum + 1, this.GlobalTransform.origin, this._playerVelocity, this._mesh.Rotation, _maxHealth, _maxArmour);
         _currentHealth = _maxHealth;
         _currentArmour = _maxArmour;
     }
-    private void Die(string inflictorType, Player attacker)
+
+    private void Die()
     {
         throw new NotImplementedException();
         // death sound

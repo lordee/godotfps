@@ -63,7 +63,7 @@ public class Network : Node
                     Vector3 rot = p.Player.Mesh.Rotation;
                     
                     // FIXME - change statenum to rotating int to save bytes, change to bytes of all players
-                    RpcUnreliable(nameof(ReceivePMovementClient), p.Player.ServerState.StateNum, p.ID, org.x, org.y, org.z, velo.x, velo.y, velo.z, rot.x, rot.y, rot.z);
+                    RpcUnreliable(nameof(ReceivePMovementClient), p.Player.ServerState.StateNum, p.ID, p.Player.CurrentHealth, p.Player.CurrentArmour, org.x, org.y, org.z, velo.x, velo.y, velo.z, rot.x, rot.y, rot.z);
 
                     if (p.ID != 1)
                     {
@@ -264,8 +264,9 @@ public class Network : Node
         p.pCmdQueue.Enqueue(pCmd);
     }
 
+    // FIXME - packets to be all players and only h/a of owning player
     [Slave]
-    public void ReceivePMovementClient(int stateNum, int id, float orgX, float orgY, float orgZ, float veloX, float veloY, float veloZ
+    public void ReceivePMovementClient(int stateNum, int id, float health, float armour, float orgX, float orgY, float orgZ, float veloX, float veloY, float veloZ
         , float rotX, float rotY, float rotZ)
     {
         Vector3 org = new Vector3(orgX, orgY, orgZ);
@@ -273,7 +274,7 @@ public class Network : Node
         Vector3 rot = new Vector3(rotX, rotY, rotZ);
 
         Player p = PeerList.Where(p2 => p2.ID == id).First().Player;
-        p.SetServerState(stateNum, org, velo, rot);
+        p.SetServerState(stateNum, org, velo, rot, health, armour);
     }
 
     [Slave]

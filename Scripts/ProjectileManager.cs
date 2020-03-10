@@ -85,7 +85,7 @@ public class ProjectileManager : Node
             // if c collider is kinematic body (direct hit)
             if (c.Collider is Player pl)
             {
-                //pl.TakeDamage(this.Transform, _weaponOwnerString, _weaponOwnerInflictLength, _playerOwner, damage);
+                pl.TakeDamage(proj, damage);
                 proj.Explode(pl, damage);
             }
             else {

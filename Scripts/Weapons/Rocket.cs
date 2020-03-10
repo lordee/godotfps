@@ -68,7 +68,6 @@ public class Rocket : KinematicBody
         foreach (Godot.Collections.Dictionary r in result) {
             if (r["collider"] is Player pl)
             {
-                GD.Print("found player");
                 if (pl != ignore || ignore == null)
                 {
                     // find how far from explosion as a percentage, apply to damage
@@ -76,19 +75,9 @@ public class Rocket : KinematicBody
                     dist = dist > this._areaOfEffectRadius ? (this._areaOfEffectRadius*.99f) : dist;
                     float pc = ((this._areaOfEffectRadius - dist) / this._areaOfEffectRadius);
                     float d = damage * pc;
-                    GD.Print("dam: " + damage);
-                    GD.Print("pc: " + pc);
-                    GD.Print("dist: " + dist);
-                    GD.Print("aoe: " + this._areaOfEffectRadius);
-                    GD.Print(this._playerOwner.Name);
-                    GD.Print(pl.Name);
-                    if (pl == this._playerOwner)
-                    {
-                        d = d * 0.5f;
-                    }
-                    GD.Print("inflicted dam: " + d);
+
                     // inflict damage
-                    //pl.TakeDamage(this.Transform, _weaponOwnerString, _weaponOwnerInflictLength, this._playerOwner, d);
+                    pl.TakeDamage(this, d);
                 }
             }
         }
