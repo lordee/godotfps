@@ -143,10 +143,6 @@ public class Network : Node
 
             SyncWorld(id);
         }
-        else
-        {
-            LoadUI();
-        }
     }
 
     public void ClientDisconnected(string id)
@@ -188,17 +184,18 @@ public class Network : Node
         _world.StartWorld();
 
         AddPlayer(_id, true);
-        LoadUI();
+        
         
         _active = true;
 	}
 
     // FIXME - move to a different node
-    private void LoadUI()
+    private void LoadUI(Player p)
     {
         PackedScene uips = ResourceLoader.Load("res://Scenes/UI.tscn") as PackedScene;
-        CanvasLayer ui = uips.Instance() as CanvasLayer;
+        UI ui = uips.Instance() as UI;
         _initial.AddChild(ui);
+        ui.Init(p);
     }
 
     private void AddPlayer(int id, bool playerControlled)
@@ -208,6 +205,7 @@ public class Network : Node
         if (c != null)
         {
             _pc = c;
+            LoadUI(_pc.Player);
         }
 
         Player p = GetNode("/root/Initial/World/" + id) as Player;

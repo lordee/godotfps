@@ -14,16 +14,13 @@ public class Player : KinematicBody
     public MeshInstance Mesh {get { return _mesh; }}
     ProjectileManager _projectileManager;
 
-
     public bool PlayerControlled = false;
 
     // fields
     public int Team;
     public int ID;
     
-
     // movement
-    //PlayerCmd _pCmd = new PlayerCmd();
     private bool _wishJump;
     private bool _touchingGround = false;
     private Vector3 _playerVelocity = new Vector3();
@@ -48,8 +45,6 @@ public class Player : KinematicBody
     public float _airControl = 0.3f;               // How precise air control is
     
     private bool _newRotation = false;
-    //private int _lastState = 0;
-    //public int LastState { get { return _lastState; }}
 
     public Queue<PlayerCmd> pCmdQueue = new Queue<PlayerCmd>();
     private State _serverState;
@@ -57,8 +52,14 @@ public class Player : KinematicBody
     private State _predictedState;
     public State PredictedState { get { return _predictedState; }}
 
+    private int _maxArmour = 200;
+    private int _currentArmour;
+    public int CurrentArmour { get { return _currentArmour; }}
+    private int _maxHealth = 100;
+    private int _currentHealth;
+    public int CurrentHealth { get { return _currentHealth; }}
+
     // test rocket stuff
-    
     float _lastRocketShot = 0f;
     float _rocketCD = .5f;
     float _shootRange = 1000f;
@@ -133,8 +134,7 @@ public class Player : KinematicBody
         t.origin = predState.Origin;
         GlobalTransform = t;
 
-        // FIXME store these calls once...
-        if (this.ID != GetTree().GetNetworkUniqueId())
+        if (!PlayerControlled)
         {
             _mesh.Rotation = pCmd.rotation;
         }
@@ -419,7 +419,50 @@ public class Player : KinematicBody
 
         return scale;
     }
+/*
+    public void TakeDamage(Rocket inflictor, float damage)
+    {       
+        float vel = damage;
+        damage = inflictor.Owner == this ? damage * .5f : damage;
 
+        // take from armour and health
+        int a = CurrentArmour;
+        int h = CurrentHealth;
+        // calc max a used (4 armour to every 1 health of damage)
+        float aUsed = damage / 5 * 4;
+
+        if (aUsed >= a)
+        {
+            aUsed = a;
+        }
+        CurrentArmour -= Convert.ToInt16(aUsed);
+
+        float hUsed = damage - aUsed;
+
+        if (h > hUsed)
+        {
+            // they survive
+            CurrentHealth -= Convert.ToInt16(hUsed);
+        }
+        else
+        {
+            this.Die(inflictorType, attacker);
+            return;
+        }
+
+        // add velocity
+        AddVelocity(inflictorTransform.origin, damage);
+    }
+*/
+
+    public void Spawn(Vector3 spawnPoint)
+    {
+        this.Translation = spawnPoint;
+        // FIXME - this is ugly, it should just be sent on next network update?
+        this.SetServerState(this.ServerState.StateNum + 1, this.GlobalTransform.origin, this._playerVelocity, this._mesh.Rotation);
+        _currentHealth = _maxHealth;
+        _currentArmour = _maxArmour;
+    }
     private void Die(string inflictorType, Player attacker)
     {
         throw new NotImplementedException();

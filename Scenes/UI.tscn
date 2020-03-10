@@ -1,15 +1,17 @@
-[gd_scene load_steps=6 format=2]
+[gd_scene load_steps=7 format=2]
 
 [ext_resource path="res://Assets/UI/health.png" type="Texture" id=1]
 [ext_resource path="res://Assets/UI/Shrikhand-Regular.ttf" type="DynamicFontData" id=2]
 [ext_resource path="res://Assets/UI/armour.png" type="Texture" id=3]
 [ext_resource path="res://Assets/Sprites/Crosshair 1.png" type="Texture" id=4]
+[ext_resource path="res://Scripts/UI.cs" type="Script" id=5]
 
 [sub_resource type="DynamicFont" id=1]
 size = 45
 font_data = ExtResource( 2 )
 
 [node name="UI" type="CanvasLayer"]
+script = ExtResource( 5 )
 
 [node name="Health" type="Sprite" parent="."]
 position = Vector2( 559.484, 569.718 )
@@ -23,6 +25,9 @@ margin_right = 662.0
 margin_bottom = 600.0
 custom_fonts/font = SubResource( 1 )
 text = "0"
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="Armour" type="Sprite" parent="."]
 position = Vector2( 377.171, 569.539 )

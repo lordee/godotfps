@@ -194,8 +194,7 @@ public class World : Node
 
     public void Spawn(Player p)
     {
-        p.Translation = GetNextSpawn(p.Team);
-        p.SetServerState(p.ServerState.StateNum + 1, p.GlobalTransform.origin, p.PlayerVelocity, p.Mesh.Rotation);
+        p.Spawn(this.GetNextSpawn(p.Team));        
     }
 
     public Vector3 GetNextSpawn(int teamID)
