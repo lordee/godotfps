@@ -164,15 +164,12 @@ public class Player : KinematicBody
         _serverState.StateNum = stateNum;
         _serverState.Origin = org;
         _serverState.Velocity = velo;
+        _currentHealth = health;
+        _currentArmour = armour;
 
         if (!PlayerControlled)
         {
             this._mesh.Rotation = rot;
-        }
-        else
-        {
-            _currentHealth = health;
-            _currentArmour = armour;
         }
 
         if (pCmdQueue.Count > 0)
@@ -477,10 +474,12 @@ public class Player : KinematicBody
 
     private void Die()
     {
-        throw new NotImplementedException();
+        // FIXME
         // death sound
         // orientation change
         // respawn on input
         // log the death
+
+        _world.Spawn(this);
     }
 }
