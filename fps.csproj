@@ -69,6 +69,7 @@
     <Compile Include="Scripts\Peer.cs" />
     <Compile Include="Scripts\State.cs" />
     <Compile Include="Scripts\PlayerCmd.cs" />
+    <Compile Include="Scripts\SnapShot.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

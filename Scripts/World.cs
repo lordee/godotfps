@@ -42,6 +42,21 @@ public class World : Node
     public ProjectileManager ProjectileManager {
         get { return _projectileManager; }
     }
+    private Player _worldOwner;
+
+
+    private float _gameTime = 0f;
+    private int _serverSnapNum = 0;
+    public int ServerSnapNum { 
+        get { return _serverSnapNum; }
+        set { _serverSnapNum = value; }
+    }
+
+    private int _localSnapNum = 0;
+    public int LocalSnapNum { get { return _localSnapNum; }}
+
+    // FIXME - just add to scene tree manually instead of evaluating this constantly, same for network
+    private bool _active = false;
 
     public override void _Ready()
     {
@@ -51,18 +66,105 @@ public class World : Node
 
     public override void _PhysicsProcess(float delta)
     {
-        foreach (Peer peer in _network.PeerList)
+        if (_active)
         {
-            Player p = peer.Player;
-            p.ProcessCommands(delta);
+            _gameTime += delta;
+            _localSnapNum++;
+            if (IsNetworkMaster())
+            {
+                _serverSnapNum = _localSnapNum;
+            }
+            if (_worldOwner != null)
+            {
+                // process frame(s)
+                int count = _worldOwner.pCmdQueue.Count == 0 ? 1 : _worldOwner.pCmdQueue.Count;
+                List<PlayerCmd> allCmds = new List<PlayerCmd>();
+                foreach(Peer peer in _network.PeerList)
+                {
+                    if (peer.Player.pCmdQueue.Count == 0)
+                    {
+                        allCmds.Add(
+                            new PlayerCmd{
+                                snapshot = LocalSnapNum,
+                                playerID = peer.Player.ID,
+                                move_forward = 0,
+                                move_right = 0,
+                                move_up = 0,
+                                aim = new Basis(),
+                                cam_angle = 0,
+                                rotation = peer.Player.Mesh.Rotation,
+                                attack = 0
+                                }
+                            );
+                    }
+                    else
+                    {
+                        allCmds.AddRange(peer.Player.pCmdQueue);
+                    }
+                    peer.Player.PredictedState = peer.Player.ServerState;
+                }
+
+                allCmds.Sort((x,y) => x.snapshot.CompareTo(y.snapshot));
+
+                foreach(PlayerCmd pCmd in allCmds)
+                {
+                    int diff = LocalSnapNum - pCmd.snapshot;
+
+                    if (IsNetworkMaster())
+                    {
+                        RewindPlayers(diff, delta);
+                    }
+
+                    Player p = _network.PeerList.Find(x => x.ID == pCmd.playerID).Player;
+                    p.ProcessCommand(pCmd, delta);
+
+                    if (IsNetworkMaster())
+                    {
+                        FastForwardPlayers();
+                    }
+                }
+
+                _projectileManager.ProcessProjectiles(delta);
+            }
+        }
+    }
+
+    private bool RewindPlayers(int ticks, float delta)
+    {
+        bool rewound = false;
+
+        ticks = ticks > _network.Snapshots.Count ? _network.Snapshots.Count : ticks; // we only hold backrectime worth of ticks
+        if (ticks > 0)
+        {
+            int pos = _network.Snapshots.Count - ticks;
+            SnapShot sn = _network.Snapshots[pos];
+            foreach(PlayerSnap psn in sn.PlayerSnap)
+            {
+                Player brp = GetNode(psn.NodeName) as Player;
+                Transform t = brp.GlobalTransform;
+                t.origin = psn.Origin;
+                brp.GlobalTransform = t;
+            }
+            rewound = true;
         }
 
-        _projectileManager.ProcessProjectiles(delta);
+        return rewound;
+    }
+
+    private void FastForwardPlayers()
+    {
+        SnapShot sn = _network.Snapshots[_network.Snapshots.Count - 1];
+        foreach(PlayerSnap psn in sn.PlayerSnap)
+        {
+            Player brp = GetNode(psn.NodeName) as Player;
+            Transform t = brp.GlobalTransform;
+            t.origin = psn.Origin;
+            brp.GlobalTransform = t;
+        }
     }
 
     public void StartWorld()
     {
-        Input.SetMouseMode(Input.MouseMode.Visible);
         PackedScene main = (PackedScene)ResourceLoader.Load("res://Maps/lastresort_b5.tscn");
         Spatial inst = (Spatial)main.Instance();
         Initial of = GetNode("/root/Initial") as Initial;
@@ -139,6 +241,7 @@ public class World : Node
         }
 
         this.LinkDoors(doors);
+        _active = true;
     }
 
     private void LinkDoors(List<Trigger_Door> doors)
@@ -180,7 +283,8 @@ public class World : Node
             pc.Init(player);
             pc.SetProcess(true);
             pc.Notification(NotificationReady);
-            Input.SetMouseMode(Input.MouseMode.Captured);
+            Input.SetMouseMode(Input.MouseMode.Visible);
+            _worldOwner = player;
         }
         player.Team = 1;
 

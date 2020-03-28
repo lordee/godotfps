@@ -5,13 +5,12 @@ using System.Collections.Generic;
 public class Peer
 {
     public int ID;
-    public int Ping;
     public Player Player;
+    public int LastSnapshot;
 
-    public Peer(int id, int ping, Player p)
+    public Peer(int id, Player p)
     {
         ID = id;
-        Ping = ping;
         Player = p;
     }
 }

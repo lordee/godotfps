@@ -17,12 +17,13 @@ public class Network : Node
     public List<Peer> PeerList = new List<Peer>();
 
     private bool _active = false;
-
-    private float _gameTime = 0f;
     private float _lastPingSent = 0f;
     private float _lastPingGT = 0f;
 
     StringBuilder sb = new StringBuilder();
+
+    public List<SnapShot> Snapshots = new List<SnapShot>();
+    
 
     public override void _Ready()
     {
@@ -35,100 +36,37 @@ public class Network : Node
         _initial = GetNode("/root/Initial") as Initial;
         _world = GetNode("/root/Initial/World") as World;
         _projectileManager = GetNode("/root/Initial/World/ProjectileManager") as ProjectileManager;
-
     }
 
     public override void _PhysicsProcess(float delta)
     {
         if (_active)
         {
-            _gameTime += delta;
             _lastPingSent += delta;
             if (IsNetworkMaster())
             {
-                string pingString = "";
-                // send updates to each peer
-
-                string projectiles = "";
-                if (GetProjectileString(ref projectiles))
+                while(Snapshots.Count > _world.BackRecTime / delta)
                 {
-                    byte[] projectilesBytes = Encoding.UTF8.GetBytes(projectiles);
-                    RpcUnreliable(nameof(ReceiveProjectilesClient), projectilesBytes);
+                    Snapshots.RemoveAt(0);
                 }
+                SnapShot sn = new SnapShot();
+                sn.SnapNum = _world.LocalSnapNum;
 
-                foreach (Peer p in PeerList)
-                {
-                    Vector3 org = p.Player.ServerState.Origin;
-                    Vector3 velo = p.Player.ServerState.Velocity;
-                    Vector3 rot = p.Player.Mesh.Rotation;
-                    
-                    // FIXME - change statenum to rotating int to save bytes, change to bytes of all players
-                    RpcUnreliable(nameof(ReceivePMovementClient), p.Player.ServerState.StateNum, p.ID, p.Player.CurrentHealth, p.Player.CurrentArmour, org.x, org.y, org.z, velo.x, velo.y, velo.z, rot.x, rot.y, rot.z);
+                Snapshots.Add(sn);
 
-                    if (p.ID != 1)
-                    {
-                        pingString += "," + p.ID.ToString() + "," + p.Ping.ToString();
-                    }
-                }
-                
-                if (_lastPingSent > 3f)
-                {
-                    _lastPingSent = 0f;
-                    _lastPingGT = _gameTime;
-                    if (pingString.Length > 0)
-                    {
-                        pingString = pingString.Substr(1, pingString.Length);
-                    }
-                    byte[] pingBytes = Encoding.UTF8.GetBytes(pingString);
-                    RpcUnreliable(nameof(Ping), pingBytes);
-                }
+                string packetString = BuildPacketString(sn);
+                byte[] packetBytes = Encoding.UTF8.GetBytes(packetString);
+                RpcUnreliable(nameof(ReceivePacket), packetBytes);
             }
-
-            // send update to network master
-            foreach(PlayerCmd pcmd in _pc.Player.pCmdQueue)
+            else
             {
-                SendPMovement(1, _id, pcmd);
+                // FIXME send x updates to network server, not all
+                foreach(PlayerCmd pcmd in _pc.Player.pCmdQueue)
+                {
+                    SendPMovement(1, _id, pcmd, _world.LocalSnapNum);
+                }
             }
         }
-    }
-
-    public bool GetProjectileString(ref string projectiles)
-    {
-        sb.Clear();
-        foreach(Rocket p in _projectileManager.Projectiles)
-        {
-            sb.Append(p.ServerState.StateNum);
-            sb.Append(",");
-            sb.Append(p.Name);
-            sb.Append(",");
-            sb.Append(p.PlayerOwner.ID);
-            sb.Append(",");
-            sb.Append(p.GlobalTransform.origin.x);
-            sb.Append(",");
-            sb.Append(p.GlobalTransform.origin.y);
-            sb.Append(",");
-            sb.Append(p.GlobalTransform.origin.z);
-            sb.Append(",");
-            sb.Append(p.Velocity.x);
-            sb.Append(",");
-            sb.Append(p.Velocity.y);
-            sb.Append(",");
-            sb.Append(p.Velocity.z);
-            sb.Append(",");
-            sb.Append(p.Rotation.x);
-            sb.Append(",");
-            sb.Append(p.Rotation.y);
-            sb.Append(",");
-            sb.Append(p.Rotation.z);
-            sb.Append(",");
-        }
-        if (sb.Length > 0)
-        {
-            sb.Remove(sb.Length - 1, 1);
-            projectiles = sb.ToString();
-            return true;
-        }
-        return false;
     }
 
     public void ClientConnected(string ids)
@@ -185,7 +123,6 @@ public class Network : Node
 
         AddPlayer(_id, true);
         
-        
         _active = true;
 	}
 
@@ -210,7 +147,7 @@ public class Network : Node
 
         Player p = GetNode("/root/Initial/World/" + id) as Player;
         p.PlayerControlled = playerControlled;
-        PeerList.Add(new Peer(id, 0, p));
+        PeerList.Add(new Peer(id, p));
     }
     
     private void SyncWorld(int id)
@@ -218,18 +155,18 @@ public class Network : Node
         // TODO - send over all ents to new player?
         foreach(Peer p in PeerList)
         {
-            RpcId(id, nameof(SyncWorldReceive), ET.PLAYER, p.ID.ToString());
+            RpcId(id, nameof(SyncWorldReceive), _world.LocalSnapNum, ET.PLAYER, p.ID);
         }
     }
 
     // only clients receive this, only on first connect?
     [Remote]
-    public void SyncWorldReceive(ET entType, string nodeName)
+    public void SyncWorldReceive(int serverSnapNum, ET entType, int id)
     {
+        _world.ServerSnapNum = serverSnapNum;
         switch (entType)
         {
             case ET.PLAYER:
-                int id = Convert.ToInt32(nodeName);
                 if (id == GetTree().GetNetworkUniqueId())
                 {
                     _world.StartWorld();
@@ -246,13 +183,15 @@ public class Network : Node
     }
 
     [Remote]
-    public void ReceivePMovementServer(int id, float move_forward, float move_right, float move_up, Vector3 aimx
+    public void ReceivePMovementServer(int snapNum, int id, float move_forward, float move_right, float move_up, Vector3 aimx
     , Vector3 aimy, Vector3 aimz, float camAngle, float rotX, float rotY, float rotZ, float att, float attDirX
     , float attDirY, float attDirZ)
     {
         Basis aim = new Basis(aimx, aimy, aimz);
         Player p = GetNode("/root/Initial/World/" + id.ToString()) as Player;
         PlayerCmd pCmd;
+        pCmd.playerID = id;
+        pCmd.snapshot = snapNum;
         pCmd.aim = aim;
         pCmd.move_forward = move_forward;
         pCmd.move_right = move_right;
@@ -261,20 +200,15 @@ public class Network : Node
         pCmd.rotation = new Vector3(rotX, rotY, rotZ);
         pCmd.attack = att;
         pCmd.attackDir = new Vector3(attDirX, attDirY, attDirZ);
-        p.pCmdQueue.Enqueue(pCmd);
+        //p.pCmdQueue.Enqueue(pCmd);
+        p.pCmdQueue.Add(pCmd);
     }
 
-    // FIXME - packets to be all players and only h/a of owning player
-    [Slave]
-    public void ReceivePMovementClient(int stateNum, int id, float health, float armour, float orgX, float orgY, float orgZ, float veloX, float veloY, float veloZ
-        , float rotX, float rotY, float rotZ)
+    // FIXME - only h/a of owning player
+    public void UpdatePlayer(int id, float health, float armour, Vector3 org, Vector3 velo, Vector3 rot)
     {
-        Vector3 org = new Vector3(orgX, orgY, orgZ);
-        Vector3 velo = new Vector3(veloX, veloY, veloZ);
-        Vector3 rot = new Vector3(rotX, rotY, rotZ);
-
         Player p = PeerList.Where(p2 => p2.ID == id).First().Player;
-        p.SetServerState(stateNum, org, velo, rot, health, armour);
+        p.SetServerState(org, velo, rot, health, armour);
     }
 
     [Slave]
@@ -305,54 +239,168 @@ public class Network : Node
                     , float.Parse(split[i++],  System.Globalization.CultureInfo.InvariantCulture)
                     , float.Parse(split[i++],  System.Globalization.CultureInfo.InvariantCulture)
                 );
-                _projectileManager.AddNetworkedProjectile(stateNum, pName, pID, org, vel, rot);
+                _projectileManager.AddNetworkedProjectile(pName, pID, org, vel, rot);
             }
         }
     }
 
-    // clients
-    [Slave]
-    public void Ping(byte[] pingBytes)
-    {
-        string pingString = Encoding.UTF8.GetString(pingBytes);
-        string[] split = pingString.Split(",");
-        for(int i = 0; i < split.Length; i++)
-        {
-            int id = 0;
-            int ping = 0;
-            if (i % 2 == 0)
-            {
-                id = Convert.ToInt32(split[i++]);
-                ping = Convert.ToInt32(split[i]);
-                if (id == _id)
-                {
-                    // it's actually ping to server
-                    id = 1;
-                }
-                Peer p = PeerList.Where(p2 => p2.ID == id).First();
-                p.Ping = ping;
-            }
-        }
-
-        RpcUnreliable(nameof(PingServer), _id);
-    }
-
-    // server receives and notes
-    [Remote]
-    public void PingServer(int id)
-    {
-        // note response time against client
-        Peer p = PeerList.Where(p2 => p2.ID == id).First();
-        p.Ping = Convert.ToInt16(_gameTime - _lastPingGT);
-    }
-
-    public void SendPMovement(int RecID, int id, PlayerCmd pCmd)
+    public void SendPMovement(int RecID, int id, PlayerCmd pCmd, int snapNum)
     {       
-        if (!IsNetworkMaster())
+        RpcUnreliableId(RecID, nameof(ReceivePMovementServer), snapNum, id, pCmd.move_forward, pCmd.move_right
+        , pCmd.move_up, pCmd.aim.x, pCmd.aim.y, pCmd.aim.z, pCmd.cam_angle, pCmd.rotation.x, pCmd.rotation.y
+        , pCmd.rotation.z, pCmd.attack, pCmd.attackDir.x, pCmd.attackDir.y, pCmd.attackDir.z);
+    }
+
+    [Slave]
+    public void ReceivePacket(byte[] packet)
+    {
+        string pkStr = Encoding.UTF8.GetString(packet);
+        string[] split = pkStr.Split(",");
+        int snapNum = Convert.ToInt32(split[0]);
+        _world.ServerSnapNum = snapNum;
+
+        for (int i = 1; i < split.Length; i++)
         {
-            RpcUnreliableId(RecID, nameof(ReceivePMovementServer), id, pCmd.move_forward, pCmd.move_right
-            , pCmd.move_up, pCmd.aim.x, pCmd.aim.y, pCmd.aim.z, pCmd.cam_angle, pCmd.rotation.x, pCmd.rotation.y
-            , pCmd.rotation.z, pCmd.attack, pCmd.attackDir.x, pCmd.attackDir.y, pCmd.attackDir.z);
+            ET type = (ET)Convert.ToInt32(split[i++]);
+            switch(type)
+            {
+                case ET.PLAYER:
+                    ProcessPlayerPacket(split, ref i);
+                    break;
+                case ET.PROJECTILE:
+                    ProcessProjectilePacket(split, ref i);
+                    break;
+            }
         }
+    }
+
+    private void ProcessProjectilePacket(string[] split, ref int i)
+    {
+        string pName = split[i++];
+        string pID = split[i++];
+        Vector3 porg = new Vector3(
+            float.Parse(split[i++],  System.Globalization.CultureInfo.InvariantCulture)
+            , float.Parse(split[i++],  System.Globalization.CultureInfo.InvariantCulture)
+            , float.Parse(split[i++],  System.Globalization.CultureInfo.InvariantCulture)
+        );
+        Vector3 pvel = new Vector3(
+            float.Parse(split[i++],  System.Globalization.CultureInfo.InvariantCulture)
+            , float.Parse(split[i++],  System.Globalization.CultureInfo.InvariantCulture)
+            , float.Parse(split[i++],  System.Globalization.CultureInfo.InvariantCulture)
+        );
+
+        Vector3 prot = new Vector3(
+            float.Parse(split[i++],  System.Globalization.CultureInfo.InvariantCulture)
+            , float.Parse(split[i++],  System.Globalization.CultureInfo.InvariantCulture)
+            , float.Parse(split[i],  System.Globalization.CultureInfo.InvariantCulture)
+        );
+        _projectileManager.AddNetworkedProjectile(pName, pID, porg, pvel, prot);
+    }
+
+    private void ProcessPlayerPacket(string[] split, ref int i)
+    {
+        int id = Convert.ToInt32(split[i++]);
+        int health = Convert.ToInt32(split[i++]);
+        int armour = Convert.ToInt32(split[i++]);
+        Vector3 org = new Vector3(
+            float.Parse(split[i++],  System.Globalization.CultureInfo.InvariantCulture)
+            , float.Parse(split[i++],  System.Globalization.CultureInfo.InvariantCulture)
+            , float.Parse(split[i++],  System.Globalization.CultureInfo.InvariantCulture)
+        );
+        Vector3 vel = new Vector3(
+            float.Parse(split[i++],  System.Globalization.CultureInfo.InvariantCulture)
+            , float.Parse(split[i++],  System.Globalization.CultureInfo.InvariantCulture)
+            , float.Parse(split[i++],  System.Globalization.CultureInfo.InvariantCulture)
+        );
+
+        Vector3 rot = new Vector3(
+            float.Parse(split[i++],  System.Globalization.CultureInfo.InvariantCulture)
+            , float.Parse(split[i++],  System.Globalization.CultureInfo.InvariantCulture)
+            , float.Parse(split[i],  System.Globalization.CultureInfo.InvariantCulture)
+        );
+        UpdatePlayer(id, health, armour, org, vel, rot);
+    }
+
+    private string BuildPacketString(SnapShot sn)
+    {
+        sb.Clear();
+        sb.Append(_world.LocalSnapNum);
+        sb.Append(",");
+        // players
+        foreach(Peer p in PeerList)
+        {
+            Vector3 org = p.Player.ServerState.Origin;
+            Vector3 velo = p.Player.ServerState.Velocity;
+            Vector3 rot = p.Player.Mesh.Rotation;
+
+            PlayerSnap ps = new PlayerSnap();
+            ps.Origin = org;
+            ps.Velocity = velo;
+            ps.NodeName = p.Player.Name;
+            ps.Rotation = rot;
+            ps.CmdQueue = p.Player.pCmdQueue;
+            sn.PlayerSnap.Add(ps);
+
+            sb.Append((int)ET.PLAYER);
+            sb.Append(",");
+            sb.Append(p.ID);
+            sb.Append(",");
+            sb.Append(p.Player.CurrentHealth);
+            sb.Append(",");
+            sb.Append(p.Player.CurrentArmour);
+            sb.Append(",");
+            sb.Append(org.x);
+            sb.Append(",");
+            sb.Append(org.y);
+            sb.Append(",");
+            sb.Append(org.z);
+            sb.Append(",");
+            sb.Append(velo.x);
+            sb.Append(",");
+            sb.Append(velo.y);
+            sb.Append(",");
+            sb.Append(velo.z);
+            sb.Append(",");
+            sb.Append(rot.x);
+            sb.Append(",");
+            sb.Append(rot.y);
+            sb.Append(",");
+            sb.Append(rot.z);
+            sb.Append(",");
+        }
+        // projectiles
+        foreach(Rocket p in _projectileManager.Projectiles)
+        {
+            sb.Append((int)ET.PROJECTILE);
+            sb.Append(",");
+            sb.Append(p.Name);
+            sb.Append(",");
+            sb.Append(p.PlayerOwner.ID);
+            sb.Append(",");
+            sb.Append(p.GlobalTransform.origin.x);
+            sb.Append(",");
+            sb.Append(p.GlobalTransform.origin.y);
+            sb.Append(",");
+            sb.Append(p.GlobalTransform.origin.z);
+            sb.Append(",");
+            sb.Append(p.Velocity.x);
+            sb.Append(",");
+            sb.Append(p.Velocity.y);
+            sb.Append(",");
+            sb.Append(p.Velocity.z);
+            sb.Append(",");
+            sb.Append(p.Rotation.x);
+            sb.Append(",");
+            sb.Append(p.Rotation.y);
+            sb.Append(",");
+            sb.Append(p.Rotation.z);
+            sb.Append(",");
+        }
+
+        if (sb.Length > (_world.LocalSnapNum.ToString().Length + 1))
+        {
+            sb.Remove(sb.Length - 1, 1);
+        }
+        return sb.ToString();
     }
 }

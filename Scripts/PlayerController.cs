@@ -7,6 +7,7 @@ public class PlayerController : Camera
     Player _player;
     public Player Player { get { return _player; }}
     Network _network;
+    World _world;
 
     // Player commands, stores wish commands that the player asks for (Forward, back, jump, etc)
     private float move_forward = 0;
@@ -30,10 +31,12 @@ public class PlayerController : Camera
 
     // settings
     private float mouseSensitivity = 0.2f;
+    private Input.MouseMode _currentMouseMode = Input.MouseMode.Visible;
 
     public override void _Ready()
     {
         _network = GetNode("/root/Initial/Network") as Network;
+        _world = GetNode("/root/Initial/World") as World;
     }
 
     public void Init(Player p)
@@ -82,6 +85,8 @@ public class PlayerController : Camera
         }
 
         PlayerCmd pCmd;
+        pCmd.playerID = _player.ID;
+        pCmd.snapshot = _world.LocalSnapNum;
         pCmd.move_forward = move_forward;
         pCmd.move_right = move_right;
         pCmd.move_up = move_up;
@@ -90,7 +95,8 @@ public class PlayerController : Camera
         pCmd.rotation = _player.Mesh.Rotation;
         pCmd.attack = attack;
         pCmd.attackDir = shootTo;
-        _player.pCmdQueue.Enqueue(pCmd);
+        //_player.pCmdQueue.Enqueue(pCmd);
+        _player.pCmdQueue.Add(pCmd);
     }
 
     public override void _Input(InputEvent e)
@@ -118,6 +124,19 @@ public class PlayerController : Camera
                         _cameraAngle += change;
                     }
                 }
+            }
+        }
+        if (Input.IsActionJustPressed("togglemousemode"))
+        {
+            if (_currentMouseMode == Input.MouseMode.Visible)
+            {
+                _currentMouseMode = Input.MouseMode.Captured;
+                Input.SetMouseMode(Input.MouseMode.Captured);
+            }
+            else
+            {
+                _currentMouseMode = Input.MouseMode.Visible;
+                Input.SetMouseMode(Input.MouseMode.Visible);
             }
         }
     }    

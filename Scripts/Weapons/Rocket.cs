@@ -82,7 +82,7 @@ public class Rocket : KinematicBody
             }
         }
     }
-
+/*
     public void SetServerState(int stateNum, Vector3 org, Vector3 velo, Vector3 rot)
     {
         _serverState.StateNum = stateNum;
@@ -90,4 +90,5 @@ public class Rocket : KinematicBody
         _serverState.Velocity = velo;
         this.Rotation = rot;
     }
+    */
 }

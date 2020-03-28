@@ -18,6 +18,7 @@ public class ProjectileManager : Node
         _rocketScene = ResourceLoader.Load("res://Scenes/Weapons/Rocket.tscn") as PackedScene;
     }
 
+    // when a player attacks
     public void AddProjectile(Player shooter, Vector3 dest)
     {
         Rocket proj = _rocketScene.Instance() as Rocket;
@@ -25,9 +26,15 @@ public class ProjectileManager : Node
         this.AddChild(proj);
         Vector3 vel = dest.Normalized() * proj.Speed;
         proj.Init(shooter, vel);
+
+        // FIXME - move projectiles forward by ping amount
+        if (IsNetworkMaster())
+        {
+            
+        }
     }
 
-    public void AddNetworkedProjectile(int stateNum, string name, string pID, Vector3 org, Vector3 vel, Vector3 rot)
+    public void AddNetworkedProjectile(string name, string pID, Vector3 org, Vector3 vel, Vector3 rot)
     {
         Rocket proj = _projectiles.Where(p => p.Name == name).SingleOrDefault();
         
@@ -46,9 +53,9 @@ public class ProjectileManager : Node
                 return;
             }
         }
-        else
+        else // apply update to existing projectile
         {
-            proj.SetServerState(stateNum, org, vel, rot);
+            //proj.SetServerState(stateNum, org, vel, rot);
             Transform t = proj.GlobalTransform;
                 
             t.origin = org;
@@ -65,10 +72,10 @@ public class ProjectileManager : Node
             State predictedState = proj.ServerState;
             predictedState = ProcessMovement(predictedState, delta, proj);
 
-            if (IsNetworkMaster())
+            /*if (IsNetworkMaster())
             {
                 proj.SetServerState(predictedState.StateNum, predictedState.Origin, predictedState.Velocity, proj.Rotation);
-            }
+            }*/
         }
         _projectiles.RemoveAll(p => _remove.Contains(p));
         _remove.Clear();
@@ -95,7 +102,7 @@ public class ProjectileManager : Node
         }
 
         proj.PredictedState = new State {
-            StateNum = proj.PredictedState.StateNum + 1,
+            StateNum = newState.StateNum + 1,
             Origin = proj.GlobalTransform.origin,
             Velocity = proj.Velocity
         };

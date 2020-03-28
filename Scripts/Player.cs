@@ -3,6 +3,7 @@ using static Godot.Mathf;
 using static FMath;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 public class Player : KinematicBody
 {
@@ -13,6 +14,7 @@ public class Player : KinematicBody
     MeshInstance _mesh;
     public MeshInstance Mesh {get { return _mesh; }}
     ProjectileManager _projectileManager;
+    Network _network;
 
     public bool PlayerControlled = false;
 
@@ -44,11 +46,15 @@ public class Player : KinematicBody
     public float _sideStrafeSpeed = 3.0f;          // What the max speed to generate when side strafing
     public float _airControl = 0.3f;               // How precise air control is
     
-    public Queue<PlayerCmd> pCmdQueue = new Queue<PlayerCmd>();
+    // public Queue<PlayerCmd> pCmdQueue = new Queue<PlayerCmd>();
+    public List<PlayerCmd> pCmdQueue = new List<PlayerCmd>();
     private State _serverState;
     public State ServerState { get { return _serverState; }}
     private State _predictedState;
-    public State PredictedState { get { return _predictedState; }}
+    public State PredictedState { 
+        get { return _predictedState; }
+        set { _predictedState = value; }
+        }
 
     private int _maxArmour = 200;
     private float _currentArmour;
@@ -69,6 +75,7 @@ public class Player : KinematicBody
         _stairCatcher = (RayCast)GetNode("StairCatcher");
         _mesh = GetNode("MeshInstance") as MeshInstance;
         _projectileManager = GetNode("/root/Initial/World/ProjectileManager") as ProjectileManager;
+        _network = GetNode("/root/Initial/Network") as Network;
     }
 
     public void RotateHead(float rad)
@@ -77,9 +84,21 @@ public class Player : KinematicBody
         _mesh.RotateY(rad);
     }
 
+    public void ProcessCommand(PlayerCmd pCmd, float delta)
+    {
+        ProcessAttack(pCmd, delta);
+        ProcessMovement(_predictedState, pCmd, delta);
+        if (IsNetworkMaster())
+        {
+            SetServerState(_predictedState.Origin, _predictedState.Velocity, _mesh.Rotation, _currentHealth, _currentArmour);
+        }
+    }
+/*
     public void ProcessCommands(float delta)
     {
         State predictedState = _serverState;
+        predictedState.StateNum = _network.SnapNum;
+
         bool addedCmd = false;
         if (pCmdQueue.Count == 0)
         {
@@ -108,9 +127,10 @@ public class Player : KinematicBody
 
         if (IsNetworkMaster())
         {
-            SetServerState(predictedState.StateNum, predictedState.Origin, predictedState.Velocity, _mesh.Rotation, _currentHealth, _currentArmour);
+            SetServerState(predictedState.Origin, predictedState.Velocity, _mesh.Rotation, _currentHealth, _currentArmour);
         }
     }
+    */
 
     public void ProcessAttack(PlayerCmd pCmd, float delta)
     {
@@ -152,16 +172,15 @@ public class Player : KinematicBody
         _touchingGround = IsOnFloor();
 
         _predictedState = new State {
-            StateNum = _predictedState.StateNum + 1,
+            StateNum = predState.StateNum + 1,
             Origin = GlobalTransform.origin,
             Velocity = _playerVelocity
         };
         return _predictedState;
     }
 
-    public void SetServerState(int stateNum, Vector3 org, Vector3 velo, Vector3 rot, float health, float armour)
+    public void SetServerState(Vector3 org, Vector3 velo, Vector3 rot, float health, float armour)
     {
-        _serverState.StateNum = stateNum;
         _serverState.Origin = org;
         _serverState.Velocity = velo;
         _currentHealth = health;
@@ -170,15 +189,16 @@ public class Player : KinematicBody
         if (!PlayerControlled)
         {
             this._mesh.Rotation = rot;
-        }
+        } 
 
         if (pCmdQueue.Count > 0)
         {
-            int count = (stateNum > _predictedState.StateNum) ? pCmdQueue.Count - 1 : pCmdQueue.Count - (_predictedState.StateNum - stateNum);
+            int count = (_world.ServerSnapNum > _world.LocalSnapNum) ? pCmdQueue.Count - 1 : pCmdQueue.Count - (_world.LocalSnapNum - _world.ServerSnapNum);
             
             for (int i = 0; i < count; i++)
             {
-                pCmdQueue.Dequeue();
+                pCmdQueue.RemoveAt(0);
+                //pCmdQueue.Dequeue();
             }
         }
     }
@@ -466,8 +486,8 @@ public class Player : KinematicBody
     public void Spawn(Vector3 spawnPoint)
     {
         this.Translation = spawnPoint;
-        // FIXME - this is ugly, it should just be sent on next network update?
-        this.SetServerState(this.ServerState.StateNum + 1, this.GlobalTransform.origin, this._playerVelocity, this._mesh.Rotation, _maxHealth, _maxArmour);
+
+        this.SetServerState(this.GlobalTransform.origin, this._playerVelocity, this._mesh.Rotation, _maxHealth, _maxArmour);
         _currentHealth = _maxHealth;
         _currentArmour = _maxArmour;
     }
