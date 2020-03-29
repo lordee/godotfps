@@ -46,6 +46,8 @@ public class World : Node
 
 
     private float _gameTime = 0f;
+
+    
     private int _serverSnapNum = 0;
     public int ServerSnapNum { 
         get { return _serverSnapNum; }
@@ -53,7 +55,11 @@ public class World : Node
     }
 
     private int _localSnapNum = 0;
-    public int LocalSnapNum { get { return _localSnapNum; }}
+    public int LocalSnapNum { 
+        get { return _localSnapNum; }
+        set { _localSnapNum = value; }
+        }
+
 
     // FIXME - just add to scene tree manually instead of evaluating this constantly, same for network
     private bool _active = false;
@@ -109,13 +115,14 @@ public class World : Node
                 foreach(PlayerCmd pCmd in allCmds)
                 {
                     int diff = LocalSnapNum - pCmd.snapshot;
+                    //Player p = _network.PeerList.Find(x => x.ID == pCmd.playerID).Player;
+                    Player p = GetNode("/root/Initial/World/" + pCmd.playerID.ToString()) as Player;
 
                     if (IsNetworkMaster())
                     {
                         RewindPlayers(diff, delta);
                     }
 
-                    Player p = _network.PeerList.Find(x => x.ID == pCmd.playerID).Player;
                     p.ProcessCommand(pCmd, delta);
 
                     if (IsNetworkMaster())

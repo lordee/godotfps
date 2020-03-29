@@ -93,44 +93,6 @@ public class Player : KinematicBody
             SetServerState(_predictedState.Origin, _predictedState.Velocity, _mesh.Rotation, _currentHealth, _currentArmour);
         }
     }
-/*
-    public void ProcessCommands(float delta)
-    {
-        State predictedState = _serverState;
-        predictedState.StateNum = _network.SnapNum;
-
-        bool addedCmd = false;
-        if (pCmdQueue.Count == 0)
-        {
-            pCmdQueue.Enqueue(new PlayerCmd{
-                move_forward = 0,
-                move_right = 0,
-                move_up = 0,
-                aim = new Basis(),
-                cam_angle = 0,
-                rotation = _mesh.Rotation,
-                attack = 0
-            });
-            addedCmd = true;
-        }
-
-        foreach(PlayerCmd pCmd in pCmdQueue)
-        {
-            ProcessAttack(pCmd, delta);
-            predictedState = ProcessMovement(predictedState, pCmd, delta);
-        }
-
-        if (addedCmd)
-        {
-            pCmdQueue.Dequeue();
-        }
-
-        if (IsNetworkMaster())
-        {
-            SetServerState(predictedState.Origin, predictedState.Velocity, _mesh.Rotation, _currentHealth, _currentArmour);
-        }
-    }
-    */
 
     public void ProcessAttack(PlayerCmd pCmd, float delta)
     {
@@ -138,9 +100,18 @@ public class Player : KinematicBody
 
         if (pCmd.attack == 1 && _lastRocketShot >= _rocketCD)
         {           
+            GD.Print("shooting: " + _lastRocketShot);
             _projectileManager.AddProjectile(this, pCmd.attackDir);
 
             _lastRocketShot = 0f;
+        }
+        else
+        {
+            if (pCmd.playerID != 1 && pCmd.attack == 1)
+            {
+                GD.Print("_lastRocketShot:" + _lastRocketShot);
+            }
+            
         }
     }
 

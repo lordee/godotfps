@@ -207,41 +207,9 @@ public class Network : Node
     // FIXME - only h/a of owning player
     public void UpdatePlayer(int id, float health, float armour, Vector3 org, Vector3 velo, Vector3 rot)
     {
-        Player p = PeerList.Where(p2 => p2.ID == id).First().Player;
+        //Player p = PeerList.Where(p2 => p2.ID == id).First().Player;
+        Player p = GetNode("/root/Initial/World/" + id.ToString()) as Player;
         p.SetServerState(org, velo, rot, health, armour);
-    }
-
-    [Slave]
-    public void ReceiveProjectilesClient(byte[] projData)
-    {
-        string projString = Encoding.UTF8.GetString(projData);
-        string[] split = projString.Split(",");
-        for (int i = 0; i < split.Length; i++)
-        {
-            if (i % 2 == 0)
-            {
-                int stateNum = Convert.ToInt32(split[i++]);
-                string pName = split[i++];
-                string pID = split[i++];
-                Vector3 org = new Vector3(
-                    float.Parse(split[i++],  System.Globalization.CultureInfo.InvariantCulture)
-                    , float.Parse(split[i++],  System.Globalization.CultureInfo.InvariantCulture)
-                    , float.Parse(split[i++],  System.Globalization.CultureInfo.InvariantCulture)
-                );
-                Vector3 vel = new Vector3(
-                    float.Parse(split[i++],  System.Globalization.CultureInfo.InvariantCulture)
-                    , float.Parse(split[i++],  System.Globalization.CultureInfo.InvariantCulture)
-                    , float.Parse(split[i++],  System.Globalization.CultureInfo.InvariantCulture)
-                );
-
-                Vector3 rot = new Vector3(
-                    float.Parse(split[i++],  System.Globalization.CultureInfo.InvariantCulture)
-                    , float.Parse(split[i++],  System.Globalization.CultureInfo.InvariantCulture)
-                    , float.Parse(split[i++],  System.Globalization.CultureInfo.InvariantCulture)
-                );
-                _projectileManager.AddNetworkedProjectile(pName, pID, org, vel, rot);
-            }
-        }
     }
 
     public void SendPMovement(int RecID, int id, PlayerCmd pCmd, int snapNum)
@@ -272,6 +240,7 @@ public class Network : Node
                     break;
             }
         }
+        _world.LocalSnapNum = _world.LocalSnapNum < _world.ServerSnapNum ? _world.ServerSnapNum : _world.LocalSnapNum;
     }
 
     private void ProcessProjectilePacket(string[] split, ref int i)
