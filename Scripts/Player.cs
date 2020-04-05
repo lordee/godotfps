@@ -97,21 +97,11 @@ public class Player : KinematicBody
     public void ProcessAttack(PlayerCmd pCmd, float delta)
     {
         _lastRocketShot += delta;
-
         if (pCmd.attack == 1 && _lastRocketShot >= _rocketCD)
         {           
-            GD.Print("shooting: " + _lastRocketShot);
             _projectileManager.AddProjectile(this, pCmd.attackDir);
 
             _lastRocketShot = 0f;
-        }
-        else
-        {
-            if (pCmd.playerID != 1 && pCmd.attack == 1)
-            {
-                GD.Print("_lastRocketShot:" + _lastRocketShot);
-            }
-            
         }
     }
 

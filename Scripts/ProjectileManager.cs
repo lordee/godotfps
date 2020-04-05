@@ -55,7 +55,7 @@ public class ProjectileManager : Node
         }
         else // apply update to existing projectile
         {
-            //proj.SetServerState(stateNum, org, vel, rot);
+            proj.SetServerState(org, vel, rot);
             Transform t = proj.GlobalTransform;
                 
             t.origin = org;

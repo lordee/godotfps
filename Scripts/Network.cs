@@ -60,10 +60,10 @@ public class Network : Node
             }
             else
             {
-                // FIXME send x updates to network server, not all
+                // FIXME - stop resending commands after trying 3 times, also send pcmds in 1 packet...
                 foreach(PlayerCmd pcmd in _pc.Player.pCmdQueue)
                 {
-                    SendPMovement(1, _id, pcmd, _world.LocalSnapNum);
+                    SendPMovement(1, _id, pcmd);
                 }
             }
         }
@@ -187,8 +187,20 @@ public class Network : Node
     , Vector3 aimy, Vector3 aimz, float camAngle, float rotX, float rotY, float rotZ, float att, float attDirX
     , float attDirY, float attDirZ)
     {
+        Peer p = PeerList.Where(x => x.ID == id).FirstOrDefault();
+        if (p == null)
+        {
+            return;
+        }
+        if (snapNum <= p.LastSnapshot)
+        {
+            return;
+        }
+
+        Player pl = p.Player;
+        
         Basis aim = new Basis(aimx, aimy, aimz);
-        Player p = GetNode("/root/Initial/World/" + id.ToString()) as Player;
+        
         PlayerCmd pCmd;
         pCmd.playerID = id;
         pCmd.snapshot = snapNum;
@@ -201,7 +213,7 @@ public class Network : Node
         pCmd.attack = att;
         pCmd.attackDir = new Vector3(attDirX, attDirY, attDirZ);
         //p.pCmdQueue.Enqueue(pCmd);
-        p.pCmdQueue.Add(pCmd);
+        pl.pCmdQueue.Add(pCmd);
     }
 
     // FIXME - only h/a of owning player
@@ -212,9 +224,9 @@ public class Network : Node
         p.SetServerState(org, velo, rot, health, armour);
     }
 
-    public void SendPMovement(int RecID, int id, PlayerCmd pCmd, int snapNum)
+    public void SendPMovement(int RecID, int id, PlayerCmd pCmd)
     {       
-        RpcUnreliableId(RecID, nameof(ReceivePMovementServer), snapNum, id, pCmd.move_forward, pCmd.move_right
+        RpcUnreliableId(RecID, nameof(ReceivePMovementServer), pCmd.snapshot, id, pCmd.move_forward, pCmd.move_right
         , pCmd.move_up, pCmd.aim.x, pCmd.aim.y, pCmd.aim.z, pCmd.cam_angle, pCmd.rotation.x, pCmd.rotation.y
         , pCmd.rotation.z, pCmd.attack, pCmd.attackDir.x, pCmd.attackDir.y, pCmd.attackDir.z);
     }

@@ -2,6 +2,7 @@ using Godot;
 using System;
 using System.Collections.Generic;
 using System.Collections;
+using System.Linq;
 
 public class World : Node
 {
@@ -46,6 +47,7 @@ public class World : Node
 
 
     private float _gameTime = 0f;
+    public float GameTime { get { return _gameTime; }}
 
     
     private int _serverSnapNum = 0;
@@ -115,15 +117,20 @@ public class World : Node
                 foreach(PlayerCmd pCmd in allCmds)
                 {
                     int diff = LocalSnapNum - pCmd.snapshot;
-                    //Player p = _network.PeerList.Find(x => x.ID == pCmd.playerID).Player;
-                    Player p = GetNode("/root/Initial/World/" + pCmd.playerID.ToString()) as Player;
+                    Peer p = _network.PeerList.Find(x => x.ID == pCmd.playerID);
+                    Player pl = p.Player;
 
                     if (IsNetworkMaster())
                     {
+                        if (diff < 0)
+                        {
+                            return;
+                        }
                         RewindPlayers(diff, delta);
                     }
 
-                    p.ProcessCommand(pCmd, delta);
+                    pl.ProcessCommand(pCmd, delta);
+                    p.LastSnapshot = pCmd.snapshot;
 
                     if (IsNetworkMaster())
                     {
