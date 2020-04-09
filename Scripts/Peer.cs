@@ -7,6 +7,7 @@ public class Peer
     public int ID;
     public Player Player;
     public int LastSnapshot = 0;
+    public float Ping = 0;
 
     public Peer(int id, Player p)
     {

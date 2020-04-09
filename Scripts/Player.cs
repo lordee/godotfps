@@ -15,6 +15,7 @@ public class Player : KinematicBody
     public MeshInstance Mesh {get { return _mesh; }}
     ProjectileManager _projectileManager;
     Network _network;
+    public Peer Peer;
 
     public bool PlayerControlled = false;
 
@@ -46,7 +47,6 @@ public class Player : KinematicBody
     public float _sideStrafeSpeed = 3.0f;          // What the max speed to generate when side strafing
     public float _airControl = 0.3f;               // How precise air control is
     
-    // public Queue<PlayerCmd> pCmdQueue = new Queue<PlayerCmd>();
     public List<PlayerCmd> pCmdQueue = new List<PlayerCmd>();
     private State _serverState;
     public State ServerState { get { return _serverState; }}
@@ -78,6 +78,54 @@ public class Player : KinematicBody
         _network = GetNode("/root/Initial/Network") as Network;
     }
 
+    public override void _PhysicsProcess(float delta)
+    {
+        _predictedState = _serverState;
+        if (pCmdQueue.Count == 0)
+        {
+            pCmdQueue.Add(
+                new PlayerCmd{
+                    snapshot = 0,
+                    playerID = ID,
+                    move_forward = 0,
+                    move_right = 0,
+                    move_up = 0,
+                    aim = new Basis(),
+                    cam_angle = 0,
+                    rotation = Mesh.Rotation,
+                    attack = 0
+                    }
+                );
+        }
+        pCmdQueue.Sort((x,y) => x.snapshot.CompareTo(y.snapshot));
+
+        PlayerCmd pCmd = pCmdQueue[0];
+        //foreach(PlayerCmd pCmd in pCmdQueue)
+        //{
+            int diff = _world.LocalSnapNum - pCmd.snapshot;
+            Peer p = this.Peer;
+
+            if (IsNetworkMaster())
+            {
+                if (diff < 0)
+                {
+                    return;
+                }
+                _world.RewindPlayers(diff, delta);
+            }
+
+            p.LastSnapshot = pCmd.snapshot;
+            
+            this.ProcessCommand(pCmd, delta);
+            
+
+            if (IsNetworkMaster())
+            {
+                _world.FastForwardPlayers();
+            }
+        //}
+    }
+
     public void RotateHead(float rad)
     {
         _head.RotateY(rad);
@@ -100,7 +148,6 @@ public class Player : KinematicBody
         if (pCmd.attack == 1 && _lastRocketShot >= _rocketCD)
         {           
             _projectileManager.AddProjectile(this, pCmd.attackDir);
-
             _lastRocketShot = 0f;
         }
     }

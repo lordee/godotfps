@@ -49,6 +49,8 @@ public class World : Node
     private float _gameTime = 0f;
     public float GameTime { get { return _gameTime; }}
 
+    public float FrameDelta = 0f;
+
     
     private int _serverSnapNum = 0;
     public int ServerSnapNum { 
@@ -76,74 +78,17 @@ public class World : Node
     {
         if (_active)
         {
+            FrameDelta = delta;
             _gameTime += delta;
             _localSnapNum++;
             if (IsNetworkMaster())
             {
                 _serverSnapNum = _localSnapNum;
             }
-            if (_worldOwner != null)
-            {
-                // process frame(s)
-                int count = _worldOwner.pCmdQueue.Count == 0 ? 1 : _worldOwner.pCmdQueue.Count;
-                List<PlayerCmd> allCmds = new List<PlayerCmd>();
-                foreach(Peer peer in _network.PeerList)
-                {
-                    if (peer.Player.pCmdQueue.Count == 0)
-                    {
-                        allCmds.Add(
-                            new PlayerCmd{
-                                snapshot = LocalSnapNum,
-                                playerID = peer.Player.ID,
-                                move_forward = 0,
-                                move_right = 0,
-                                move_up = 0,
-                                aim = new Basis(),
-                                cam_angle = 0,
-                                rotation = peer.Player.Mesh.Rotation,
-                                attack = 0
-                                }
-                            );
-                    }
-                    else
-                    {
-                        allCmds.AddRange(peer.Player.pCmdQueue);
-                    }
-                    peer.Player.PredictedState = peer.Player.ServerState;
-                }
-
-                allCmds.Sort((x,y) => x.snapshot.CompareTo(y.snapshot));
-
-                foreach(PlayerCmd pCmd in allCmds)
-                {
-                    int diff = LocalSnapNum - pCmd.snapshot;
-                    Peer p = _network.PeerList.Find(x => x.ID == pCmd.playerID);
-                    Player pl = p.Player;
-
-                    if (IsNetworkMaster())
-                    {
-                        if (diff < 0)
-                        {
-                            return;
-                        }
-                        RewindPlayers(diff, delta);
-                    }
-
-                    pl.ProcessCommand(pCmd, delta);
-                    p.LastSnapshot = pCmd.snapshot;
-
-                    if (IsNetworkMaster())
-                    {
-                        FastForwardPlayers();
-                    }
-                }
-
-                _projectileManager.ProcessProjectiles(delta);
-            }
         }
     }
 
-    private bool RewindPlayers(int ticks, float delta)
+    public bool RewindPlayers(int ticks, float delta)
     {
         bool rewound = false;
 
@@ -165,7 +110,7 @@ public class World : Node
         return rewound;
     }
 
-    private void FastForwardPlayers()
+    public void FastForwardPlayers()
     {
         SnapShot sn = _network.Snapshots[_network.Snapshots.Count - 1];
         foreach(PlayerSnap psn in sn.PlayerSnap)

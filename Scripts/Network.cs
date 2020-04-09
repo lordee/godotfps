@@ -17,8 +17,6 @@ public class Network : Node
     public List<Peer> PeerList = new List<Peer>();
 
     private bool _active = false;
-    private float _lastPingSent = 0f;
-    private float _lastPingGT = 0f;
 
     StringBuilder sb = new StringBuilder();
 
@@ -42,7 +40,6 @@ public class Network : Node
     {
         if (_active)
         {
-            _lastPingSent += delta;
             if (IsNetworkMaster())
             {
                 while(Snapshots.Count > _world.BackRecTime / delta)
@@ -147,7 +144,9 @@ public class Network : Node
 
         Player p = GetNode("/root/Initial/World/" + id) as Player;
         p.PlayerControlled = playerControlled;
-        PeerList.Add(new Peer(id, p));
+        Peer pe = new Peer(id, p);
+        PeerList.Add(pe);
+        p.Peer = pe;
     }
     
     private void SyncWorld(int id)
@@ -183,7 +182,7 @@ public class Network : Node
     }
 
     [Remote]
-    public void ReceivePMovementServer(int snapNum, int id, float move_forward, float move_right, float move_up, Vector3 aimx
+    public void ReceivePMovementServer(int serverSnapNumAck, int snapNum, int id, float move_forward, float move_right, float move_up, Vector3 aimx
     , Vector3 aimy, Vector3 aimz, float camAngle, float rotX, float rotY, float rotZ, float att, float attDirX
     , float attDirY, float attDirZ)
     {
@@ -192,6 +191,8 @@ public class Network : Node
         {
             return;
         }
+        p.Ping = (_world.LocalSnapNum - serverSnapNumAck) * _world.FrameDelta;
+
         if (snapNum <= p.LastSnapshot)
         {
             return;
@@ -212,21 +213,20 @@ public class Network : Node
         pCmd.rotation = new Vector3(rotX, rotY, rotZ);
         pCmd.attack = att;
         pCmd.attackDir = new Vector3(attDirX, attDirY, attDirZ);
-        //p.pCmdQueue.Enqueue(pCmd);
         pl.pCmdQueue.Add(pCmd);
     }
 
     // FIXME - only h/a of owning player
-    public void UpdatePlayer(int id, float health, float armour, Vector3 org, Vector3 velo, Vector3 rot)
+    public void UpdatePlayer(int id, float ping, float health, float armour, Vector3 org, Vector3 velo, Vector3 rot)
     {
-        //Player p = PeerList.Where(p2 => p2.ID == id).First().Player;
-        Player p = GetNode("/root/Initial/World/" + id.ToString()) as Player;
-        p.SetServerState(org, velo, rot, health, armour);
+        Peer p = PeerList.Where(p2 => p2.ID == id).First();
+        p.Ping = ping;
+        p.Player.SetServerState(org, velo, rot, health, armour);
     }
 
     public void SendPMovement(int RecID, int id, PlayerCmd pCmd)
     {       
-        RpcUnreliableId(RecID, nameof(ReceivePMovementServer), pCmd.snapshot, id, pCmd.move_forward, pCmd.move_right
+        RpcUnreliableId(RecID, nameof(ReceivePMovementServer), _world.ServerSnapNum, pCmd.snapshot, id, pCmd.move_forward, pCmd.move_right
         , pCmd.move_up, pCmd.aim.x, pCmd.aim.y, pCmd.aim.z, pCmd.cam_angle, pCmd.rotation.x, pCmd.rotation.y
         , pCmd.rotation.z, pCmd.attack, pCmd.attackDir.x, pCmd.attackDir.y, pCmd.attackDir.z);
     }
@@ -281,6 +281,7 @@ public class Network : Node
     private void ProcessPlayerPacket(string[] split, ref int i)
     {
         int id = Convert.ToInt32(split[i++]);
+        float ping = float.Parse(split[i++]);
         int health = Convert.ToInt32(split[i++]);
         int armour = Convert.ToInt32(split[i++]);
         Vector3 org = new Vector3(
@@ -299,7 +300,7 @@ public class Network : Node
             , float.Parse(split[i++],  System.Globalization.CultureInfo.InvariantCulture)
             , float.Parse(split[i],  System.Globalization.CultureInfo.InvariantCulture)
         );
-        UpdatePlayer(id, health, armour, org, vel, rot);
+        UpdatePlayer(id, ping, health, armour, org, vel, rot);
     }
 
     private string BuildPacketString(SnapShot sn)
@@ -325,6 +326,8 @@ public class Network : Node
             sb.Append((int)ET.PLAYER);
             sb.Append(",");
             sb.Append(p.ID);
+            sb.Append(",");
+            sb.Append(p.Ping);
             sb.Append(",");
             sb.Append(p.Player.CurrentHealth);
             sb.Append(",");
