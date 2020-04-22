@@ -55,14 +55,6 @@ public class Network : Node
                 byte[] packetBytes = Encoding.UTF8.GetBytes(packetString);
                 RpcUnreliable(nameof(ReceivePacket), packetBytes);
             }
-            else
-            {
-                // FIXME - stop resending commands after trying 3 times, also send pcmds in 1 packet...
-                foreach(PlayerCmd pcmd in _pc.Player.pCmdQueue)
-                {
-                    SendPMovement(1, _id, pcmd);
-                }
-            }
         }
     }
 
@@ -98,6 +90,7 @@ public class Network : Node
     public void ConnectionRemoved()
     {
         GD.Print("ConnectionRemoved");
+        GetTree().Quit();
     }
 
     public void ConnectTo(string InIp, int port)
@@ -182,10 +175,14 @@ public class Network : Node
     }
 
     [Remote]
-    public void ReceivePMovementServer(int serverSnapNumAck, int snapNum, int id, float move_forward, float move_right, float move_up, Vector3 aimx
-    , Vector3 aimy, Vector3 aimz, float camAngle, float rotX, float rotY, float rotZ, float att, float attDirX
-    , float attDirY, float attDirZ)
+    public void ReceivePMovementServer(byte[] packet)
     {
+        string pkStr = Encoding.UTF8.GetString(packet);
+        string[] split = pkStr.Split(",");
+
+        int serverSnapNumAck = Convert.ToInt32(split[0]);
+        int id = Convert.ToInt32(split[1]);
+
         Peer p = PeerList.Where(x => x.ID == id).FirstOrDefault();
         if (p == null)
         {
@@ -193,27 +190,29 @@ public class Network : Node
         }
         p.Ping = (_world.LocalSnapNum - serverSnapNumAck) * _world.FrameDelta;
 
-        if (snapNum <= p.LastSnapshot)
+        for (int i = 2; i < split.Length; i++)
         {
-            return;
+            PlayerCmd pCmd = new PlayerCmd();
+            pCmd.playerID = id;
+            pCmd.snapshot = Convert.ToInt32(split[i++]);
+            pCmd.move_forward = float.Parse(split[i++]);
+            pCmd.move_right = float.Parse(split[i++]);
+            pCmd.move_up = float.Parse(split[i++]);
+            pCmd.aim = new Basis(
+                                new Vector3(float.Parse(split[i++]), float.Parse(split[i++]), float.Parse(split[i++])),
+                                new Vector3(float.Parse(split[i++]), float.Parse(split[i++]), float.Parse(split[i++])),
+                                new Vector3(float.Parse(split[i++]), float.Parse(split[i++]), float.Parse(split[i++]))
+                                );
+            pCmd.cam_angle = float.Parse(split[i++]);
+            pCmd.rotation = new Vector3(float.Parse(split[i++]), float.Parse(split[i++]), float.Parse(split[i++]));
+            pCmd.attack = float.Parse(split[i++]);
+            pCmd._projName = split[i++];
+            pCmd.attackDir = new Vector3(float.Parse(split[i++]), float.Parse(split[i++]), float.Parse(split[i]));
+            if (pCmd.snapshot > p.LastSnapshot)
+            {
+                p.Player.pCmdQueue.Add(pCmd);
+            }
         }
-
-        Player pl = p.Player;
-        
-        Basis aim = new Basis(aimx, aimy, aimz);
-        
-        PlayerCmd pCmd;
-        pCmd.playerID = id;
-        pCmd.snapshot = snapNum;
-        pCmd.aim = aim;
-        pCmd.move_forward = move_forward;
-        pCmd.move_right = move_right;
-        pCmd.move_up = move_up;
-        pCmd.cam_angle = camAngle;
-        pCmd.rotation = new Vector3(rotX, rotY, rotZ);
-        pCmd.attack = att;
-        pCmd.attackDir = new Vector3(attDirX, attDirY, attDirZ);
-        pl.pCmdQueue.Add(pCmd);
     }
 
     // FIXME - only h/a of owning player
@@ -224,11 +223,12 @@ public class Network : Node
         p.Player.SetServerState(org, velo, rot, health, armour);
     }
 
-    public void SendPMovement(int RecID, int id, PlayerCmd pCmd)
+    public void SendPMovement(int RecID, int id, List<PlayerCmd> pCmdQueue)
     {       
-        RpcUnreliableId(RecID, nameof(ReceivePMovementServer), _world.ServerSnapNum, pCmd.snapshot, id, pCmd.move_forward, pCmd.move_right
-        , pCmd.move_up, pCmd.aim.x, pCmd.aim.y, pCmd.aim.z, pCmd.cam_angle, pCmd.rotation.x, pCmd.rotation.y
-        , pCmd.rotation.z, pCmd.attack, pCmd.attackDir.x, pCmd.attackDir.y, pCmd.attackDir.z);
+        string packetString = BuildClientCmdPacket(id, pCmdQueue);
+        byte[] packetBytes = Encoding.UTF8.GetBytes(packetString);
+
+        RpcUnreliableId(RecID, nameof(ReceivePMovementServer), packetBytes);
     }
 
     [Slave]
@@ -253,6 +253,7 @@ public class Network : Node
             }
         }
         _world.LocalSnapNum = _world.LocalSnapNum < _world.ServerSnapNum ? _world.ServerSnapNum : _world.LocalSnapNum;
+        //_world.LocalSnapNum = _world.ServerSnapNum;
     }
 
     private void ProcessProjectilePacket(string[] split, ref int i)
@@ -382,6 +383,67 @@ public class Network : Node
         }
 
         if (sb.Length > (_world.LocalSnapNum.ToString().Length + 1))
+        {
+            sb.Remove(sb.Length - 1, 1);
+        }
+        return sb.ToString();
+    }
+
+    private string BuildClientCmdPacket(int id, List<PlayerCmd> pCmdQueue)
+    {
+        sb.Clear();
+        sb.Append(_world.ServerSnapNum);
+        sb.Append(",");
+        sb.Append(id.ToString());
+        sb.Append(",");
+        foreach(PlayerCmd pCmd in pCmdQueue)
+        {
+            sb.Append(pCmd.snapshot);
+            sb.Append(",");
+            sb.Append(pCmd.move_forward);
+            sb.Append(",");
+            sb.Append(pCmd.move_right);
+            sb.Append(",");
+            sb.Append(pCmd.move_up);
+            sb.Append(",");
+            sb.Append(pCmd.aim.x.x);
+            sb.Append(",");
+            sb.Append(pCmd.aim.x.y);
+            sb.Append(",");
+            sb.Append(pCmd.aim.x.z);
+            sb.Append(",");
+            sb.Append(pCmd.aim.y.x);
+            sb.Append(",");
+            sb.Append(pCmd.aim.y.y);
+            sb.Append(",");
+            sb.Append(pCmd.aim.y.z);
+            sb.Append(",");
+            sb.Append(pCmd.aim.z.x);
+            sb.Append(",");
+            sb.Append(pCmd.aim.z.y);
+            sb.Append(",");
+            sb.Append(pCmd.aim.z.z);
+            sb.Append(",");
+            sb.Append(pCmd.cam_angle);
+            sb.Append(",");
+            sb.Append(pCmd.rotation.x);
+            sb.Append(",");
+            sb.Append(pCmd.rotation.y);
+            sb.Append(",");
+            sb.Append(pCmd.rotation.z);
+            sb.Append(",");
+            sb.Append(pCmd.attack);
+            sb.Append(",");
+            sb.Append("\"" + pCmd.projName + "\"");
+            sb.Append(",");
+            sb.Append(pCmd.attackDir.x);
+            sb.Append(",");
+            sb.Append(pCmd.attackDir.y);
+            sb.Append(",");
+            sb.Append(pCmd.attackDir.z);
+            sb.Append(",");
+        }
+        if (pCmdQueue.Count > 0)
         {
             sb.Remove(sb.Length - 1, 1);
         }
