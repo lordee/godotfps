@@ -31,7 +31,7 @@ public class ProjectileManager : Node
     }
 
     // when a player attacks
-    public void AddProjectile(Player shooter, Vector3 dest)
+    public string AddProjectile(Player shooter, Vector3 dest, string projName)
     {
         Rocket proj = _rocketScene.Instance() as Rocket;
         _projectiles.Add(proj);
@@ -45,12 +45,22 @@ public class ProjectileManager : Node
         }
         
         proj.Init(shooter, vel);
+        proj.Name = projName.Length > 0 ? projName : shooter.ID + "!" + proj.Name;
+        
+        // godot inserts @ signs and numbers to non unique names that can happen due to sync issues
+        // it also currently doesn't allow you to manually insert them, so server sets wrong name! and sends back wrong name!
+        // great architecture!
+
+        // if this is too slow we need to track unique projectile count on client and set that as name, but i worry about uniqueness still
+        proj.Name = proj.Name.Replace("@", "");
+
         //ProcessProjectile(proj, ping);
+        return proj.Name;
     }
 
     public void AddNetworkedProjectile(string name, string pID, Vector3 org, Vector3 vel, Vector3 rot)
     {
-        Rocket proj = _projectiles.Where(p => p.Name == name).SingleOrDefault();
+        Rocket proj = _projectiles.Where(p => p.Name.Replace("@", "") == name).SingleOrDefault();
         
         if (proj == null)
         {
@@ -58,6 +68,7 @@ public class ProjectileManager : Node
             if (p != null)
             {
                 proj = _rocketScene.Instance() as Rocket;
+                proj.Name = name;
                 _projectiles.Add(proj);
                 this.AddChild(proj);
                 float ping = IsNetworkMaster() ? 0 : p.Ping;

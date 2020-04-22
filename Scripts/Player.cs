@@ -99,14 +99,17 @@ public class Player : KinematicBody
         }
         pCmdQueue.Sort((x,y) => x.snapshot.CompareTo(y.snapshot));
 
-        PlayerCmd pCmd = pCmdQueue[0];
-        //foreach(PlayerCmd pCmd in pCmdQueue)
-        //{
-            int diff = _world.LocalSnapNum - pCmd.snapshot;
+        foreach(PlayerCmd pCmd in pCmdQueue)
+        {
             Peer p = this.Peer;
+            if (pCmd.snapshot <= p.LastSnapshot)
+            {
+                continue;
+            }
 
             if (IsNetworkMaster())
             {
+                int diff = _world.LocalSnapNum - pCmd.snapshot;
                 if (diff < 0)
                 {
                     return;
@@ -116,14 +119,27 @@ public class Player : KinematicBody
 
             p.LastSnapshot = pCmd.snapshot;
             
-            this.ProcessCommand(pCmd, delta);
-            
+            //this.ProcessCommand(pCmd, delta);
+            this.ProcessAttack(pCmd, delta);
 
             if (IsNetworkMaster())
             {
                 _world.FastForwardPlayers();
             }
-        //}
+
+            this.ProcessMovement(_predictedState, pCmd, delta);
+        }
+
+        if (IsNetworkMaster())
+        {
+            SetServerState(_predictedState.Origin, _predictedState.Velocity, _mesh.Rotation, _currentHealth, _currentArmour);
+        }
+        else
+        {
+            // FIXME - stop resending commands after trying 3 times
+            _network.SendPMovement(1, ID, pCmdQueue);
+        }
+        TrimCmdQueue();
     }
 
     public void RotateHead(float rad)
@@ -136,18 +152,15 @@ public class Player : KinematicBody
     {
         ProcessAttack(pCmd, delta);
         ProcessMovement(_predictedState, pCmd, delta);
-        if (IsNetworkMaster())
-        {
-            SetServerState(_predictedState.Origin, _predictedState.Velocity, _mesh.Rotation, _currentHealth, _currentArmour);
-        }
     }
 
     public void ProcessAttack(PlayerCmd pCmd, float delta)
     {
         _lastRocketShot += delta;
         if (pCmd.attack == 1 && _lastRocketShot >= _rocketCD)
-        {           
-            _projectileManager.AddProjectile(this, pCmd.attackDir);
+        {
+            string name = _projectileManager.AddProjectile(this, pCmd.attackDir, pCmd.projName);
+            pCmd.projName = name;
             _lastRocketShot = 0f;
         }
     }
@@ -198,15 +211,17 @@ public class Player : KinematicBody
         {
             this._mesh.Rotation = rot;
         } 
+    }
 
+    public void TrimCmdQueue()
+    {
         if (pCmdQueue.Count > 0)
         {
             int count = (_world.ServerSnapNum > _world.LocalSnapNum) ? pCmdQueue.Count - 1 : pCmdQueue.Count - (_world.LocalSnapNum - _world.ServerSnapNum);
-            
+             
             for (int i = 0; i < count; i++)
             {
                 pCmdQueue.RemoveAt(0);
-                //pCmdQueue.Dequeue();
             }
         }
     }

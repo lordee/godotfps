@@ -1,6 +1,6 @@
 using Godot;
 
-public struct PlayerCmd
+public class PlayerCmd
 {
     public int snapshot;
     public int playerID;
@@ -12,4 +12,9 @@ public struct PlayerCmd
     public Vector3 rotation;
     public float attack;
     public Vector3 attackDir;
+    public string _projName;
+    public string projName { 
+        get { return _projName; }
+        set { _projName = value; }
+        }
 }

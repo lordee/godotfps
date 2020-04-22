@@ -84,7 +84,7 @@ public class PlayerController : Camera
             shootTo = to + origin;
         }
 
-        PlayerCmd pCmd;
+        PlayerCmd pCmd = new PlayerCmd();
         pCmd.playerID = _player.ID;
         pCmd.snapshot = _world.LocalSnapNum;
         pCmd.move_forward = move_forward;
@@ -95,6 +95,7 @@ public class PlayerController : Camera
         pCmd.rotation = _player.Mesh.Rotation;
         pCmd.attack = attack;
         pCmd.attackDir = shootTo;
+        pCmd._projName = "";
         //_player.pCmdQueue.Enqueue(pCmd);
         _player.pCmdQueue.Add(pCmd);
     }
