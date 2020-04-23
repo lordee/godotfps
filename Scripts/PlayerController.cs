@@ -79,10 +79,13 @@ public class PlayerController : Camera
         if (Input.IsActionPressed("attack"))
         {
             attack = 1;
-            Vector3 origin = ProjectRayOrigin(new Vector2(Crosshair.Position.x, Crosshair.Position.y));
-            Vector3 to = ProjectRayNormal(new Vector2(Crosshair.Position.x, Crosshair.Position.y)) * _shootRange;
+            float ypos = Crosshair.Position.y - (Crosshair.Texture.GetSize().y * Crosshair.Scale.y/2);
+            Vector2 pos = new Vector2(Crosshair.Position.x, ypos);
+            Vector3 origin = ProjectRayOrigin(pos);
+            Vector3 to = ProjectRayNormal(pos) * _shootRange;
             shootTo = to + origin;
         }
+        
 
         PlayerCmd pCmd = new PlayerCmd();
         pCmd.playerID = _player.ID;
@@ -96,7 +99,6 @@ public class PlayerController : Camera
         pCmd.attack = attack;
         pCmd.attackDir = shootTo;
         pCmd._projName = "";
-        //_player.pCmdQueue.Enqueue(pCmd);
         _player.pCmdQueue.Add(pCmd);
     }
 
