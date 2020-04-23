@@ -55,11 +55,11 @@
     <Compile Include="Scripts\Initial.cs" />
     <Compile Include="Scripts\Network.cs" />
     <Compile Include="Scripts\Lobby.cs" />
-    <Compile Include="Scripts\Main.cs" />
     <Compile Include="Scripts\Player.cs" />
     <Compile Include="Scripts\PlayerController.cs" />
     <Compile Include="Scripts\ProjectileManager.cs" />
     <Compile Include="Scripts\UI.cs" />
+    <Compile Include="Scripts\UI\MainMenu.cs" />
     <Compile Include="Scripts\Weapons\Rocket.cs" />
     <Compile Include="Scripts\Weapons\RocketExplosion.cs" />
     <Compile Include="Scripts\World.cs" />

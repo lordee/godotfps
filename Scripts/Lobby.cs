@@ -19,22 +19,6 @@ public class Lobby : Control
         _network = GetNode("/root/Initial/Network") as Network;
     }
 
-    // Network callbacks from SceneTree
-
-    // callback from SceneTree
-    private void _Player_Connected(int id)
-    {
-        GD.Print("player connected");
-        // someone connected, start the game!
-	    PackedScene main = (PackedScene)ResourceLoader.Load("res://Scenes/Main.tscn");
-        Main inst = (Main)main.Instance();
-        Node of = GetNode("/root/Initial");
-
-        of.AddChild(inst);
-	
-        this.Hide();
-    }
-	
     private void _Set_Status(string text, bool isok)
     {
         // simple way to show status		

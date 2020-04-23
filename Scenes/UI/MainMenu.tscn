@@ -1,0 +1,41 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://Scripts/UI/MainMenu.cs" type="Script" id=1]
+
+[node name="Menu" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ColorRect" type="ColorRect" parent="."]
+margin_right = 1019.0
+margin_bottom = 597.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+color = Color( 0.290196, 0.290196, 0.290196, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+margin_left = 381.0
+margin_top = 179.0
+margin_right = 637.0
+margin_bottom = 382.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Options" type="Button" parent="VBoxContainer"]
+margin_right = 256.0
+margin_bottom = 20.0
+text = "Options"
+
+[node name="Quit" type="Button" parent="VBoxContainer"]
+margin_top = 24.0
+margin_right = 256.0
+margin_bottom = 44.0
+text = "Quit"
