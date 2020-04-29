@@ -56,6 +56,6 @@ public class MainMenu : Control
 
     private void Quit_Click()
     {
-        GetTree().Quit();
+        _game.Quit();
     }
 }

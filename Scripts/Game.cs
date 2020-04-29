@@ -26,6 +26,7 @@ public class Game : Node
     public void Quit()
     {
         Network.Disconnect();
+        GetTree().Quit();
     }
 
     public void LoadUI(PlayerController p)

@@ -91,7 +91,7 @@ public class Network : Node
     public void ConnectionRemoved()
     {
         GD.Print("ConnectionRemoved");
-        GetTree().Quit();
+        _game.Quit();
     }
 
     public void ConnectTo(string InIp, int port)
