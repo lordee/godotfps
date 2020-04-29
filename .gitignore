@@ -1,3 +1,4 @@
 *.import
 .mono/temp/*
 .mono/metadata/*
+Build/*

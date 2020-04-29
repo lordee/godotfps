@@ -8,16 +8,14 @@ public class ProjectileManager : Node
     private List<Rocket> _projectiles = new List<Rocket>();
     public List<Rocket> Projectiles { get { return _projectiles; }}
     HashSet<Rocket> _remove = new HashSet<Rocket>();
-    private World _world;
-    private Network _network;
+    private Game _game;
 
     PackedScene _rocketScene;
 
     public override void _Ready()
     {
-        _world = GetNode("/root/Initial/World") as World;
+        _game = GetTree().Root.GetNode("Game") as Game;
         _rocketScene = ResourceLoader.Load("res://Scenes/Weapons/Rocket.tscn") as PackedScene;
-        _network = GetNode("/root/Initial/Network") as Network;
     }
 
     public override void _PhysicsProcess(float delta)
@@ -37,7 +35,7 @@ public class ProjectileManager : Node
         _projectiles.Add(proj);
         this.AddChild(proj);
         Vector3 vel = dest.Normalized() * proj.Speed;
-        Peer p = _network.PeerList.Where(e => e.ID == shooter.ID).SingleOrDefault();
+        Peer p = _game.Network.PeerList.Where(e => e.ID == shooter.ID).SingleOrDefault();
         float ping = 0f;
         if (p != null)
         {
@@ -64,7 +62,7 @@ public class ProjectileManager : Node
         
         if (proj == null)
         {
-            Peer p = _network.PeerList.Where(e => e.ID == Convert.ToInt64(pID)).SingleOrDefault();
+            Peer p = _game.Network.PeerList.Where(e => e.ID == Convert.ToInt64(pID)).SingleOrDefault();
             if (p != null)
             {
                 proj = _rocketScene.Instance() as Rocket;

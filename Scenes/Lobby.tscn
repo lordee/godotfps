@@ -2,7 +2,7 @@
 
 [ext_resource path="res://Scripts/Lobby.cs" type="Script" id=1]
 
-[node name="lobby" type="Control"]
+[node name="Lobby" type="Control"]
 margin_right = 40.0
 margin_bottom = 40.0
 size_flags_horizontal = 2

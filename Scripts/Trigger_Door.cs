@@ -15,7 +15,7 @@ public class Trigger_Door : Area
     private float _damage = 2;
     private float _angle = 0;
     private float _lip = .8f;
-    private World _world;
+    private Game _game;
     // lip
     // sounds
     AudioStreamPlayer3D _sndOpen = null;
@@ -32,10 +32,9 @@ public class Trigger_Door : Area
     private STATE _open = STATE.CLOSE;
     Vector3 _lastPos;
 
-
     public override void _Ready()
     {
-        _world = GetNode("/root/Initial/World") as World;
+        _game = GetTree().Root.GetNode("Game") as Game;
     }
 
     public void Init(Godot.Collections.Dictionary fields)
@@ -51,9 +50,9 @@ public class Trigger_Door : Area
         entityName = "entity_" + entityName.Substring(0, entityName.Find("_", 0));
 
         // link doors to mesh
-        _mesh = GetNode("/root/Initial/Map/QodotMap/Meshes/" + entityName) as MeshInstance;
+        _mesh = _game.Map.GetNode("QodotMap/Meshes/" + entityName) as MeshInstance;
         // link doors to collision
-        Godot.Collections.Array collisions = (GetNode("/root/Initial/Map/QodotMap/Collision/Static Collision") as StaticBody).GetChildren();
+        Godot.Collections.Array collisions = (_game.Map.GetNode("QodotMap/Collision/Static Collision") as StaticBody).GetChildren();
         foreach(CollisionShape cs in collisions)
         {
             if (cs.Name.Contains(entityName))

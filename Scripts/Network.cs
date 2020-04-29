@@ -6,9 +6,7 @@ using System.Text;
 
 public class Network : Node
 {
-    Initial _initial;
-    World _world;
-    ProjectileManager _projectileManager;
+    Game _game;
     
     private int maxPlayers = 8;
     
@@ -31,9 +29,7 @@ public class Network : Node
         GetTree().Connect("connection_failed", this, "ConnectionFailed");
         GetTree().Connect("server_disconnected", this, "ConnectionRemoved");
 
-        _initial = GetNode("/root/Initial") as Initial;
-        _world = GetNode("/root/Initial/World") as World;
-        _projectileManager = GetNode("/root/Initial/World/ProjectileManager") as ProjectileManager;
+        _game = GetNode("/root/Game") as Game;
     }
 
     public override void _PhysicsProcess(float delta)
@@ -42,12 +38,12 @@ public class Network : Node
         {
             if (IsNetworkMaster())
             {
-                while(Snapshots.Count > _world.BackRecTime / delta)
+                while(Snapshots.Count > _game.World.BackRecTime / delta)
                 {
                     Snapshots.RemoveAt(0);
                 }
                 SnapShot sn = new SnapShot();
-                sn.SnapNum = _world.LocalSnapNum;
+                sn.SnapNum = _game.World.LocalSnapNum;
 
                 Snapshots.Add(sn);
 
@@ -56,6 +52,11 @@ public class Network : Node
                 RpcUnreliable(nameof(ReceivePacket), packetBytes);
             }
         }
+    }
+
+    public void Disconnect()
+    {
+        // TODO - implement
     }
 
     public void ClientConnected(string ids)
@@ -109,33 +110,24 @@ public class Network : Node
 		GD.Print($"Started hosting on port '{port}'");
         GetTree().NetworkPeer = Peer;
         _id = GetTree().GetNetworkUniqueId();
-        _world.StartWorld();
+        _game.World.StartWorld();
 
         AddPlayer(_id, true);
         
         _active = true;
 	}
 
-    // FIXME - move to a different node
-    private void LoadUI(Player p)
-    {
-        PackedScene uips = ResourceLoader.Load("res://Scenes/UI.tscn") as PackedScene;
-        UI ui = uips.Instance() as UI;
-        _initial.AddChild(ui);
-        ui.Init(p);
-    }
-
     private void AddPlayer(int id, bool playerControlled)
     {
-        PlayerController c = _world.AddPlayer(id, playerControlled);
+        PlayerController c = _game.World.AddPlayer(id, playerControlled);
 
         if (c != null)
         {
             _pc = c;
-            LoadUI(_pc.Player);
+            _game.LoadUI(_pc);
         }
 
-        Player p = GetNode("/root/Initial/World/" + id) as Player;
+        Player p = _game.World.GetNode(id.ToString()) as Player;
         p.PlayerControlled = playerControlled;
         Peer pe = new Peer(id, p);
         PeerList.Add(pe);
@@ -147,7 +139,7 @@ public class Network : Node
         // TODO - send over all ents to new player?
         foreach(Peer p in PeerList)
         {
-            RpcId(id, nameof(SyncWorldReceive), _world.LocalSnapNum, ET.PLAYER, p.ID);
+            RpcId(id, nameof(SyncWorldReceive), _game.World.LocalSnapNum, ET.PLAYER, p.ID);
         }
     }
 
@@ -155,13 +147,13 @@ public class Network : Node
     [Remote]
     public void SyncWorldReceive(int serverSnapNum, ET entType, int id)
     {
-        _world.ServerSnapNum = serverSnapNum;
+        _game.World.ServerSnapNum = serverSnapNum;
         switch (entType)
         {
             case ET.PLAYER:
                 if (id == GetTree().GetNetworkUniqueId())
                 {
-                    _world.StartWorld();
+                    _game.World.StartWorld();
                     _id = id;
                     AddPlayer(id, true);
                     _active = true;
@@ -188,7 +180,7 @@ public class Network : Node
         {
             return;
         }
-        p.Ping = (_world.LocalSnapNum - serverSnapNumAck) * _world.FrameDelta;
+        p.Ping = (_game.World.LocalSnapNum - serverSnapNumAck) * _game.World.FrameDelta;
 
         for (int i = 2; i < split.Length; i++)
         {
@@ -237,7 +229,7 @@ public class Network : Node
         string pkStr = Encoding.UTF8.GetString(packet);
         string[] split = pkStr.Split(",");
         int snapNum = Convert.ToInt32(split[0]);
-        _world.ServerSnapNum = snapNum;
+        _game.World.ServerSnapNum = snapNum;
 
         for (int i = 1; i < split.Length; i++)
         {
@@ -252,8 +244,7 @@ public class Network : Node
                     break;
             }
         }
-        _world.LocalSnapNum = _world.LocalSnapNum < _world.ServerSnapNum ? _world.ServerSnapNum : _world.LocalSnapNum;
-        //_world.LocalSnapNum = _world.ServerSnapNum;
+        _game.World.LocalSnapNum = _game.World.LocalSnapNum < _game.World.ServerSnapNum ? _game.World.ServerSnapNum : _game.World.LocalSnapNum;
     }
 
     private void ProcessProjectilePacket(string[] split, ref int i)
@@ -276,7 +267,7 @@ public class Network : Node
             , float.Parse(split[i++],  System.Globalization.CultureInfo.InvariantCulture)
             , float.Parse(split[i],  System.Globalization.CultureInfo.InvariantCulture)
         );
-        _projectileManager.AddNetworkedProjectile(pName, pID, porg, pvel, prot);
+        _game.World.ProjectileManager.AddNetworkedProjectile(pName, pID, porg, pvel, prot);
     }
 
     private void ProcessPlayerPacket(string[] split, ref int i)
@@ -307,7 +298,7 @@ public class Network : Node
     private string BuildPacketString(SnapShot sn)
     {
         sb.Clear();
-        sb.Append(_world.LocalSnapNum);
+        sb.Append(_game.World.LocalSnapNum);
         sb.Append(",");
         // players
         foreach(Peer p in PeerList)
@@ -354,7 +345,7 @@ public class Network : Node
             sb.Append(",");
         }
         // projectiles
-        foreach(Rocket p in _projectileManager.Projectiles)
+        foreach(Rocket p in _game.World.ProjectileManager.Projectiles)
         {
             sb.Append((int)ET.PROJECTILE);
             sb.Append(",");
@@ -382,7 +373,7 @@ public class Network : Node
             sb.Append(",");
         }
 
-        if (sb.Length > (_world.LocalSnapNum.ToString().Length + 1))
+        if (sb.Length > (_game.World.LocalSnapNum.ToString().Length + 1))
         {
             sb.Remove(sb.Length - 1, 1);
         }
@@ -392,7 +383,7 @@ public class Network : Node
     private string BuildClientCmdPacket(int id, List<PlayerCmd> pCmdQueue)
     {
         sb.Clear();
-        sb.Append(_world.ServerSnapNum);
+        sb.Append(_game.World.ServerSnapNum);
         sb.Append(",");
         sb.Append(id.ToString());
         sb.Append(",");

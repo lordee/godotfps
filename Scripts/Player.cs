@@ -8,13 +8,11 @@ using System.Linq;
 public class Player : KinematicBody
 {
     // Nodes
+    Game _game;
     Spatial _head;
-    World _world;
     RayCast _stairCatcher;
     MeshInstance _mesh;
     public MeshInstance Mesh {get { return _mesh; }}
-    ProjectileManager _projectileManager;
-    Network _network;
     public Peer Peer;
 
     public bool PlayerControlled = false;
@@ -70,12 +68,10 @@ public class Player : KinematicBody
 
     public override void _Ready()
     {
+        _game = GetTree().Root.GetNode("Game") as Game;
         _head = (Spatial)GetNode("Head");
-        _world = GetNode("/root/Initial/World") as World;
         _stairCatcher = (RayCast)GetNode("StairCatcher");
         _mesh = GetNode("MeshInstance") as MeshInstance;
-        _projectileManager = GetNode("/root/Initial/World/ProjectileManager") as ProjectileManager;
-        _network = GetNode("/root/Initial/Network") as Network;
     }
 
     public override void _PhysicsProcess(float delta)
@@ -109,12 +105,12 @@ public class Player : KinematicBody
 
             if (IsNetworkMaster())
             {
-                int diff = _world.LocalSnapNum - pCmd.snapshot;
+                int diff = _game.World.LocalSnapNum - pCmd.snapshot;
                 if (diff < 0)
                 {
                     return;
                 }
-                _world.RewindPlayers(diff, delta);
+                _game.World.RewindPlayers(diff, delta);
             }
 
             p.LastSnapshot = pCmd.snapshot;
@@ -124,7 +120,7 @@ public class Player : KinematicBody
 
             if (IsNetworkMaster())
             {
-                _world.FastForwardPlayers();
+                _game.World.FastForwardPlayers();
             }
 
             this.ProcessMovement(_predictedState, pCmd, delta);
@@ -137,7 +133,7 @@ public class Player : KinematicBody
         else
         {
             // FIXME - stop resending commands after trying 3 times
-            _network.SendPMovement(1, ID, pCmdQueue);
+            _game.Network.SendPMovement(1, ID, pCmdQueue);
         }
         TrimCmdQueue();
     }
@@ -159,7 +155,7 @@ public class Player : KinematicBody
         _lastRocketShot += delta;
         if (pCmd.attack == 1 && _lastRocketShot >= _rocketCD)
         {
-            string name = _projectileManager.AddProjectile(this, pCmd.attackDir, pCmd.projName);
+            string name = _game.World.ProjectileManager.AddProjectile(this, pCmd.attackDir, pCmd.projName);
             pCmd.projName = name;
             _lastRocketShot = 0f;
         }
@@ -189,7 +185,7 @@ public class Player : KinematicBody
             AirMove(delta, pCmd);
         }
 
-        _playerVelocity = this.MoveAndSlide(_playerVelocity, _world.Up);
+        _playerVelocity = this.MoveAndSlide(_playerVelocity, _game.World.Up);
         _touchingGround = IsOnFloor();
 
         _predictedState = new State {
@@ -217,7 +213,7 @@ public class Player : KinematicBody
     {
         if (pCmdQueue.Count > 0)
         {
-            int count = (_world.ServerSnapNum > _world.LocalSnapNum) ? pCmdQueue.Count - 1 : pCmdQueue.Count - (_world.LocalSnapNum - _world.ServerSnapNum);
+            int count = (_game.World.ServerSnapNum > _game.World.LocalSnapNum) ? pCmdQueue.Count - 1 : pCmdQueue.Count - (_game.World.LocalSnapNum - _game.World.ServerSnapNum);
              
             for (int i = 0; i < count; i++)
             {
@@ -275,7 +271,7 @@ public class Player : KinematicBody
         if (wishSpeed > 0 && _stairCatcher.IsColliding())
         {
             Vector3 col = _stairCatcher.GetCollisionNormal();
-            float ang = Mathf.Rad2Deg(Mathf.Acos(col.Dot(_world.Up)));
+            float ang = Mathf.Rad2Deg(Mathf.Acos(col.Dot(_game.World.Up)));
             if (ang < _maxStairAngle)
             {
                 _playerVelocity.y = _stairJumpHeight;
@@ -334,7 +330,7 @@ public class Player : KinematicBody
         // Apply gravity
         if (!_climbLadder)
         {
-            _playerVelocity.y -= _world.Gravity * delta;
+            _playerVelocity.y -= _game.World.Gravity * delta;
         }
     }
 
@@ -344,7 +340,7 @@ public class Player : KinematicBody
         {
             _wishJump = true;
         }
-        if (pCmd.move_up == -1)
+        if (pCmd.move_up <= 0)
         {
             _wishJump = false;
         }
@@ -523,6 +519,6 @@ public class Player : KinematicBody
         // respawn on input
         // log the death
 
-        _world.Spawn(this);
+        _game.World.Spawn(this);
     }
 }

@@ -9,7 +9,7 @@ public class Rocket : KinematicBody
     public float Damage = 100;
     private float _areaOfEffectRadius = 0;
     PackedScene _particleScene;
-    private World _world;
+    private Game _game;
 
     public Vector3 Velocity = new Vector3();
 
@@ -22,7 +22,7 @@ public class Rocket : KinematicBody
 
     public override void _Ready()
     {
-        _world = GetNode("/root/Initial/World") as World;
+        _game = GetTree().Root.GetNode("Game") as Game;
         _particleScene = ResourceLoader.Load(_particleResource) as PackedScene;
         _areaOfEffectRadius = Damage / 10;
     }
@@ -32,7 +32,7 @@ public class Rocket : KinematicBody
         this.AddCollisionExceptionWith(shooter);
         this.GlobalTransform = shooter.GlobalTransform;
         Velocity = vel;
-        this.LookAt(vel * 1000, _world.Up);
+        this.LookAt(vel * 1000, _game.World.Up);
         _playerOwner = shooter;
     }
 
@@ -42,7 +42,7 @@ public class Rocket : KinematicBody
         
         Particles p = (Particles)_particleScene.Instance();
         p.Transform = this.Transform;
-        _world.AddChild(p);
+        _game.World.AddChild(p);
         p.Emitting = true;
         
         // remove projectile

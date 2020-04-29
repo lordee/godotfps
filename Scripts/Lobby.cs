@@ -8,7 +8,7 @@ public class Lobby : Control
     Button _joinBtn;
     Button _hostBtn;
     LineEdit _address;
-    Network _network;
+    Game _game;
     public override void _Ready()
     {
         _joinBtn = (Button)GetNode("panel/join");
@@ -16,7 +16,8 @@ public class Lobby : Control
         _hostBtn.Connect("pressed", this, "_On_Host_Pressed");
         _joinBtn.Connect("pressed", this, "_On_Join_Pressed");
         _address = GetNode("panel/address") as LineEdit;
-        _network = GetNode("/root/Initial/Network") as Network;
+        _game = GetTree().Root.GetNode("Game") as Game;
+        UIManager.Open(nameof(Lobby));
     }
 
     private void _Set_Status(string text, bool isok)
@@ -38,15 +39,20 @@ public class Lobby : Control
 
     private void _On_Host_Pressed()
     {
-        GD.Print("on host pressed");
-        _network.Host(DEFAULT_PORT);
-        this.Hide();
+        _game.Network.Host(DEFAULT_PORT);
+        Close();
     }
 
     private void _On_Join_Pressed()
     {   
-        _network.ConnectTo(_address.Text, DEFAULT_PORT);
+        _game.Network.ConnectTo(_address.Text, DEFAULT_PORT);
         
+        Close();
+    }
+
+    private void Close()
+    {
         this.Hide();
+        UIManager.Close(nameof(Lobby));
     }
 }

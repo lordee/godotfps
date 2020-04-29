@@ -38,7 +38,7 @@ public class World : Node
     private List<string> _playerNodeNames = new List<string>();
     
     // nodes
-    private Network _network;
+    private Game _game;
     private ProjectileManager _projectileManager;
     public ProjectileManager ProjectileManager {
         get { return _projectileManager; }
@@ -70,8 +70,8 @@ public class World : Node
 
     public override void _Ready()
     {
-        _network = GetNode("/root/Initial/Network") as Network;
-        _projectileManager = GetNode("/root/Initial/World/ProjectileManager") as ProjectileManager;
+        _game = GetTree().Root.GetNode("Game") as Game;
+        _projectileManager = GetNode("ProjectileManager") as ProjectileManager;
     }
 
     public override void _PhysicsProcess(float delta)
@@ -92,11 +92,11 @@ public class World : Node
     {
         bool rewound = false;
 
-        ticks = ticks > _network.Snapshots.Count ? _network.Snapshots.Count : ticks; // we only hold backrectime worth of ticks
+        ticks = ticks > _game.Network.Snapshots.Count ? _game.Network.Snapshots.Count : ticks; // we only hold backrectime worth of ticks
         if (ticks > 0)
         {
-            int pos = _network.Snapshots.Count - ticks;
-            SnapShot sn = _network.Snapshots[pos];
+            int pos = _game.Network.Snapshots.Count - ticks;
+            SnapShot sn = _game.Network.Snapshots[pos];
             foreach(PlayerSnap psn in sn.PlayerSnap)
             {
                 Player brp = GetNode(psn.NodeName) as Player;
@@ -112,7 +112,7 @@ public class World : Node
 
     public void FastForwardPlayers()
     {
-        SnapShot sn = _network.Snapshots[_network.Snapshots.Count - 1];
+        SnapShot sn = _game.Network.Snapshots[_game.Network.Snapshots.Count - 1];
         foreach(PlayerSnap psn in sn.PlayerSnap)
         {
             Player brp = GetNode(psn.NodeName) as Player;
@@ -126,11 +126,10 @@ public class World : Node
     {
         PackedScene main = (PackedScene)ResourceLoader.Load("res://Maps/lastresort_b5.tscn");
         Spatial inst = (Spatial)main.Instance();
-        Initial of = GetNode("/root/Initial") as Initial;
 
-        of.AddChild(inst);
+        _game.Map.AddChild(inst);
 
-        Spatial entitySpawns = GetNode("/root/Initial/Map/QodotMap/Entity Spawns") as Spatial;
+        Spatial entitySpawns = _game.Map.GetNode("QodotMap/Entity Spawns") as Spatial;
         Godot.Collections.Array ents = entitySpawns.GetChildren();
 
         foreach(Spatial ent in ents)
@@ -170,7 +169,7 @@ public class World : Node
             }
         }
 
-        Spatial triggers = GetNode("/root/Initial/Map/QodotMap/Triggers") as Spatial;
+        Spatial triggers = _game.Map.GetNode("QodotMap/Triggers") as Spatial;
         Godot.Collections.Array triggerents = triggers.GetChildren();
         List<Trigger_Door> doors = new List<Trigger_Door>();
 
@@ -242,7 +241,7 @@ public class World : Node
             pc.Init(player);
             pc.SetProcess(true);
             pc.Notification(NotificationReady);
-            Input.SetMouseMode(Input.MouseMode.Visible);
+            //Input.SetMouseMode(Input.MouseMode.Visible);
             _worldOwner = player;
         }
         player.Team = 1;

@@ -4,10 +4,9 @@ using System;
 
 public class PlayerController : Camera
 {
+    Game _game;
     Player _player;
     public Player Player { get { return _player; }}
-    Network _network;
-    World _world;
 
     // Player commands, stores wish commands that the player asks for (Forward, back, jump, etc)
     private float move_forward = 0;
@@ -23,7 +22,7 @@ public class PlayerController : Camera
         get {
             if (_crosshair == null)
             {
-                _crosshair = (Sprite)GetNode("/root/Initial/UI/Crosshair");
+                _crosshair = _game.HUD.Crosshair;
             }
             return _crosshair;
         }
@@ -35,8 +34,7 @@ public class PlayerController : Camera
 
     public override void _Ready()
     {
-        _network = GetNode("/root/Initial/Network") as Network;
-        _world = GetNode("/root/Initial/World") as World;
+        _game = GetTree().Root.GetNode("Game") as Game;
     }
 
     public void Init(Player p)
@@ -47,38 +45,9 @@ public class PlayerController : Camera
 
     public override void _PhysicsProcess(float delta)
     {
-        if (Input.IsActionJustPressed("jump"))
-        {
-            move_up = 1;
-        }
-        if (Input.IsActionJustReleased("jump"))
-        {
-            move_up = -1;
-        }
-        move_forward = 0;
-        if (Input.IsActionPressed("move_forward"))
-        {
-            move_forward += 1;
-        }
-        if (Input.IsActionPressed("move_back"))
-        {
-            move_forward += -1;
-        }
-        move_right = 0;
-        if (Input.IsActionPressed("move_right"))
-        {
-            move_right += 1;
-        }
-        if (Input.IsActionPressed("move_left"))
-        {
-            move_right += -1;
-        }
-
-        attack = 0;
         shootTo = new Vector3();
-        if (Input.IsActionPressed("attack"))
+        if (attack == 1)
         {
-            attack = 1;
             float ypos = Crosshair.Position.y - (Crosshair.Texture.GetSize().y * Crosshair.Scale.y/2);
             Vector2 pos = new Vector2(Crosshair.Position.x, ypos);
             Vector3 origin = ProjectRayOrigin(pos);
@@ -86,10 +55,9 @@ public class PlayerController : Camera
             shootTo = to + origin;
         }
         
-
         PlayerCmd pCmd = new PlayerCmd();
         pCmd.playerID = _player.ID;
-        pCmd.snapshot = _world.LocalSnapNum;
+        pCmd.snapshot = _game.World.LocalSnapNum;
         pCmd.move_forward = move_forward;
         pCmd.move_right = move_right;
         pCmd.move_up = move_up;
@@ -102,45 +70,105 @@ public class PlayerController : Camera
         _player.pCmdQueue.Add(pCmd);
     }
 
-    public override void _Input(InputEvent e)
+    [InputWithArg(typeof(PlayerController), nameof(MoveForward))]
+    public static void MoveForward(float val)
     {
-        // moving mouse
+        Game.Client.move_forward += val;
+    }
+
+    [InputWithArg(typeof(PlayerController), nameof(MoveBack))]
+    public static void MoveBack(float val)
+    {
+        Game.Client.move_forward -= val;
+    }
+
+    [InputWithArg(typeof(PlayerController), nameof(MoveRight))]
+    public static void MoveRight(float val)
+    {
+        Game.Client.move_right += val;
+    }
+
+    [InputWithArg(typeof(PlayerController), nameof(MoveLeft))]
+    public static void MoveLeft(float val)
+    {
+        Game.Client.move_right -= val;
+    }
+
+    [InputWithArg(typeof(PlayerController), nameof(Jump))]
+    public static void Jump(float val)
+    {
+        Game.Client.move_up = val;
+    }
+
+    [InputWithArg(typeof(PlayerController), nameof(Attack))]
+    public static void Attack(float val)
+    {
         if (Input.GetMouseMode() == Input.MouseMode.Captured)
         {
-            if (e is InputEventMouseMotion em)
-            {
-                if (em.Relative.Length() > 0)
-                {          
-                    float look_right = em.Relative.x;
-                    float look_up = em.Relative.y;
-
-                    // limit how far up/down we look
-                    // invert mouse
-                    float rotate = Mathf.Deg2Rad(-look_right * mouseSensitivity);
-                    float change = look_up * mouseSensitivity;
-
-                    // inverted, fix later
-                    _player.RotateHead(rotate);
-                    if (_cameraAngle + change < 90F && _cameraAngle + change > -90F)
-                    {
-                        this.RotateX(Mathf.Deg2Rad(change));
-                        _cameraAngle += change;
-                    }
-                }
-            }
+            Game.Client.attack = val;
         }
-        if (Input.IsActionJustPressed("togglemousemode"))
+    }
+
+    [InputWithoutArg(typeof(PlayerController), nameof(MouseModeToggle))]
+    public static void MouseModeToggle()
+    {
+        Settings.MouseCursorVisible = !Settings.MouseCursorVisible;
+        if (Settings.MouseCursorVisible)
         {
-            if (_currentMouseMode == Input.MouseMode.Visible)
+            Input.SetMouseMode(Input.MouseMode.Visible);
+        }
+        else
+        {
+            Input.SetMouseMode(Input.MouseMode.Captured);
+        }
+    }
+
+    [InputWithArg(typeof(PlayerController), nameof(LookUp))]
+	public static void LookUp(float val)
+	{
+        if (val > 0)
+        {
+            float change = val * Settings.Sensitivity * Settings.Inverted;
+            if (Game.Client._cameraAngle + change < 90f && Game.Client._cameraAngle + change > -90f)
             {
-                _currentMouseMode = Input.MouseMode.Captured;
-                Input.SetMouseMode(Input.MouseMode.Captured);
-            }
-            else
-            {
-                _currentMouseMode = Input.MouseMode.Visible;
-                Input.SetMouseMode(Input.MouseMode.Visible);
+                Game.Client.RotateX(Mathf.Deg2Rad(change));
             }
         }
-    }    
+	}
+
+
+	[InputWithArg(typeof(PlayerController), nameof(LookDown))]
+	public static void LookDown(float val)
+	{
+        if (val > 0)
+        {
+            float change = -val * Settings.Sensitivity * Settings.Inverted;
+            if (Game.Client._cameraAngle + change < 90f && Game.Client._cameraAngle + change > -90f)
+            {
+                Game.Client.RotateX(Mathf.Deg2Rad(change));
+            }
+        }
+	}
+
+
+	[InputWithArg(typeof(PlayerController), nameof(LookRight))]
+	public static void LookRight(float val)
+	{
+		if (val > 0)
+        {
+            float change = Mathf.Deg2Rad(-val * Settings.Sensitivity);
+            Game.Client.Player.RotateHead(change);
+        }
+	}
+
+
+	[InputWithArg(typeof(PlayerController), nameof(LookLeft))]
+	public static void LookLeft(float val)
+	{
+		if (val > 0)
+        {
+            float change = Mathf.Deg2Rad(val * Settings.Sensitivity);
+            Game.Client.Player.RotateHead(change);
+        }
+	}
 }
