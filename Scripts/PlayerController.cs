@@ -131,6 +131,7 @@ public class PlayerController : Camera
             float change = val * Settings.Sensitivity * Settings.Inverted;
             if (Game.Client._cameraAngle + change < 90f && Game.Client._cameraAngle + change > -90f)
             {
+                Game.Client._cameraAngle += change;
                 Game.Client.RotateX(Mathf.Deg2Rad(change));
             }
         }
@@ -145,6 +146,7 @@ public class PlayerController : Camera
             float change = -val * Settings.Sensitivity * Settings.Inverted;
             if (Game.Client._cameraAngle + change < 90f && Game.Client._cameraAngle + change > -90f)
             {
+                Game.Client._cameraAngle += change;
                 Game.Client.RotateX(Mathf.Deg2Rad(change));
             }
         }
