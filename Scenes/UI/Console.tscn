@@ -9,6 +9,7 @@ bg_color = Color( 0.207843, 0.32549, 0.27451, 1 )
 [sub_resource type="StyleBoxEmpty" id=2]
 
 [node name="ConsoleWindow" type="Panel"]
+modulate = Color( 1, 1, 1, 0.380392 )
 anchor_right = 1.0
 anchor_bottom = 1.0
 custom_styles/panel = SubResource( 1 )
@@ -25,13 +26,13 @@ size_flags_vertical = 3
 
 [node name="HBox" type="HBoxContainer" parent="VBox"]
 margin_right = 1024.0
-margin_bottom = 584.0
+margin_bottom = 568.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
 [node name="SpacerLeft" type="Panel" parent="VBox/HBox"]
 margin_right = 4.0
-margin_bottom = 584.0
+margin_bottom = 568.0
 size_flags_horizontal = 3
 size_flags_stretch_ratio = 0.01
 custom_styles/panel = SubResource( 2 )
@@ -39,7 +40,7 @@ custom_styles/panel = SubResource( 2 )
 [node name="Console" type="RichTextLabel" parent="VBox/HBox"]
 margin_left = 8.0
 margin_right = 504.0
-margin_bottom = 584.0
+margin_bottom = 568.0
 focus_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -51,7 +52,7 @@ selection_enabled = true
 [node name="SpacerMiddle" type="Panel" parent="VBox/HBox"]
 margin_left = 508.0
 margin_right = 512.0
-margin_bottom = 584.0
+margin_bottom = 568.0
 size_flags_horizontal = 3
 size_flags_stretch_ratio = 0.01
 custom_styles/panel = SubResource( 2 )
@@ -59,7 +60,7 @@ custom_styles/panel = SubResource( 2 )
 [node name="Log" type="RichTextLabel" parent="VBox/HBox"]
 margin_left = 516.0
 margin_right = 1012.0
-margin_bottom = 584.0
+margin_bottom = 568.0
 focus_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -71,13 +72,13 @@ selection_enabled = true
 [node name="SpacerRight" type="Panel" parent="VBox/HBox"]
 margin_left = 1016.0
 margin_right = 1024.0
-margin_bottom = 584.0
+margin_bottom = 568.0
 size_flags_horizontal = 3
 size_flags_stretch_ratio = 0.01
 custom_styles/panel = SubResource( 2 )
 
 [node name="LineEdit" type="LineEdit" parent="VBox"]
-margin_top = 588.0
+margin_top = 572.0
 margin_right = 1024.0
 margin_bottom = 600.0
 hint_tooltip = "The console is disabled in 0.1.6"
