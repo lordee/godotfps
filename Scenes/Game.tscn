@@ -31,11 +31,11 @@ script = ExtResource( 6 )
 [node name="UIManager" type="Node" parent="."]
 script = ExtResource( 8 )
 
-[node name="Console" parent="UIManager" instance=ExtResource( 7 )]
-visible = false
-
 [node name="HUD" parent="UIManager" instance=ExtResource( 5 )]
 
 [node name="Lobby" parent="UIManager" instance=ExtResource( 9 )]
 
 [node name="MainMenu" parent="UIManager" instance=ExtResource( 10 )]
+
+[node name="Console" parent="UIManager" instance=ExtResource( 7 )]
+visible = false

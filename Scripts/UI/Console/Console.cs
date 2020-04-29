@@ -26,50 +26,36 @@ public class Console : Panel
 		LogLabel.Text += "\n";
 	}
 
-	public override void _Process(float Delta)
+	public void UI_Up()
 	{
-		if(Input.IsActionJustPressed("Enter") && IsOpen)
+		InputLine.GrabFocus();
+
+		if(Input.IsActionJustPressed("ui_up") && HistoryLocation > 0)
 		{
-			this.Execute(InputLine.Text);
-			InputLine.Text = "";
+			HistoryLocation -= 1;
+			InputLine.Text = History[HistoryLocation];
+
+			InputLine.CaretPosition = InputLine.Text.Length;
 		}
 	}
 
-	public override void _Input(InputEvent Event)
+	public void UI_Down()
 	{
-		if(Event.IsAction("ui_up"))
-		{
-			GetTree().SetInputAsHandled();
-			InputLine.GrabFocus();
+		InputLine.GrabFocus();
 
-			if(Input.IsActionJustPressed("ui_up") && HistoryLocation > 0)
+		if(Input.IsActionJustPressed("ui_down") && HistoryLocation < History.Count)
+		{
+			HistoryLocation += 1;
+			if(HistoryLocation == History.Count)
 			{
-				HistoryLocation -= 1;
+				InputLine.Text = "";
+			}
+			else
+			{
 				InputLine.Text = History[HistoryLocation];
-
-				InputLine.CaretPosition = InputLine.Text.Length;
 			}
-		}
 
-		if(Event.IsAction("ui_down"))
-		{
-			GetTree().SetInputAsHandled();
-			InputLine.GrabFocus();
-
-			if(Input.IsActionJustPressed("ui_down") && HistoryLocation < History.Count)
-			{
-				HistoryLocation += 1;
-				if(HistoryLocation == History.Count)
-				{
-					InputLine.Text = "";
-				}
-				else
-				{
-					InputLine.Text = History[HistoryLocation];
-				}
-
-				InputLine.CaretPosition = InputLine.Text.Length;
-			}
+			InputLine.CaretPosition = InputLine.Text.Length;
 		}
 	}
 
@@ -120,9 +106,15 @@ public class Console : Panel
 		Log($"ERROR: {ToThrow}");
 	}
 
+	public void ExecuteInput()
+	{
+		this.Execute(InputLine.Text);
+		InputLine.Text = "";
+	}
 
 	public void Execute(string Command)
 	{
+		InputLine.Text = "";
 		Console.Print("\n>>> " + Command);
 
 		if(History.Count <= 0 || History[History.Count-1] != Command)

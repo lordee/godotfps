@@ -3,17 +3,17 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
+public class UIItem
+{
+    public string Type;
+    public bool Open;
+}
+
 public class UIManager : Node
 {
-    private class UIItem
-    {
-        public string Type;
-        public bool Open;
-    }
-
     private static bool _menuOpen = false;
     private static bool _consoleOpen = false;
-    private static List<UIItem> Items = new List<UIItem>();
+    public static List<UIItem> Items = new List<UIItem>();
 
     public static MainMenu MainMenu;
     public static Console Console;

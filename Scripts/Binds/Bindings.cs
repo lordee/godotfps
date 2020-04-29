@@ -591,9 +591,29 @@ public class Bindings : Node
 
 	public override void _Input(InputEvent Event)
 	{
+		// UI Binds
 		if(UIManager.UIOpen())
 		{
-			// UI Binds
+			// if console open
+			if (UIManager.Items.Where(e => e.Type == nameof(Console) && e.Open == true).FirstOrDefault() != null)
+			{
+				if (Input.IsActionJustPressed("console_execute"))
+				{
+					UIManager.Console.ExecuteInput();
+				}
+				else if (Event.IsAction("ui_up"))
+				{
+					UIManager.Console.UI_Up();
+				}
+				else if (Event.IsAction("ui_down"))
+				{
+					UIManager.Console.UI_Down();
+				}
+				else if (Event.IsAction("ui_cancel"))
+				{
+					UIManager.Console.Close();
+				}
+			}
 			return;
 		}
 
