@@ -24,6 +24,15 @@ public class Console : Panel
 		LogLabel = GetNode<RichTextLabel>("VBox/HBox/Log");
 		Console.Print("");
 		LogLabel.Text += "\n";
+
+		InputLine.Connect("text_changed", this, nameof(Text_Changed));
+	}
+
+	private void Text_Changed(string newtext)
+	{
+		// FIXME - filter out key bound to toggle of console
+		InputLine.Text = InputLine.Text.Replace("`", "");
+		InputLine.CaretPosition = InputLine.Text.Length;
 	}
 
 	public void UI_Up()
