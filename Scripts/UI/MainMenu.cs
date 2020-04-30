@@ -51,7 +51,8 @@ public class MainMenu : Control
 
     private void Options_Click()
     {
-        GD.Print("options click!");
+        UIManager.Open(nameof(OptionsMenu));
+        UIManager.OptionsMenu.Show();
     }
 
     private void Quit_Click()

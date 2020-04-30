@@ -4,15 +4,32 @@ using System;
 public class OptionsMenu : Control
 {
 
-    // Called when the node enters the scene tree for the first time.
+    Container _controlsContainer;
     public override void _Ready()
     {
-        
+        _controlsContainer = GetNode("TabContainer/Controls/ControlsContainer") as Container;
+
+        _controlsContainer.AddChild(AddControl("test", nameof(TestMethod)));
     }
 
-//  // Called every frame. 'delta' is the elapsed time since the previous frame.
-//  public override void _Process(float delta)
-//  {
-//      
-//  }
+    private HBoxContainer AddControl(string lblText, string func)
+    {
+        HBoxContainer hbox = new HBoxContainer();
+        hbox.MarginLeft = 2;
+        
+        Label lbl = new Label();
+        lbl.Text = lblText;
+        hbox.AddChild(lbl);
+
+        CheckBox cb = new CheckBox();
+        cb.Connect("toggled", this, func);
+        hbox.AddChild(cb);
+
+        return hbox;
+    }
+
+    private void TestMethod(bool test)
+    {
+        GD.Print("clicked " + test);
+    }
 }

@@ -16,12 +16,14 @@ public class UIManager : Node
     public static List<UIItem> Items = new List<UIItem>();
 
     public static MainMenu MainMenu;
+    public static OptionsMenu OptionsMenu;
     public static Console Console;
 
     // Called when the node enters the scene tree for the first time.
     public override void _Ready()
     {
         MainMenu = GetNode("MainMenu") as MainMenu;
+        OptionsMenu = GetNode("OptionsMenu") as OptionsMenu;
         Console = GetNode("Console") as Console;
     }
 
