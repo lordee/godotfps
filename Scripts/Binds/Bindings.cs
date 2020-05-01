@@ -623,16 +623,16 @@ public class Bindings : Node
 						switch(Binding.AxisDirection)
 						{
 							case(DIRECTION.UP):
-								Binding.FuncWithArg.Invoke(GreaterEqualZero(-MotionEvent.Relative.y)/Settings.Sensitivity);
+								Binding.FuncWithArg.Invoke(GreaterEqualZero(-MotionEvent.Relative.y));
 								break;
 							case(DIRECTION.DOWN):
-								Binding.FuncWithArg.Invoke(GreaterEqualZero(MotionEvent.Relative.y)/Settings.Sensitivity);
+								Binding.FuncWithArg.Invoke(GreaterEqualZero(MotionEvent.Relative.y));
 								break;
 							case(DIRECTION.RIGHT):
-								Binding.FuncWithArg.Invoke(GreaterEqualZero(MotionEvent.Relative.x)/Settings.Sensitivity);
+								Binding.FuncWithArg.Invoke(GreaterEqualZero(MotionEvent.Relative.x));
 								break;
 							case(DIRECTION.LEFT):
-								Binding.FuncWithArg.Invoke(GreaterEqualZero(-MotionEvent.Relative.x)/Settings.Sensitivity);
+								Binding.FuncWithArg.Invoke(GreaterEqualZero(-MotionEvent.Relative.x));
 								break;
 						}
 					}
