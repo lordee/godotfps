@@ -139,10 +139,6 @@ public class Console : Panel, IUIItem
 	[InputWithoutArg(typeof(Console), nameof(ConsoleToggle))]
 	public static void ConsoleToggle()
 	{
-		IsOpen = !IsOpen;
-		if (IsOpen)
-		{
-			UIManager.Open(UIManager.Console);
-		}
+		UIManager.Open(UIManager.Console);
 	}
 }

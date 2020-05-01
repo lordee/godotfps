@@ -8,16 +8,13 @@ class BindingObject
 	public Action<float> FuncWithArg = null;
 	public Bindings.TYPE Type = Bindings.TYPE.UNSET;
 	public Bindings.DIRECTION AxisDirection; //Only used if Type is AXIS
-	public bool UIBind = false;
 
 	public bool JoyWasInDeadzone = true;
 
-	public BindingObject(string NameArg, bool uibind)
+	public BindingObject(string NameArg)
 	{
 		Name = NameArg;
-		UIBind = uibind;
 	}
-
 
 	public bool Equals(BindingObject Other)
 	{

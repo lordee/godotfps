@@ -50,9 +50,9 @@ public class Bindings : Node
 	}
 
 
-	public static bool Bind(string KeyName, string FunctionName, bool UIBind)
+	public static bool Bind(string KeyName, string FunctionName)
 	{
-		BindingObject NewBind = new BindingObject(KeyName, UIBind);
+		BindingObject NewBind = new BindingObject(KeyName);
 
 		bool Found = false;
 
@@ -513,82 +513,79 @@ public class Bindings : Node
 
 		foreach(BindingObject Binding in BindingsWithArg)
 		{
-			if ((Binding.UIBind) || (!UIManager.UIOpen() && !Binding.UIBind))
+			if(Binding.Type == TYPE.SCANCODE || Binding.Type == TYPE.MOUSEBUTTON || Binding.Type == TYPE.CONTROLLERBUTTON)
 			{
-				if(Binding.Type == TYPE.SCANCODE || Binding.Type == TYPE.MOUSEBUTTON || Binding.Type == TYPE.CONTROLLERBUTTON)
+				if(Input.IsActionJustPressed(Binding.Name))
 				{
-					if(Input.IsActionJustPressed(Binding.Name))
-					{
-						Binding.FuncWithArg.Invoke(1);
-					}
-					else if(Input.IsActionJustReleased(Binding.Name))
-					{
-						Binding.FuncWithArg.Invoke(-1);
+					Binding.FuncWithArg.Invoke(1);
+				}
+				else if(Input.IsActionJustReleased(Binding.Name))
+				{
+					Binding.FuncWithArg.Invoke(-1);
+				}
+			}
+			else if(Binding.Type == TYPE.MOUSEWHEEL)
+			{
+				if(Input.IsActionJustReleased(Binding.Name))
+				{
+					Binding.FuncWithArg.Invoke(1);
+				}
+			}
+			else if(Binding.Type == TYPE.CONTROLLERAXIS)
+			{
+				int VerticalAxis = 0;
+				int HorizontalAxis = 0;
+
+				foreach(InputEvent Option in InputMap.GetActionList(Binding.Name)) {
+					if (Option is InputEventJoypadMotion JoyEvent) {
+						InputEventJoypadMotion StickEvent = JoyEvent;
+						if(StickEvent.Axis == 0 || StickEvent.Axis == 1)
+						{
+							// We are using Left stick
+							VerticalAxis = 1;
+							HorizontalAxis = 0;
+						}
+						else if(StickEvent.Axis == 2 || StickEvent.Axis == 3)
+						{
+							// We are using Right stick
+							VerticalAxis = 3;
+							HorizontalAxis = 2;
+						}
+						else
+						{
+							Console.ThrowPrint("This joystick doesn't seem to exist");
+							return;
+						}
 					}
 				}
-				else if(Binding.Type == TYPE.MOUSEWHEEL)
+
+				if (Math.Abs(Input.GetJoyAxis(0,HorizontalAxis)) >= Settings.Deadzone || Math.Abs(Input.GetJoyAxis(0,VerticalAxis)) >= Settings.Deadzone)
 				{
-					if(Input.IsActionJustReleased(Binding.Name))
+					float HorizontalMovement = Input.GetJoyAxis(0,HorizontalAxis);
+					float VerticalMovement = Input.GetJoyAxis(0,VerticalAxis);
+					switch(Binding.AxisDirection)
 					{
-						Binding.FuncWithArg.Invoke(1);
+						case(DIRECTION.UP):
+							Binding.FuncWithArg.Invoke(-VerticalMovement);
+							break;
+						case(DIRECTION.DOWN):
+							Binding.FuncWithArg.Invoke(VerticalMovement);
+							break;
+						case(DIRECTION.RIGHT):
+							Binding.FuncWithArg.Invoke(HorizontalMovement);
+							break;
+						case(DIRECTION.LEFT):
+							Binding.FuncWithArg.Invoke(-HorizontalMovement);
+							break;
 					}
+					Binding.JoyWasInDeadzone = false;
 				}
-				else if(Binding.Type == TYPE.CONTROLLERAXIS)
+				else // Set sens to zero to simulate key release
 				{
-					int VerticalAxis = 0;
-					int HorizontalAxis = 0;
-
-					foreach(InputEvent Option in InputMap.GetActionList(Binding.Name)) {
-						if (Option is InputEventJoypadMotion JoyEvent) {
-							InputEventJoypadMotion StickEvent = JoyEvent;
-							if(StickEvent.Axis == 0 || StickEvent.Axis == 1)
-							{
-								// We are using Left stick
-								VerticalAxis = 1;
-								HorizontalAxis = 0;
-							}
-							else if(StickEvent.Axis == 2 || StickEvent.Axis == 3)
-							{
-								// We are using Right stick
-								VerticalAxis = 3;
-								HorizontalAxis = 2;
-							}
-							else
-							{
-								Console.ThrowPrint("This joystick doesn't seem to exist");
-								return;
-							}
-						}
-					}
-
-					if (Math.Abs(Input.GetJoyAxis(0,HorizontalAxis)) >= Settings.Deadzone || Math.Abs(Input.GetJoyAxis(0,VerticalAxis)) >= Settings.Deadzone)
+					if (Binding.JoyWasInDeadzone == false) // Only do this if the Binding wasn't zero last time
 					{
-						float HorizontalMovement = Input.GetJoyAxis(0,HorizontalAxis);
-						float VerticalMovement = Input.GetJoyAxis(0,VerticalAxis);
-						switch(Binding.AxisDirection)
-						{
-							case(DIRECTION.UP):
-								Binding.FuncWithArg.Invoke(-VerticalMovement);
-								break;
-							case(DIRECTION.DOWN):
-								Binding.FuncWithArg.Invoke(VerticalMovement);
-								break;
-							case(DIRECTION.RIGHT):
-								Binding.FuncWithArg.Invoke(HorizontalMovement);
-								break;
-							case(DIRECTION.LEFT):
-								Binding.FuncWithArg.Invoke(-HorizontalMovement);
-								break;
-						}
-						Binding.JoyWasInDeadzone = false;
-					}
-					else // Set sens to zero to simulate key release
-					{
-						if (Binding.JoyWasInDeadzone == false) // Only do this if the Binding wasn't zero last time
-						{
-							Binding.FuncWithArg.Invoke(0);
-							Binding.JoyWasInDeadzone = true;
-						}
+						Binding.FuncWithArg.Invoke(0);
+						Binding.JoyWasInDeadzone = true;
 					}
 				}
 			}
@@ -596,21 +593,18 @@ public class Bindings : Node
 
 		foreach(BindingObject Binding in BindingsWithoutArg)
 		{
-			if ((Binding.UIBind) || (!UIManager.UIOpen() && !Binding.UIBind))
+			if(Binding.Type == TYPE.SCANCODE || Binding.Type == TYPE.MOUSEBUTTON || Binding.Type == TYPE.CONTROLLERBUTTON)
 			{
-				if(Binding.Type == TYPE.SCANCODE || Binding.Type == TYPE.MOUSEBUTTON || Binding.Type == TYPE.CONTROLLERBUTTON)
+				if(Input.IsActionJustPressed(Binding.Name))
 				{
-					if(Input.IsActionJustPressed(Binding.Name))
-					{
-						Binding.FuncWithoutArg.Invoke();
-					}
+					Binding.FuncWithoutArg.Invoke();
 				}
-				else if(Binding.Type == TYPE.MOUSEWHEEL)
+			}
+			else if(Binding.Type == TYPE.MOUSEWHEEL)
+			{
+				if(Input.IsActionJustReleased(Binding.Name))
 				{
-					if(Input.IsActionJustReleased(Binding.Name))
-					{
-						Binding.FuncWithoutArg.Invoke();
-					}
+					Binding.FuncWithoutArg.Invoke();
 				}
 			}
 		}
@@ -624,38 +618,32 @@ public class Bindings : Node
 			{
 				foreach(BindingObject Binding in BindingsWithArg)
 				{
-					if ((Binding.UIBind) || (!UIManager.UIOpen() && !Binding.UIBind))
+					if(Binding.Type == TYPE.MOUSEAXIS)
 					{
-						if(Binding.Type == TYPE.MOUSEAXIS)
+						switch(Binding.AxisDirection)
 						{
-							switch(Binding.AxisDirection)
-							{
-								case(DIRECTION.UP):
-									Binding.FuncWithArg.Invoke(GreaterEqualZero(-MotionEvent.Relative.y)/Settings.Sensitivity);
-									break;
-								case(DIRECTION.DOWN):
-									Binding.FuncWithArg.Invoke(GreaterEqualZero(MotionEvent.Relative.y)/Settings.Sensitivity);
-									break;
-								case(DIRECTION.RIGHT):
-									Binding.FuncWithArg.Invoke(GreaterEqualZero(MotionEvent.Relative.x)/Settings.Sensitivity);
-									break;
-								case(DIRECTION.LEFT):
-									Binding.FuncWithArg.Invoke(GreaterEqualZero(-MotionEvent.Relative.x)/Settings.Sensitivity);
-									break;
-							}
+							case(DIRECTION.UP):
+								Binding.FuncWithArg.Invoke(GreaterEqualZero(-MotionEvent.Relative.y)/Settings.Sensitivity);
+								break;
+							case(DIRECTION.DOWN):
+								Binding.FuncWithArg.Invoke(GreaterEqualZero(MotionEvent.Relative.y)/Settings.Sensitivity);
+								break;
+							case(DIRECTION.RIGHT):
+								Binding.FuncWithArg.Invoke(GreaterEqualZero(MotionEvent.Relative.x)/Settings.Sensitivity);
+								break;
+							case(DIRECTION.LEFT):
+								Binding.FuncWithArg.Invoke(GreaterEqualZero(-MotionEvent.Relative.x)/Settings.Sensitivity);
+								break;
 						}
 					}
 				}
 
 				foreach(BindingObject Binding in BindingsWithoutArg)
 				{
-					if ((Binding.UIBind) || (!UIManager.UIOpen() && !Binding.UIBind))
+					if(Binding.Type == TYPE.MOUSEAXIS)
 					{
-						if(Binding.Type == TYPE.MOUSEAXIS)
-						{
-							//Don't need to switch on the direction as it doesn't want an argument anyway
-							Binding.FuncWithoutArg.Invoke();
-						}
+						//Don't need to switch on the direction as it doesn't want an argument anyway
+						Binding.FuncWithoutArg.Invoke();
 					}
 				}
 			}

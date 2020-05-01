@@ -31,14 +31,10 @@ public class MainMenu : Control, IUIItem
         this.Hide();
     }
 
-    [InputWithoutArg(typeof(MainMenu), nameof(ToggleMenu))]
-    public static void ToggleMenu()
+    [InputWithoutArg(typeof(MainMenu), nameof(MainMenuToggle))]
+    public static void MainMenuToggle()
     {
-        IsOpen = !IsOpen;
-        if (IsOpen)
-        {
-            UIManager.Open(UIManager.MainMenu);
-        }
+        UIManager.Open(UIManager.MainMenu);
     }
 
     private void Options_Click()

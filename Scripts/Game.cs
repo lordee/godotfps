@@ -47,22 +47,22 @@ public class Game : Node
     private void LoadDefaultConfig()
     {
         // kb move
-        Bindings.Bind("W", nameof(PlayerController.MoveForward), false);
-        Bindings.Bind("A", nameof(PlayerController.MoveLeft), false);
-        Bindings.Bind("S", nameof(PlayerController.MoveBack), false);
-        Bindings.Bind("D", nameof(PlayerController.MoveRight), false);
-        Bindings.Bind("Space", nameof(PlayerController.Jump), false);
+        Bindings.Bind("W", nameof(PlayerController.MoveForward));
+        Bindings.Bind("A", nameof(PlayerController.MoveLeft));
+        Bindings.Bind("S", nameof(PlayerController.MoveBack));
+        Bindings.Bind("D", nameof(PlayerController.MoveRight));
+        Bindings.Bind("Space", nameof(PlayerController.Jump));
 
         // mouse
-        Bindings.Bind("MouseOne", nameof(PlayerController.Attack), false);
-        Bindings.Bind("MouseUp",  nameof(PlayerController.LookUp), false);
-        Bindings.Bind("MouseDown", nameof(PlayerController.LookDown), false);
-        Bindings.Bind("MouseRight",nameof(PlayerController.LookRight), false);
-        Bindings.Bind("MouseLeft", nameof(PlayerController.LookLeft), false);
+        Bindings.Bind("MouseOne", nameof(PlayerController.Attack));
+        Bindings.Bind("MouseUp",  nameof(PlayerController.LookUp));
+        Bindings.Bind("MouseDown", nameof(PlayerController.LookDown));
+        Bindings.Bind("MouseRight",nameof(PlayerController.LookRight));
+        Bindings.Bind("MouseLeft", nameof(PlayerController.LookLeft));
 
         // other
-        Bindings.Bind("M", nameof(PlayerController.MouseModeToggle), false);
-        Bindings.Bind("Escape", nameof(MainMenu.ToggleMenu), false);
-        Bindings.Bind("`", nameof(Console.ConsoleToggle), true);
+        Bindings.Bind("M", nameof(PlayerController.MouseModeToggle));
+        Bindings.Bind("Escape", nameof(MainMenu.MainMenuToggle));
+        Bindings.Bind("`", nameof(Console.ConsoleToggle));
     }
 }
