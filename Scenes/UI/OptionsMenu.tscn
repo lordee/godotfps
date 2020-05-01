@@ -37,38 +37,14 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="HBoxContainer" type="HBoxContainer" parent="TabContainer/Controls/ControlsContainer"]
-margin_right = 113.0
-margin_bottom = 24.0
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="Label" type="Label" parent="TabContainer/Controls/ControlsContainer/HBoxContainer"]
-margin_top = 5.0
-margin_right = 85.0
-margin_bottom = 19.0
-text = "Invert Mouse"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="CheckBox" type="CheckBox" parent="TabContainer/Controls/ControlsContainer/HBoxContainer"]
-margin_left = 89.0
-margin_right = 113.0
-margin_bottom = 24.0
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
 [node name="Other tab" type="Panel" parent="TabContainer"]
 visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_left = 4.0
 margin_top = 32.0
-margin_right = -983.0
-margin_bottom = -530.0
+margin_right = -4.0
+margin_bottom = -4.0
 
 [node name="GridContainer2" type="GridContainer" parent="TabContainer/Other tab"]
 visible = false

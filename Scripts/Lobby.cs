@@ -1,7 +1,7 @@
 using Godot;
 using System;
 
-public class Lobby : Control
+public class Lobby : Control, IUIItem
 {
     int DEFAULT_PORT = 8910; // some random number, pick your port properly
 
@@ -17,7 +17,7 @@ public class Lobby : Control
         _joinBtn.Connect("pressed", this, "_On_Join_Pressed");
         _address = GetNode("panel/address") as LineEdit;
         _game = GetTree().Root.GetNode("Game") as Game;
-        UIManager.Open(nameof(Lobby));
+        UIManager.Open(this);
     }
 
     private void _Set_Status(string text, bool isok)
@@ -40,19 +40,43 @@ public class Lobby : Control
     private void _On_Host_Pressed()
     {
         _game.Network.Host(DEFAULT_PORT);
-        Close();
+        UIManager.Close();
     }
 
     private void _On_Join_Pressed()
     {   
         _game.Network.ConnectTo(_address.Text, DEFAULT_PORT);
         
-        Close();
+        UIManager.Close();
     }
 
-    private void Close()
+    public void Open()
+    {
+        this.Show();
+    }
+
+    public void Close()
     {
         this.Hide();
-        UIManager.Close(nameof(Lobby));
+    }
+
+    public void UI_Up()
+    {
+
+    }
+
+    public void UI_Down()
+    {
+
+    }
+
+    public void UI_Cancel()
+    {
+        UIManager.Open(UIManager.MainMenu);
+    }
+
+    public void UI_Accept()
+    {
+        
     }
 }

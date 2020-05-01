@@ -1,7 +1,7 @@
 using Godot;
 using System;
 
-public class OptionsMenu : Control
+public class OptionsMenu : Control, IUIItem
 {
 
     Container _controlsContainer;
@@ -9,10 +9,12 @@ public class OptionsMenu : Control
     {
         _controlsContainer = GetNode("TabContainer/Controls/ControlsContainer") as Container;
 
-        _controlsContainer.AddChild(AddControl("test", nameof(TestMethod)));
+        HBoxContainer invertMouse = AddControl("Invert Mouse", nameof(InvertMouseToggle), (Settings.InvertedMouse == -1) ? true : false);
+        _controlsContainer.AddChild(invertMouse);
+
     }
 
-    private HBoxContainer AddControl(string lblText, string func)
+    private HBoxContainer AddControl(string lblText, string func, bool val)
     {
         HBoxContainer hbox = new HBoxContainer();
         hbox.MarginLeft = 2;
@@ -24,12 +26,44 @@ public class OptionsMenu : Control
         CheckBox cb = new CheckBox();
         cb.Connect("toggled", this, func);
         hbox.AddChild(cb);
+        cb.Pressed = val;
 
         return hbox;
     }
 
-    private void TestMethod(bool test)
+    // FIXME - should not need this method
+    private void InvertMouseToggle(bool val)
     {
-        GD.Print("clicked " + test);
+        Settings.InvertMouse(val);
+    }
+
+    public void Open()
+    {
+        this.Show();
+    }
+
+    public void Close()
+    {
+        this.Hide();
+    }
+
+    public void UI_Up()
+    {
+
+    }
+
+    public void UI_Down()
+    {
+
+    }
+
+    public void UI_Cancel()
+    {
+        UIManager.Close();
+    }
+
+    public void UI_Accept()
+    {
+        
     }
 }

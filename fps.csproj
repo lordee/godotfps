@@ -62,6 +62,7 @@
     <Compile Include="Scripts\UI\MainMenu.cs" />
     <Compile Include="Scripts\UI\OptionsMenu.cs" />
     <Compile Include="Scripts\UI\UIManager.cs" />
+    <Compile Include="Scripts\UI\IUIItem.cs" />
     <Compile Include="Scripts\Weapons\Rocket.cs" />
     <Compile Include="Scripts\Weapons\RocketExplosion.cs" />
     <Compile Include="Scripts\World.cs" />

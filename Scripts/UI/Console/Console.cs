@@ -2,7 +2,7 @@ using Godot;
 using System;
 using System.Collections.Generic;
 
-public class Console : Panel
+public class Console : Panel, IUIItem
 {
 	public static bool IsOpen = false;
 
@@ -77,8 +77,6 @@ public class Console : Panel
 		InputLine.GrabFocus();
 
 		HistoryLocation = History.Count;
-
-		UIManager.Open(nameof(Console));
 	}
 
 	public void Close()
@@ -88,8 +86,6 @@ public class Console : Panel
 		InputLine.Editable = false;
 		InputLine.Text = "";
 		HistoryLocation = History.Count;
-
-		UIManager.Close(nameof(Console));
 	}
 
 	public static void Print(object ToPrint)
@@ -115,10 +111,15 @@ public class Console : Panel
 		Log($"ERROR: {ToThrow}");
 	}
 
-	public void ExecuteInput()
+	public void UI_Accept()
 	{
 		this.Execute(InputLine.Text);
 		InputLine.Text = "";
+	}
+
+	public void UI_Cancel()
+	{
+		UIManager.Close();
 	}
 
 	public void Execute(string Command)
@@ -141,13 +142,7 @@ public class Console : Panel
 		IsOpen = !IsOpen;
 		if (IsOpen)
 		{
-			UIManager.Console.Open();
-			UIManager.Open(nameof(Console));
-		}
-		else
-		{
-			UIManager.Console.Close();
-			UIManager.Close(nameof(Console));
+			UIManager.Open(UIManager.Console);
 		}
 	}
 }

@@ -28,10 +28,6 @@ public class PlayerController : Camera
         }
     }
 
-    // settings
-    private float mouseSensitivity = 0.2f;
-    private Input.MouseMode _currentMouseMode = Input.MouseMode.Visible;
-
     public override void _Ready()
     {
         _game = GetTree().Root.GetNode("Game") as Game;
@@ -128,7 +124,7 @@ public class PlayerController : Camera
 	{
         if (val > 0)
         {
-            float change = val * Settings.Sensitivity * Settings.Inverted;
+            float change = val * Settings.Sensitivity * Settings.InvertedMouse;
             if (Game.Client._cameraAngle + change < 90f && Game.Client._cameraAngle + change > -90f)
             {
                 Game.Client._cameraAngle += change;
@@ -143,7 +139,7 @@ public class PlayerController : Camera
 	{
         if (val > 0)
         {
-            float change = -val * Settings.Sensitivity * Settings.Inverted;
+            float change = -val * Settings.Sensitivity * Settings.InvertedMouse;
             if (Game.Client._cameraAngle + change < 90f && Game.Client._cameraAngle + change > -90f)
             {
                 Game.Client._cameraAngle += change;

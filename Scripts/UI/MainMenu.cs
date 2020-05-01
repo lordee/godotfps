@@ -1,7 +1,7 @@
 using Godot;
 using System;
 
-public class MainMenu : Control
+public class MainMenu : Control, IUIItem
 {
     Button _options;
     Button _quit;
@@ -24,13 +24,11 @@ public class MainMenu : Control
     public void Open()
     {
         this.Show();
-        UIManager.Open(nameof(MainMenu));
     }
 
     public void Close()
     {
         this.Hide();
-        UIManager.Close(nameof(MainMenu));
     }
 
     [InputWithoutArg(typeof(MainMenu), nameof(ToggleMenu))]
@@ -39,24 +37,37 @@ public class MainMenu : Control
         IsOpen = !IsOpen;
         if (IsOpen)
         {
-            UIManager.MainMenu.Show();
-            UIManager.Open(nameof(MainMenu));
-        }
-        else
-        {
-            UIManager.MainMenu.Hide();
-            UIManager.Close(nameof(MainMenu));
+            UIManager.Open(UIManager.MainMenu);
         }
     }
 
     private void Options_Click()
     {
-        UIManager.Open(nameof(OptionsMenu));
-        UIManager.OptionsMenu.Show();
+        UIManager.Open(UIManager.OptionsMenu);
     }
 
     private void Quit_Click()
     {
         _game.Quit();
+    }
+
+    public void UI_Up()
+    {
+
+    }
+
+    public void UI_Down()
+    {
+
+    }
+
+    public void UI_Cancel()
+    {
+        UIManager.Close();
+    }
+
+    public void UI_Accept()
+    {
+        
     }
 }

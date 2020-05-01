@@ -62,7 +62,7 @@ public class Game : Node
 
         // other
         Bindings.Bind("M", nameof(PlayerController.MouseModeToggle), false);
-        Bindings.Bind("Escape", nameof(MainMenu.ToggleMenu), true);
+        Bindings.Bind("Escape", nameof(MainMenu.ToggleMenu), false);
         Bindings.Bind("`", nameof(Console.ConsoleToggle), true);
     }
 }

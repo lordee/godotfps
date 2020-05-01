@@ -487,36 +487,28 @@ public class Bindings : Node
 		// UI handling where action only exists for UI interaction
 		if(UIManager.UIOpen())
 		{
-			// if console open
-			if (UIManager.Items.Where(e => e.Type == nameof(Console) && e.Open == true).FirstOrDefault() != null)
+			if (Input.IsActionJustPressed("ui_accept"))
 			{
-				bool handled = false;
-				if (Input.IsActionJustPressed("console_execute"))
-				{
-					UIManager.Console.ExecuteInput();
-					handled = true;
-				}
-				else if (Input.IsActionJustPressed("ui_up"))
-				{
-					UIManager.Console.UI_Up();
-					handled = true;
-				}
-				else if (Input.IsActionJustPressed("ui_down"))
-				{
-					UIManager.Console.UI_Down();
-					handled = true;
-				}
-				else if (Input.IsActionJustPressed("ui_cancel"))
-				{
-					UIManager.Console.Close();
-					handled = true;
-				}
-
-				if (handled)
-				{
-					return;
-				}
+				UIManager.UI_Accept();
 			}
+			else if (Input.IsActionJustPressed("ui_up"))
+			{
+				UIManager.UI_Up();
+			}
+			else if (Input.IsActionJustPressed("ui_down"))
+			{
+				UIManager.UI_Down();
+			}
+			else if (Input.IsActionJustPressed("ui_cancel"))
+			{
+				UIManager.UI_Cancel();
+			}
+			else if (Input.IsActionJustPressed("ui_toggleconsole"))
+			{
+				UIManager.UI_ConsoleToggle();
+			}
+
+			return;
 		}
 
 		foreach(BindingObject Binding in BindingsWithArg)
