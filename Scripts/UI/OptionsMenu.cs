@@ -9,12 +9,12 @@ public class OptionsMenu : Control, IUIItem
     {
         _controlsContainer = GetNode("TabContainer/Controls/ControlsContainer") as Container;
 
-        HBoxContainer invertMouse = AddControl("Invert Mouse", nameof(InvertMouseToggle), (Settings.InvertedMouse == -1) ? true : false);
+        HBoxContainer invertMouse = AddCheckBox("Invert Mouse", nameof(InvertMouseToggle), (Settings.InvertedMouse == -1) ? true : false);
         _controlsContainer.AddChild(invertMouse);
 
     }
 
-    private HBoxContainer AddControl(string lblText, string func, bool val)
+    private HBoxContainer AddCheckBox(string lblText, string func, bool val)
     {
         HBoxContainer hbox = new HBoxContainer();
         hbox.MarginLeft = 2;
@@ -31,7 +31,6 @@ public class OptionsMenu : Control, IUIItem
         return hbox;
     }
 
-    // FIXME - should not need this method
     private void InvertMouseToggle(bool val)
     {
         Settings.InvertMouse(val);
