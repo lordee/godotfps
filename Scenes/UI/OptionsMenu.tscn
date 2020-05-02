@@ -29,10 +29,51 @@ margin_bottom = -4.0
 [node name="ControlsContainer" type="GridContainer" parent="TabContainer/Controls"]
 anchor_right = 1.0
 anchor_bottom = 1.0
-margin_left = 2.0
+margin_left = 5.0
 margin_top = 2.0
-margin_right = -8.0
+margin_right = -5.0
 margin_bottom = -36.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="SensitivityContainer" type="HBoxContainer" parent="TabContainer/Controls/ControlsContainer"]
+margin_right = 128.0
+margin_bottom = 24.0
+
+[node name="Label" type="Label" parent="TabContainer/Controls/ControlsContainer/SensitivityContainer"]
+margin_top = 5.0
+margin_right = 66.0
+margin_bottom = 19.0
+text = "Sensitivity"
+
+[node name="SensitivityValue" type="LineEdit" parent="TabContainer/Controls/ControlsContainer/SensitivityContainer"]
+margin_left = 70.0
+margin_right = 128.0
+margin_bottom = 24.0
+
+[node name="InvertMouseContainer" type="HBoxContainer" parent="TabContainer/Controls/ControlsContainer"]
+margin_top = 28.0
+margin_right = 128.0
+margin_bottom = 52.0
+
+[node name="Label" type="Label" parent="TabContainer/Controls/ControlsContainer/InvertMouseContainer"]
+margin_top = 5.0
+margin_right = 85.0
+margin_bottom = 19.0
+text = "Invert Mouse"
+
+[node name="InvertMouseCheckBox" type="CheckBox" parent="TabContainer/Controls/ControlsContainer/InvertMouseContainer"]
+margin_left = 89.0
+margin_right = 113.0
+margin_bottom = 24.0
+
+[node name="Save" type="Button" parent="TabContainer/Controls"]
+margin_left = 848.0
+margin_top = 541.0
+margin_right = 889.0
+margin_bottom = 561.0
+text = "Save"
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -52,3 +93,4 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 margin_right = -8.0
 margin_bottom = -36.0
+[connection signal="pressed" from="TabContainer/Controls/Save" to="." method="_on_Save_pressed"]

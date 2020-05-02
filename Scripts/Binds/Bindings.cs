@@ -44,15 +44,29 @@ public class Bindings : Node
 	private static List<BindingObject> BindingsWithoutArg = new List<BindingObject>();
 
 	private static Bindings Self;
+	private static Game _game;
 	private Bindings()
 	{
 		Self = this;
 	}
 
+	public override void _Ready()
+    {
+		_game = GetTree().Root.GetNode("Game") as Game;
+	}
 
-	public static bool Bind(string KeyName, string FunctionName)
+
+	public static bool Bind(string actionName, string KeyName)
 	{
-		BindingObject NewBind = new BindingObject(KeyName);
+		string FunctionName;
+		actionName = actionName.ToLower();
+		KeyName = KeyName.ToLower();
+		
+		var kvp = _game.Commands.List.Where(e => e.Key.ToLower() == actionName).FirstOrDefault();
+		CommandInfo ci = kvp.Value;
+		FunctionName = ci.FunctionName;
+		
+		BindingObject NewBind = new BindingObject(actionName, KeyName);
 
 		bool Found = false;
 
@@ -122,206 +136,202 @@ public class Bindings : Node
 		uint Scancode = 0;
 		switch(KeyName) //Checks custom string literals first then assumes Scancode
 		{
-			/*case "QuoteLeft": {
-				NewBind.Type = 
-
-			}*/
-			case("MouseOne"): {
+			case("mouseone"): {
 				NewBind.Type = TYPE.MOUSEBUTTON;
 				ButtonValue = ButtonList.Left;
 				break;
 			}
-			case("MouseTwo"): {
+			case("mousetwo"): {
 				NewBind.Type = TYPE.MOUSEBUTTON;
 				ButtonValue = ButtonList.Right;
 				break;
 			}
-			case("MouseThree"): {
+			case("mousethree"): {
 				NewBind.Type = TYPE.MOUSEBUTTON;
 				ButtonValue = ButtonList.Middle;
 				break;
 			}
 
-			case("WheelUp"): {
+			case("wheelup"): {
 				NewBind.Type = TYPE.MOUSEWHEEL;
 				ButtonValue = ButtonList.WheelUp;
 				break;
 			}
 
-			case("WheelDown"): {
+			case("wheeldown"): {
 				NewBind.Type = TYPE.MOUSEWHEEL;
 				ButtonValue = ButtonList.WheelDown;
 				break;
 			}
 
-			case("MouseUp"): {
+			case("mouseup"): {
 				NewBind.Type = TYPE.MOUSEAXIS;
 				AxisDirection = DIRECTION.UP;
 				break;
 			}
 
-			case("MouseDown"): {
+			case("mousedown"): {
 				NewBind.Type = TYPE.MOUSEAXIS;
 				AxisDirection = DIRECTION.DOWN;
 				break;
 			}
 
-			case("MouseRight"): {
+			case("mouseright"): {
 				NewBind.Type = TYPE.MOUSEAXIS;
 				AxisDirection = DIRECTION.RIGHT;
 				break;
 			}
 
-			case("MouseLeft"): {
+			case("mouseleft"): {
 				NewBind.Type = TYPE.MOUSEAXIS;
 				AxisDirection = DIRECTION.LEFT;
 				break;
 			}
 
-			case("LeftStickUp"): {
+			case("leftstickup"): {
 				NewBind.Type = TYPE.CONTROLLERAXIS;
 				AxisDirection = DIRECTION.UP;
 				ControllerButtonValue = JoystickList.AnalogLy;
 				break;
 			}
 
-			case("LeftStickDown"): {
+			case("leftstickdown"): {
 				NewBind.Type = TYPE.CONTROLLERAXIS;
 				AxisDirection = DIRECTION.DOWN;
 				ControllerButtonValue = JoystickList.AnalogLy;
 				break;
 			}
 
-			case("LeftStickLeft"): {
+			case("leftstickleft"): {
 				NewBind.Type = TYPE.CONTROLLERAXIS;
 				AxisDirection = DIRECTION.LEFT;
 				ControllerButtonValue = JoystickList.AnalogLx;
 				break;
 			}
 
-			case("LeftStickRight"): {
+			case("leftstickright"): {
 				NewBind.Type = TYPE.CONTROLLERAXIS;
 				AxisDirection = DIRECTION.RIGHT;
 				ControllerButtonValue = JoystickList.AnalogLx;
 				break;
 			}
 
-			case("RightStickUp"): {
+			case("rightstickup"): {
 				NewBind.Type = TYPE.CONTROLLERAXIS;
 				AxisDirection = DIRECTION.UP;
 				ControllerButtonValue = JoystickList.AnalogRy;
 				break;
 			}
-			case("RightStickDown"): {
+			case("rightstickdown"): {
 				NewBind.Type = TYPE.CONTROLLERAXIS;
 				AxisDirection = DIRECTION.DOWN;
 				ControllerButtonValue = JoystickList.AnalogRy;
 				break;
 			}
-			case("RightStickLeft"): {
+			case("rightstickleft"): {
 				NewBind.Type = TYPE.CONTROLLERAXIS;
 				AxisDirection = DIRECTION.LEFT;
 				ControllerButtonValue = JoystickList.AnalogRx;
 				break;
 			}
-			case("RightStickRight"): {
+			case("rightstickright"): {
 				NewBind.Type = TYPE.CONTROLLERAXIS;
 				AxisDirection = DIRECTION.RIGHT;
 				ControllerButtonValue = JoystickList.AnalogRx;
 				break;
 			}
 
-			case("XboxA"): {
+			case("xboxa"): {
 				NewBind.Type = TYPE.CONTROLLERBUTTON;
 				ControllerButtonValue = JoystickList.XboxA;
 				break;
 			}
 
-			case("XboxB"): {
+			case("xboxb"): {
 				NewBind.Type = TYPE.CONTROLLERBUTTON;
 				ControllerButtonValue = JoystickList.XboxB;
 				break;
 			}
 
-			case("XboxX"): {
+			case("xboxx"): {
 				NewBind.Type = TYPE.CONTROLLERBUTTON;
 				ControllerButtonValue = JoystickList.XboxX;
 				break;
 			}
 
-			case("XboxY"): {
+			case("xboxy"): {
 				NewBind.Type = TYPE.CONTROLLERBUTTON;
 				ControllerButtonValue = JoystickList.XboxY;
 				break;
 			}
 
-			case("XboxLB"): {
+			case("xboxlb"): {
 				NewBind.Type = TYPE.CONTROLLERBUTTON;
 				ControllerButtonValue = JoystickList.L;
 				break;
 			}
 
-			case("XboxRB"): {
+			case("xboxrb"): {
 				NewBind.Type = TYPE.CONTROLLERBUTTON;
 				ControllerButtonValue = JoystickList.R;
 				break;
 			}
 
-			case("XboxLT"): {
+			case("xboxlt"): {
 				NewBind.Type = TYPE.CONTROLLERBUTTON;
 				ControllerButtonValue = JoystickList.L2;
 				break;
 			}
 
-			case("XboxRT"): {
+			case("xboxrt"): {
 				NewBind.Type = TYPE.CONTROLLERBUTTON;
 				ControllerButtonValue = JoystickList.R2;
 				break;
 			}
 
-			case("RightStickClick"): {
+			case("rightstickclick"): {
 				NewBind.Type = TYPE.CONTROLLERBUTTON;
 				ControllerButtonValue = JoystickList.R3;
 				break;
 			}
 
-			case("LeftStickClick"): {
+			case("leftstickclick"): {
 				NewBind.Type = TYPE.CONTROLLERBUTTON;
 				ControllerButtonValue = JoystickList.L3;
 				break;
 			}
 
-			case("DPadUp"): {
+			case("dpadup"): {
 				NewBind.Type = TYPE.CONTROLLERBUTTON;
 				ControllerButtonValue = JoystickList.DpadUp;
 				break;
 			}
 
-			case("DPadDown"): {
+			case("dpaddown"): {
 				NewBind.Type = TYPE.CONTROLLERBUTTON;
 				ControllerButtonValue = JoystickList.DpadDown;
 				break;
 			}
 
-			case("DPadLeft"): {
+			case("dpadleft"): {
 				NewBind.Type = TYPE.CONTROLLERBUTTON;
 				ControllerButtonValue = JoystickList.DpadLeft;
 				break;
 			}
 
-			case("DPadRight"): {
+			case("dpadright"): {
 				NewBind.Type = TYPE.CONTROLLERBUTTON;
 				ControllerButtonValue = JoystickList.DpadRight;
 				break;
 			}
 
-			case("XboxStart"): {
+			case("xboxstart"): {
 				NewBind.Type = TYPE.CONTROLLERBUTTON;
 				ControllerButtonValue = JoystickList.Start;
 				break;
 			}
 
-			case("XboxSelect"): {
+			case("xboxselect"): {
 				// Or Select. Or Share. Or The big thing in the middle of ps4 remotes. Or -.
 				NewBind.Type = TYPE.CONTROLLERBUTTON;
 				ControllerButtonValue = JoystickList.Select;
@@ -357,12 +367,16 @@ public class Bindings : Node
 		UnBind(KeyName);
 
 		//Then add new bind
-		InputMap.AddAction(KeyName);
+		if (!InputMap.HasAction(actionName))
+		{
+			InputMap.AddAction(actionName);
+		}
+		
 		switch(NewBind.Type)
 		{
 			case(TYPE.SCANCODE): {
 				InputEventKey Event = new InputEventKey {Scancode = Scancode};
-				InputMap.ActionAddEvent(KeyName, Event);
+				InputMap.ActionAddEvent(actionName, Event);
 				break;
 			}
 
@@ -371,13 +385,13 @@ public class Bindings : Node
 				InputEventMouseButton Event = new InputEventMouseButton {
 					ButtonIndex = (int)ButtonValue
 				};
-				InputMap.ActionAddEvent(KeyName, Event);
+				InputMap.ActionAddEvent(actionName, Event);
 				break;
 			}
 
 			case(TYPE.MOUSEAXIS): {
 				InputEventMouseMotion Event = new InputEventMouseMotion();
-				InputMap.ActionAddEvent(KeyName, Event);
+				InputMap.ActionAddEvent(actionName, Event);
 				NewBind.AxisDirection = (DIRECTION)AxisDirection; //Has to cast as it is Nullable
 				break;
 			}
@@ -409,7 +423,7 @@ public class Bindings : Node
 					}
 				}
 
-				InputMap.ActionAddEvent(KeyName, Event);
+				InputMap.ActionAddEvent(actionName, Event);
 				NewBind.AxisDirection = (DIRECTION)AxisDirection; //Has to cast as it is Nullable
 				break;
 			}
@@ -418,7 +432,7 @@ public class Bindings : Node
 				InputEventJoypadButton Event = new InputEventJoypadButton {
 					ButtonIndex = (int) ControllerButtonValue
 				};
-				InputMap.ActionAddEvent(KeyName, Event);
+				InputMap.ActionAddEvent(actionName, Event);
 				break;
 			}
 		}
@@ -438,35 +452,52 @@ public class Bindings : Node
 
 	public static void UnBind(string KeyName)
 	{
-		if(InputMap.HasAction(KeyName))
+		KeyName = KeyName.ToLower();
+		Godot.Collections.Array actions = InputMap.GetActions();
+
+		foreach (string a in actions)
 		{
-			InputMap.EraseAction(KeyName);
-
-			List<BindingObject> Removing = new List<BindingObject>();
-			foreach(BindingObject Bind in BindingsWithArg)
+			if (!a.Contains("ui_"))
 			{
-				if(Bind.Name == KeyName)
+				Godot.Collections.Array actionList = InputMap.GetActionList(a);
+				foreach(InputEvent ie in actionList)
 				{
-					Removing.Add(Bind);
-				}
-			}
-			foreach(BindingObject Bind in Removing)
-			{
-				BindingsWithArg.Remove(Bind);
-			}
+					if (ie is InputEventKey iek)
+					{
+						string key = OS.GetScancodeString(iek.Scancode);
+						if (key.ToLower() == KeyName)
+						{
+							InputMap.ActionEraseEvent(a, iek);
 
-			Removing.Clear();
+							List<BindingObject> Removing = new List<BindingObject>();
+							foreach(BindingObject Bind in BindingsWithArg)
+							{
+								if(Bind.Name == a)
+								{
+									Removing.Add(Bind);
+								}
+							}
+							foreach(BindingObject Bind in Removing)
+							{
+								BindingsWithArg.Remove(Bind);
+							}
 
-			foreach(BindingObject Bind in BindingsWithoutArg)
-			{
-				if(Bind.Name == KeyName)
-				{
-					Removing.Add(Bind);
+							Removing.Clear();
+
+							foreach(BindingObject Bind in BindingsWithoutArg)
+							{
+								if(Bind.Name == KeyName)
+								{
+									Removing.Add(Bind);
+								}
+							}
+							foreach(BindingObject Bind in Removing)
+							{
+								BindingsWithoutArg.Remove(Bind);
+							}
+						}
+					}
 				}
-			}
-			foreach(BindingObject Bind in Removing)
-			{
-				BindingsWithoutArg.Remove(Bind);
 			}
 		}
 	}

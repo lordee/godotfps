@@ -1,6 +1,19 @@
 using Godot;
 using System.Collections.Generic;
+using System.Text;
+using System.Linq;
 
+// FIXME - overload with action type
+public delegate void CommandFunction(List<string> Args);
+public delegate void CommandFunction2(float val);
+
+public struct CommandInfo
+{
+	public string[] HelpMessages;
+	public CommandFunction Function;
+	public CommandFunction2 Function2;
+	public string FunctionName;
+}
 
 public class Commands
 {
@@ -20,6 +33,7 @@ public class Commands
                         "'help <command>' Displays the help message for an individual command",
                     },
                     Function = (Args) => this.Help(Args)
+					, FunctionName = nameof(this.Help)
                 }
             },
 
@@ -30,6 +44,17 @@ public class Commands
                         "'quit' Immediately closes the game",
                     },
                     Function = (Args) => this.Quit(Args)
+					, FunctionName = nameof(this.Quit)
+                }
+            },
+			{
+                "bind",
+                new CommandInfo {
+                    HelpMessages = new string[] {
+                        "'bind' Attach commands to keys 'bind w move_forward'",
+                    },
+                    Function = (Args) => this.Bind(Args)
+					, FunctionName = nameof(this.Bind)
                 }
             },
 
@@ -41,32 +66,154 @@ public class Commands
                         "'fps_max <fps>' Sets the max fps",
                     },
                     Function = (Args) => Commands.FpsMax(Args)
+					, FunctionName = nameof(Commands.FpsMax)
                 }
             },
+			{
+				"move_forward",
+				new CommandInfo {
+					HelpMessages = new string[] {
+						"'move_forward' Moves player forward"
+					},
+					Function2 = (Args) => PlayerController.MoveForward(Args)
+					, FunctionName = nameof(PlayerController.MoveForward)
+				}
+			},
+			{
+				"move_backward",
+				new CommandInfo {
+					HelpMessages = new string[] {
+						"'move_backward' Moves player backward"
+					},
+					Function2 = (Args) => PlayerController.MoveBack(Args)
+					, FunctionName = nameof(PlayerController.MoveBack)
+				}
+			},
+			{
+				"move_left",
+				new CommandInfo {
+					HelpMessages = new string[] {
+						"'move_left' Moves player left"
+					},
+					Function2 = (Args) => PlayerController.MoveLeft(Args)
+					, FunctionName = nameof(PlayerController.MoveLeft)
+				}
+			},
+			{
+				"move_right",
+				new CommandInfo {
+					HelpMessages = new string[] {
+						"'move_right' Moves player right"
+					},
+					Function2 = (Args) => PlayerController.MoveRight(Args)
+					, FunctionName = nameof(PlayerController.MoveRight)
+				}
+			},
+			{
+				"jump",
+				new CommandInfo {
+					HelpMessages = new string[] {
+						"'jump' Moves player upward"
+					},
+					Function2 = (Args) => PlayerController.Jump(Args)
+					, FunctionName = nameof(PlayerController.Jump)
+				}
+			},
+			{
+				"attack",
+				new CommandInfo {
+					HelpMessages = new string[] {
+						"'attack' Makes player attack"
+					},
+					Function2 = (Args) => PlayerController.Attack(Args)
+					, FunctionName = nameof(PlayerController.Attack)
+				}
+			},
+			{
+				"look_up",
+				new CommandInfo {
+					HelpMessages = new string[] {
+						"'look_up' Makes player look up"
+					},
+					Function2 = (Args) => PlayerController.LookUp(Args)
+					, FunctionName = nameof(PlayerController.LookUp)
+				}
+			},
+			{
+				"look_down",
+				new CommandInfo {
+					HelpMessages = new string[] {
+						"'look_down' Makes player look down"
+					},
+					Function2 = (Args) => PlayerController.LookDown(Args)
+					, FunctionName = nameof(PlayerController.LookDown)
+				}
+			},
+			{
+				"look_right",
+				new CommandInfo {
+					HelpMessages = new string[] {
+						"'look_right' Makes player look right"
+					},
+					Function2 = (Args) => PlayerController.LookRight(Args)
+					, FunctionName = nameof(PlayerController.LookRight)
+				}
+			},
+			{
+				"look_left",
+				new CommandInfo {
+					HelpMessages = new string[] {
+						"'look_left' Makes player look left"
+					},
+					Function2 = (Args) => PlayerController.LookLeft(Args)
+					, FunctionName = nameof(PlayerController.LookLeft)
+				}
+			},
+			{
+				"mousemode_toggle",
+				new CommandInfo {
+					HelpMessages = new string[] {
+						"'mousemode_toggle' Toggles mouse mode"
+					},
+					Function2 = (Args) => PlayerController.MouseModeToggle()
+					, FunctionName = nameof(PlayerController.MouseModeToggle)
+				}
+			},
+			{
+				"mainmenu_toggle",
+				new CommandInfo {
+					HelpMessages = new string[] {
+						"'mainmenu_toggle' Toggles main menu"
+					},
+					Function2 = (Args) => MainMenu.MainMenuToggle()
+					, FunctionName = nameof(MainMenu.MainMenuToggle)
+				}
+			},
+			{
+				"console_toggle",
+				new CommandInfo {
+					HelpMessages = new string[] {
+						"'console_toggle' Toggles console"
+					},
+					Function2 = (Args) => Console.ConsoleToggle()
+					, FunctionName = nameof(Console.ConsoleToggle)
+				}
+			},
 
         };
     }
+	
 
-    public delegate void CommandFunction(string[] Args);
-
-	public struct CommandInfo
-	{
-		public string[] HelpMessages;
-		public CommandFunction Function;
-	}
-
+	
 
 	public void RunCommand(string Line)
 	{
-
-		string[] Split = Line.Split(null);
-		if(Split.Length >= 1)
+		var parsedText = ParseText(Line, ' ', '"');
+		List<string> Args = parsedText.ToList();
+		if(Args.Count >= 1)
 		{
-			string Name = Split[0];
-
-			string[] Args = new string[Split.Length - 1];
-			for(int Index = 1; Index < Split.Length; Index += 1)
-				Args[Index - 1] = Split[Index];
+			string Name = Args[0];
+			Args.RemoveAt(0);
 
 			foreach(KeyValuePair<string, CommandInfo> Command in this.List)
 			{
@@ -80,31 +227,88 @@ public class Commands
 			Console.ThrowPrint($"No command '{Name}', try running 'help' to view  a list of all commands");
 		}
 	}
-    
-	private static bool ArgCountMismatch(string[] Args, int Expected)
+
+	public static IEnumerable<string> ParseText(string line, char delimiter, char textQualifier)
 	{
-		bool Mismatch = Args.Length != Expected;
+		if (line == null)
+			yield break;
+
+		else
+		{
+			char prevChar = '\0';
+			char nextChar = '\0';
+			char currentChar = '\0';
+
+			bool inString = false;
+
+			StringBuilder token = new StringBuilder();
+
+			for (int i = 0; i < line.Length; i++)
+			{
+				currentChar = line[i];
+
+				if (i > 0)
+					prevChar = line[i - 1];
+				else
+					prevChar = '\0';
+
+				if (i + 1 < line.Length)
+					nextChar = line[i + 1];
+				else
+					nextChar = '\0';
+
+				if (currentChar == textQualifier && (prevChar == '\0' || prevChar == delimiter) && !inString)
+				{
+					inString = true;
+					continue;
+				}
+
+				if (currentChar == textQualifier && (nextChar == '\0' || nextChar == delimiter) && inString)
+				{
+					inString = false;
+					continue;
+				}
+
+				if (currentChar == delimiter && !inString)
+				{
+					yield return token.ToString();
+					token = token.Remove(0, token.Length);
+					continue;
+				}
+
+				token = token.Append(currentChar);
+
+			}
+
+			yield return token.ToString();
+		} 
+	}
+	
+    
+	private static bool ArgCountMismatch(List<string> Args, int Expected)
+	{
+		bool Mismatch = Args.Count != Expected;
 
 		if(Mismatch)
 			Console.ThrowPrint(
-				$"Expected {Expected} arguments but received {Args.Length} arguments"
+				$"Expected {Expected} arguments but received {Args.Count} arguments"
 			);
 
 		return Mismatch;
 	}
 
-    public void Quit(string[] Args)
+    public void Quit(List<string> Args)
     {
         _game.Quit();
     }
 
 
-	public void Help(string[] Args)
+	public void Help(List<string> Args)
 	{
-		if(Args.Length == 0)
+		if(Args.Count == 0)
 		{
 			Console.Print("All commands:");
-			foreach(KeyValuePair<string, Commands.CommandInfo> Command in this.List)
+			foreach(KeyValuePair<string, CommandInfo> Command in this.List)
 			{
 				foreach(string Message in Command.Value.HelpMessages)
 					Console.Print($"  {Message}");
@@ -132,9 +336,56 @@ public class Commands
 		}
 	}
 
-	public static void FpsMax(string[] Args)
+	public void Bind(List<string> Args)
 	{
-		if(Args.Length == 0)
+		if (Args.Count == 1)
+		{
+			// return command assigned to key
+			Godot.Collections.Array actions = InputMap.GetActions();
+			if (actions.Count == 0)
+			{
+				Console.ThrowPrint($"'{Args[0]}' is unbound");
+				return;
+			}
+
+			foreach (string a in actions)
+			{
+				if (!a.Contains("ui_"))
+				{
+					Godot.Collections.Array actionList = InputMap.GetActionList(a);
+					foreach(InputEvent ie in actionList)
+					{
+						if (ie is InputEventKey iek)
+						{
+							string key = OS.GetScancodeString(iek.Scancode);
+							if (key.ToLower() == Args[0].ToLower())
+							{
+								Console.Print($"'{Args[0]}' is bound to '{a}'");
+								return;
+							}
+						}
+					}
+				}
+			}
+		}
+		else if (Args.Count == 2)
+		{
+			// bind command to key
+			Bindings.Bind(Args[1], Args[0]);
+		}
+		else if (Args.Count == 0)
+		{
+			Help(new List<string>() {"bind"});
+		}
+		else
+		{
+			Console.ThrowPrint("Too many arguments provided to bind command");
+		}
+	}
+
+	public static void FpsMax(List<string> Args)
+	{
+		if(Args.Count == 0)
 		{
 			Console.Print($"Current max fps: {Engine.TargetFps}");
 			return;
@@ -151,3 +402,5 @@ public class Commands
 			Console.ThrowPrint($"Invalid max fps {TargetString}");
 	}
 }
+
+

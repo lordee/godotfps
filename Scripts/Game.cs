@@ -10,6 +10,7 @@ public class Game : Node
     public Node Map;
     public static PlayerController Client;
     public static UIManager UIManager;
+    public static Settings Settings;
 
     public override void _Ready()
     {
@@ -19,8 +20,9 @@ public class Game : Node
         HUD = GetNode("UIManager/HUD") as HUD;
         Map = GetNode("Map");
         UIManager = GetNode("UIManager") as UIManager;
+        Settings = new Settings(this);
 
-        LoadConfig();
+        Settings.LoadConfig();
     }
 
     public void Quit()
@@ -34,35 +36,5 @@ public class Game : Node
         HUD.Init(p.Player);
         HUD.Visible = true;
         Client = p;
-    }
-
-    private void LoadConfig()
-    {
-        // TODO - load/save of config
-
-        // if not exist, load defaults
-        LoadDefaultConfig();
-    }
-
-    private void LoadDefaultConfig()
-    {
-        // kb move
-        Bindings.Bind("W", nameof(PlayerController.MoveForward));
-        Bindings.Bind("A", nameof(PlayerController.MoveLeft));
-        Bindings.Bind("S", nameof(PlayerController.MoveBack));
-        Bindings.Bind("D", nameof(PlayerController.MoveRight));
-        Bindings.Bind("Space", nameof(PlayerController.Jump));
-
-        // mouse
-        Bindings.Bind("MouseOne", nameof(PlayerController.Attack));
-        Bindings.Bind("MouseUp",  nameof(PlayerController.LookUp));
-        Bindings.Bind("MouseDown", nameof(PlayerController.LookDown));
-        Bindings.Bind("MouseRight",nameof(PlayerController.LookRight));
-        Bindings.Bind("MouseLeft", nameof(PlayerController.LookLeft));
-
-        // other
-        Bindings.Bind("M", nameof(PlayerController.MouseModeToggle));
-        Bindings.Bind("Escape", nameof(MainMenu.MainMenuToggle));
-        Bindings.Bind("`", nameof(Console.ConsoleToggle));
     }
 }

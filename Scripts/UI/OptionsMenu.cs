@@ -3,37 +3,15 @@ using System;
 
 public class OptionsMenu : Control, IUIItem
 {
-
     Container _controlsContainer;
     public override void _Ready()
     {
         _controlsContainer = GetNode("TabContainer/Controls/ControlsContainer") as Container;
-
-        HBoxContainer invertMouse = AddCheckBox("Invert Mouse", nameof(InvertMouseToggle), (Settings.InvertedMouse == -1) ? true : false);
-        _controlsContainer.AddChild(invertMouse);
-
     }
 
-    private HBoxContainer AddCheckBox(string lblText, string func, bool val)
+    private void _on_Save_pressed()
     {
-        HBoxContainer hbox = new HBoxContainer();
-        hbox.MarginLeft = 2;
-        
-        Label lbl = new Label();
-        lbl.Text = lblText;
-        hbox.AddChild(lbl);
-
-        CheckBox cb = new CheckBox();
-        cb.Connect("toggled", this, func);
-        hbox.AddChild(cb);
-        cb.Pressed = val;
-
-        return hbox;
-    }
-
-    private void InvertMouseToggle(bool val)
-    {
-        Settings.InvertMouse(val);
+        GD.Print("save");
     }
 
     public void Open()

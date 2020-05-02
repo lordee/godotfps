@@ -4,6 +4,7 @@ using System;
 class BindingObject
 {
 	public string Name = null; //Null to fail early
+	public string Key = null;
 	public Action FuncWithoutArg = null;
 	public Action<float> FuncWithArg = null;
 	public Bindings.TYPE Type = Bindings.TYPE.UNSET;
@@ -11,9 +12,10 @@ class BindingObject
 
 	public bool JoyWasInDeadzone = true;
 
-	public BindingObject(string NameArg)
+	public BindingObject(string name, string key)
 	{
-		Name = NameArg;
+		Name = name;
+		Key = key;
 	}
 
 	public bool Equals(BindingObject Other)
