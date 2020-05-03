@@ -124,7 +124,7 @@ public class PlayerController : Camera
 	{
         if (val > 0)
         {
-            float change = val * Settings.Sensitivity * Settings.InvertedMouse;
+            float change = val * Settings.Sensitivity * Settings.InvertMouseValue;
             if (Game.Client._cameraAngle + change < 90f && Game.Client._cameraAngle + change > -90f)
             {
                 Game.Client._cameraAngle += change;
@@ -139,7 +139,7 @@ public class PlayerController : Camera
 	{
         if (val > 0)
         {
-            float change = -val * Settings.Sensitivity * Settings.InvertedMouse;
+            float change = -val * Settings.Sensitivity * Settings.InvertMouseValue;
             if (Game.Client._cameraAngle + change < 90f && Game.Client._cameraAngle + change > -90f)
             {
                 Game.Client._cameraAngle += change;

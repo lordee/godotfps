@@ -1,8 +1,6 @@
 using System;
 using System.Reflection;
 
-
-
 public class InputWithoutArg : Attribute
 {
 	public Action Function;
@@ -19,8 +17,6 @@ public class InputWithoutArg : Attribute
 		Function = (Action)Delegate.CreateDelegate(typeof(Action), Method);
 	}
 }
-
-
 
 public class InputWithArg : Attribute
 {

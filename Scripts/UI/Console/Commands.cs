@@ -2,7 +2,8 @@ using Godot;
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
-using System.IO;
+using System.Reflection;
+using System;
 
 // FIXME - overload with action type
 public delegate void CommandFunction(List<string> Args);
@@ -215,42 +216,7 @@ public class Commands
 	
 	public static void SaveConfig()
 	{
-		using (StreamWriter sw = new StreamWriter(Settings.ConfigLocation))
-		{
-			foreach (string a in InputMap.GetActions())
-			{
-				if (!a.Contains("ui_"))
-				{
-					Godot.Collections.Array actionList = InputMap.GetActionList(a);
-					foreach(InputEvent ie in actionList)
-					{
-						if (ie is InputEventKey iek)
-						{
-							string key = OS.GetScancodeString(iek.Scancode);
-							sw.WriteLine("bind " + key + " " + a);
-						}
-						else if (ie is InputEventMouseButton iemb)
-						{
-							int btn = iemb.ButtonIndex;
-							string key = KeyTypes.List.Where(e => (e.Value.Type == ButtonInfo.TYPE.MOUSEBUTTON
-																|| e.Value.Type == ButtonInfo.TYPE.MOUSEWHEEL)
-																&& (int)e.Value.ButtonValue == btn	
-																).FirstOrDefault().Key;
-							sw.WriteLine("bind " + key + " " + a);
-						}
-						else if (ie is InputEventJoypadButton iejb)
-						{
-							int btn = iejb.ButtonIndex;
-							string key = KeyTypes.List.Where(e => e.Value.Type == ButtonInfo.TYPE.CONTROLLERBUTTON
-																&& (int)e.Value.ControllerButtonValue == btn	
-																).FirstOrDefault().Key;
-							sw.WriteLine("bind " + key + " " + a);
-						}
-					}
-				}
-			}
-		}
-		
+		Settings.SaveConfig();
 	}
 
 	public void RunCommand(string Line)
@@ -268,6 +234,55 @@ public class Commands
 				{
 					Command.Value.Function(Args);
 					return;
+				}
+			}
+
+			var props = Assembly.GetExecutingAssembly().GetTypes()
+					.SelectMany(t => t.GetProperties())
+					.Where(m => m.GetCustomAttributes(typeof(UserSetting), false).Length > 0);
+
+			foreach (var p in props)
+			{
+				if (p.Name.ToLower() == Name.ToLower())
+				{
+					if (p.PropertyType == typeof(String))
+					{
+						p.SetValue(null, Args[0]);
+						return;
+					}
+					else if (p.PropertyType == typeof(float) || p.PropertyType == typeof(int)
+							|| p.PropertyType == typeof(Single))
+					{
+						float f = 0;
+						if (float.TryParse(Args[0], out f))
+						{
+							p.SetValue(null, f);
+						}
+						else
+						{
+							Console.ThrowPrint($"Could not parse '{Args[0]}' as a number");
+						}
+						return;
+					}
+					else if (p.PropertyType == typeof(Boolean)) // am i dumb? yes
+					{
+						bool b;
+						int i;
+						if (bool.TryParse(Args[0], out b))
+						{
+							p.SetValue(null, b);
+						}
+						else if (int.TryParse(Args[0], out i))
+						{
+							b = i == 1 ? true : false;
+							p.SetValue(null, b);
+						}
+						else
+						{
+							Console.ThrowPrint($"Could not parse '{Args[0]}' as a bool");
+						}
+						return;
+					}
 				}
 			}
 

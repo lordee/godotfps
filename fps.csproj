@@ -74,6 +74,7 @@
     <Compile Include="Scripts\PlayerCmd.cs" />
     <Compile Include="Scripts\Util\SnapShot.cs" />
     <Compile Include="Scripts\Util\KeyType.cs" />
+    <Compile Include="Scripts\Util\UserSetting.cs" />
     <Compile Include="Scripts\Binds\BindingObject.cs" />
     <Compile Include="Scripts\Binds\Bindings.cs" />
     <Compile Include="Scripts\Binds\InputAttribute.cs" />

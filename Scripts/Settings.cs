@@ -3,14 +3,29 @@ using System;
 using System.Linq;
 using System.Reflection;
 using System.Collections.Generic;
+using System.IO;
 
 public class Settings
 {
-    public static float Deadzone = 0.25f;
-    public static float Sensitivity = 0.2f;
-    public static bool MouseCursorVisible = true;
-    public static float InvertedMouse = -1;
+    [UserSetting(typeof(Settings), nameof(Deadzone))]
+    public static float Deadzone { get; set; } = 0.25f;
+    [UserSetting(typeof(Settings), nameof(Sensitivity))]
+    public static float Sensitivity { get; set; } = 0.2f;
+    [UserSetting(typeof(Settings), nameof(InvertedMouse))]
+    public static bool InvertedMouse { 
+        get {
+            return _invertedMouse;
+        }
+        set {
+            _invertedMouse = value;
+            InvertMouseValue = value ? -1 : 1;
+        } 
+    }
+
+    private static bool _invertedMouse = true;
+    public static float InvertMouseValue = -1;
     public static string ConfigLocation = "config.cfg";
+    public static bool MouseCursorVisible = true;
     private Game _game;
 
     public Settings(Game game)
@@ -20,7 +35,7 @@ public class Settings
 
     public static void InvertMouse(bool val)
     {
-        InvertedMouse = val ? -1 : 1;
+        InvertedMouse = val;
     }
 
     public void LoadConfig()
@@ -44,15 +59,53 @@ public class Settings
         }
     }
 
-    private void SaveConfig()
+    public static void SaveConfig()
     {
-        /*using (System.IO.StreamWriter writer = new System.IO.StreamWriter(ConfigLocation))
-        {
-            foreach (string s in bindlist)
-            {
-                writer.WriteLine(s);
-            }
-        }*/
+        using (StreamWriter sw = new StreamWriter(Settings.ConfigLocation))
+		{
+			foreach (string a in InputMap.GetActions())
+			{
+				if (!a.Contains("ui_"))
+				{
+					Godot.Collections.Array actionList = InputMap.GetActionList(a);
+					foreach(InputEvent ie in actionList)
+					{
+						if (ie is InputEventKey iek)
+						{
+							string key = OS.GetScancodeString(iek.Scancode).ToLower();
+							sw.WriteLine("bind " + key + " " + a);
+						}
+						else if (ie is InputEventMouseButton iemb)
+						{
+							int btn = iemb.ButtonIndex;
+							string key = KeyTypes.List.Where(e => (e.Value.Type == ButtonInfo.TYPE.MOUSEBUTTON
+																|| e.Value.Type == ButtonInfo.TYPE.MOUSEWHEEL)
+																&& (int)e.Value.ButtonValue == btn	
+																).FirstOrDefault().Key.ToLower();
+							sw.WriteLine("bind " + key + " " + a);
+						}
+						else if (ie is InputEventJoypadButton iejb)
+						{
+							int btn = iejb.ButtonIndex;
+							string key = KeyTypes.List.Where(e => e.Value.Type == ButtonInfo.TYPE.CONTROLLERBUTTON
+																&& (int)e.Value.ControllerButtonValue == btn	
+																).FirstOrDefault().Key.ToLower();
+							sw.WriteLine("bind " + key + " " + a);
+						}
+					}
+				}
+			}
+
+			// do other settings
+			var props = Assembly.GetExecutingAssembly().GetTypes()
+					.SelectMany(t => t.GetProperties())
+					.Where(m => m.GetCustomAttributes(typeof(UserSetting), false).Length > 0);
+
+			foreach (var p in props)
+			{
+				sw.WriteLine(p.Name.ToLower() + " " + p.GetValue(null, null).ToString().ToLower());
+			}
+		}
     }
 
     private void LoadDefaultConfig()

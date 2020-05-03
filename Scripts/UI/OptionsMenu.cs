@@ -28,7 +28,7 @@ public class OptionsMenu : Control, IUIItem
     {
         _mSensitivity.Text = Settings.Sensitivity.ToString();
         stringHistory.Add("msensitivity", Settings.Sensitivity.ToString());
-        _mInvert.Pressed = Settings.InvertedMouse == -1 ? true : false;
+        _mInvert.Pressed = Settings.InvertedMouse;
     }
 
     private void _on_text_changed_number_only(string text, string controlName)
