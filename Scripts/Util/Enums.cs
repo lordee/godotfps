@@ -25,3 +25,9 @@ public enum ET // entity type
     PLAYER = 1,
     PROJECTILE = 2,
 }
+
+public class ButtonInfo
+{
+	public enum TYPE {UNSET, SCANCODE, MOUSEBUTTON, MOUSEWHEEL, MOUSEAXIS, CONTROLLERBUTTON, CONTROLLERAXIS}
+	public enum DIRECTION {UP, DOWN, RIGHT, LEFT};
+}

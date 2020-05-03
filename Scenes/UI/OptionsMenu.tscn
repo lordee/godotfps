@@ -93,4 +93,5 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 margin_right = -8.0
 margin_bottom = -36.0
+[connection signal="text_changed" from="TabContainer/Controls/ControlsContainer/SensitivityContainer/SensitivityValue" to="." method="_on_text_changed_number_only" binds= [ "mSensitivity" ]]
 [connection signal="pressed" from="TabContainer/Controls/Save" to="." method="_on_Save_pressed"]

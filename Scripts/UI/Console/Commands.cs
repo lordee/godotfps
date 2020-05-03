@@ -2,6 +2,7 @@ using Godot;
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
+using System.IO;
 
 // FIXME - overload with action type
 public delegate void CommandFunction(List<string> Args);
@@ -199,12 +200,58 @@ public class Commands
 					, FunctionName = nameof(Console.ConsoleToggle)
 				}
 			},
-
+			{
+				"save_cfg",
+				new CommandInfo {
+					HelpMessages = new string[] {
+						"'save_cfg' saves all current binds and settings to config.cfg"
+					},
+					Function = (Args) => Commands.SaveConfig()
+					, FunctionName = nameof(Commands.SaveConfig)
+				}
+			}
         };
     }
 	
-
-	
+	public static void SaveConfig()
+	{
+		using (StreamWriter sw = new StreamWriter(Settings.ConfigLocation))
+		{
+			foreach (string a in InputMap.GetActions())
+			{
+				if (!a.Contains("ui_"))
+				{
+					Godot.Collections.Array actionList = InputMap.GetActionList(a);
+					foreach(InputEvent ie in actionList)
+					{
+						if (ie is InputEventKey iek)
+						{
+							string key = OS.GetScancodeString(iek.Scancode);
+							sw.WriteLine("bind " + key + " " + a);
+						}
+						else if (ie is InputEventMouseButton iemb)
+						{
+							int btn = iemb.ButtonIndex;
+							string key = KeyTypes.List.Where(e => (e.Value.Type == ButtonInfo.TYPE.MOUSEBUTTON
+																|| e.Value.Type == ButtonInfo.TYPE.MOUSEWHEEL)
+																&& (int)e.Value.ButtonValue == btn	
+																).FirstOrDefault().Key;
+							sw.WriteLine("bind " + key + " " + a);
+						}
+						else if (ie is InputEventJoypadButton iejb)
+						{
+							int btn = iejb.ButtonIndex;
+							string key = KeyTypes.List.Where(e => e.Value.Type == ButtonInfo.TYPE.CONTROLLERBUTTON
+																&& (int)e.Value.ControllerButtonValue == btn	
+																).FirstOrDefault().Key;
+							sw.WriteLine("bind " + key + " " + a);
+						}
+					}
+				}
+			}
+		}
+		
+	}
 
 	public void RunCommand(string Line)
 	{

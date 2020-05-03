@@ -25,6 +25,9 @@ public class Settings
 
     public void LoadConfig()
     {
+        // FIXME - debugging only
+        LoadDefaultConfig();
+
         // TODO - load/save of config
         if (System.IO.File.Exists(ConfigLocation))
         {

@@ -33,10 +33,6 @@ public class Bindings : Node
 		}
 	}
 
-
-	public enum TYPE {UNSET, SCANCODE, MOUSEBUTTON, MOUSEWHEEL, MOUSEAXIS, CONTROLLERBUTTON, CONTROLLERAXIS}
-	public enum DIRECTION {UP, DOWN, RIGHT, LEFT};
-
 	private static List<WithArgInfo> WithArgMethods = null;
 	private static List<WithoutArgInfo> WithoutArgMethods = null;
 
@@ -131,236 +127,44 @@ public class Bindings : Node
 		}
 
 		var ButtonValue = ButtonList.Left;
-		var AxisDirection = DIRECTION.UP;
+		var AxisDirection = ButtonInfo.DIRECTION.UP;
 		var ControllerButtonValue = JoystickList.Axis0;
 		uint Scancode = 0;
-		switch(KeyName) //Checks custom string literals first then assumes Scancode
+
+		//Checks custom string literals first then assumes Scancode
+		KeyType kt = null;
+		KeyTypes.List.TryGetValue(KeyName, out kt);
+
+		if (kt == null)
 		{
-			case("mouseone"): {
-				NewBind.Type = TYPE.MOUSEBUTTON;
-				ButtonValue = ButtonList.Left;
-				break;
+			// scancodes
+			uint LocalScancode = (uint)OS.FindScancodeFromString(KeyName);
+			if(LocalScancode != 0)
+			{
+				//Is a valid Scancode
+				NewBind.Type = ButtonInfo.TYPE.SCANCODE;
+				Scancode = LocalScancode;
 			}
-			case("mousetwo"): {
-				NewBind.Type = TYPE.MOUSEBUTTON;
-				ButtonValue = ButtonList.Right;
-				break;
+			else if (KeyName == "`") // this fails on ubuntu 18.04 (scancode of 0 given back)
+			{
+				NewBind.Type = ButtonInfo.TYPE.SCANCODE;
+				Scancode = 96;
 			}
-			case("mousethree"): {
-				NewBind.Type = TYPE.MOUSEBUTTON;
-				ButtonValue = ButtonList.Middle;
-				break;
-			}
-
-			case("wheelup"): {
-				NewBind.Type = TYPE.MOUSEWHEEL;
-				ButtonValue = ButtonList.WheelUp;
-				break;
-			}
-
-			case("wheeldown"): {
-				NewBind.Type = TYPE.MOUSEWHEEL;
-				ButtonValue = ButtonList.WheelDown;
-				break;
-			}
-
-			case("mouseup"): {
-				NewBind.Type = TYPE.MOUSEAXIS;
-				AxisDirection = DIRECTION.UP;
-				break;
-			}
-
-			case("mousedown"): {
-				NewBind.Type = TYPE.MOUSEAXIS;
-				AxisDirection = DIRECTION.DOWN;
-				break;
-			}
-
-			case("mouseright"): {
-				NewBind.Type = TYPE.MOUSEAXIS;
-				AxisDirection = DIRECTION.RIGHT;
-				break;
-			}
-
-			case("mouseleft"): {
-				NewBind.Type = TYPE.MOUSEAXIS;
-				AxisDirection = DIRECTION.LEFT;
-				break;
-			}
-
-			case("leftstickup"): {
-				NewBind.Type = TYPE.CONTROLLERAXIS;
-				AxisDirection = DIRECTION.UP;
-				ControllerButtonValue = JoystickList.AnalogLy;
-				break;
-			}
-
-			case("leftstickdown"): {
-				NewBind.Type = TYPE.CONTROLLERAXIS;
-				AxisDirection = DIRECTION.DOWN;
-				ControllerButtonValue = JoystickList.AnalogLy;
-				break;
-			}
-
-			case("leftstickleft"): {
-				NewBind.Type = TYPE.CONTROLLERAXIS;
-				AxisDirection = DIRECTION.LEFT;
-				ControllerButtonValue = JoystickList.AnalogLx;
-				break;
-			}
-
-			case("leftstickright"): {
-				NewBind.Type = TYPE.CONTROLLERAXIS;
-				AxisDirection = DIRECTION.RIGHT;
-				ControllerButtonValue = JoystickList.AnalogLx;
-				break;
-			}
-
-			case("rightstickup"): {
-				NewBind.Type = TYPE.CONTROLLERAXIS;
-				AxisDirection = DIRECTION.UP;
-				ControllerButtonValue = JoystickList.AnalogRy;
-				break;
-			}
-			case("rightstickdown"): {
-				NewBind.Type = TYPE.CONTROLLERAXIS;
-				AxisDirection = DIRECTION.DOWN;
-				ControllerButtonValue = JoystickList.AnalogRy;
-				break;
-			}
-			case("rightstickleft"): {
-				NewBind.Type = TYPE.CONTROLLERAXIS;
-				AxisDirection = DIRECTION.LEFT;
-				ControllerButtonValue = JoystickList.AnalogRx;
-				break;
-			}
-			case("rightstickright"): {
-				NewBind.Type = TYPE.CONTROLLERAXIS;
-				AxisDirection = DIRECTION.RIGHT;
-				ControllerButtonValue = JoystickList.AnalogRx;
-				break;
-			}
-
-			case("xboxa"): {
-				NewBind.Type = TYPE.CONTROLLERBUTTON;
-				ControllerButtonValue = JoystickList.XboxA;
-				break;
-			}
-
-			case("xboxb"): {
-				NewBind.Type = TYPE.CONTROLLERBUTTON;
-				ControllerButtonValue = JoystickList.XboxB;
-				break;
-			}
-
-			case("xboxx"): {
-				NewBind.Type = TYPE.CONTROLLERBUTTON;
-				ControllerButtonValue = JoystickList.XboxX;
-				break;
-			}
-
-			case("xboxy"): {
-				NewBind.Type = TYPE.CONTROLLERBUTTON;
-				ControllerButtonValue = JoystickList.XboxY;
-				break;
-			}
-
-			case("xboxlb"): {
-				NewBind.Type = TYPE.CONTROLLERBUTTON;
-				ControllerButtonValue = JoystickList.L;
-				break;
-			}
-
-			case("xboxrb"): {
-				NewBind.Type = TYPE.CONTROLLERBUTTON;
-				ControllerButtonValue = JoystickList.R;
-				break;
-			}
-
-			case("xboxlt"): {
-				NewBind.Type = TYPE.CONTROLLERBUTTON;
-				ControllerButtonValue = JoystickList.L2;
-				break;
-			}
-
-			case("xboxrt"): {
-				NewBind.Type = TYPE.CONTROLLERBUTTON;
-				ControllerButtonValue = JoystickList.R2;
-				break;
-			}
-
-			case("rightstickclick"): {
-				NewBind.Type = TYPE.CONTROLLERBUTTON;
-				ControllerButtonValue = JoystickList.R3;
-				break;
-			}
-
-			case("leftstickclick"): {
-				NewBind.Type = TYPE.CONTROLLERBUTTON;
-				ControllerButtonValue = JoystickList.L3;
-				break;
-			}
-
-			case("dpadup"): {
-				NewBind.Type = TYPE.CONTROLLERBUTTON;
-				ControllerButtonValue = JoystickList.DpadUp;
-				break;
-			}
-
-			case("dpaddown"): {
-				NewBind.Type = TYPE.CONTROLLERBUTTON;
-				ControllerButtonValue = JoystickList.DpadDown;
-				break;
-			}
-
-			case("dpadleft"): {
-				NewBind.Type = TYPE.CONTROLLERBUTTON;
-				ControllerButtonValue = JoystickList.DpadLeft;
-				break;
-			}
-
-			case("dpadright"): {
-				NewBind.Type = TYPE.CONTROLLERBUTTON;
-				ControllerButtonValue = JoystickList.DpadRight;
-				break;
-			}
-
-			case("xboxstart"): {
-				NewBind.Type = TYPE.CONTROLLERBUTTON;
-				ControllerButtonValue = JoystickList.Start;
-				break;
-			}
-
-			case("xboxselect"): {
-				// Or Select. Or Share. Or The big thing in the middle of ps4 remotes. Or -.
-				NewBind.Type = TYPE.CONTROLLERBUTTON;
-				ControllerButtonValue = JoystickList.Select;
-				break;
-			}
-
-			default: {			
-				//Does not match any custom string literal must either be a Scancode or is invalid
-				uint LocalScancode = (uint)OS.FindScancodeFromString(KeyName);
-				if(LocalScancode != 0)
-				{
-					//Is a valid Scancode
-					NewBind.Type = TYPE.SCANCODE;
-					Scancode = LocalScancode;
-				}
-				else if (KeyName == "`") // this fails on ubuntu 18.04 (scancode of 0 given back)
-				{
-					NewBind.Type = TYPE.SCANCODE;
-					Scancode = 96;
-				}
-				else
-				{
-					//If not a valid Scancode then the provided key must not be a valid key
-					Console.ThrowPrint($"The supplied key '{KeyName}' is not a valid key");
-					return false;
-				}
-				break;
+			else
+			{
+				//If not a valid Scancode then the provided key must not be a valid key
+				Console.ThrowPrint($"The supplied key '{KeyName}' is not a valid key");
+				return false;
 			}
 		}
+		else
+		{
+			NewBind.Type = kt.Type;
+			ButtonValue = kt.ButtonValue;
+			AxisDirection = kt.Direction;
+			ControllerButtonValue = kt.ControllerButtonValue;
+		}
+
 		//Now we have everything we need to setup the bind with Godot's input system
 
 		//First clear any bind with the same key
@@ -374,14 +178,14 @@ public class Bindings : Node
 		
 		switch(NewBind.Type)
 		{
-			case(TYPE.SCANCODE): {
+			case(ButtonInfo.TYPE.SCANCODE): {
 				InputEventKey Event = new InputEventKey {Scancode = Scancode};
 				InputMap.ActionAddEvent(actionName, Event);
 				break;
 			}
 
-			case(TYPE.MOUSEBUTTON):
-			case(TYPE.MOUSEWHEEL): {
+			case(ButtonInfo.TYPE.MOUSEBUTTON):
+			case(ButtonInfo.TYPE.MOUSEWHEEL): {
 				InputEventMouseButton Event = new InputEventMouseButton {
 					ButtonIndex = (int)ButtonValue
 				};
@@ -389,46 +193,46 @@ public class Bindings : Node
 				break;
 			}
 
-			case(TYPE.MOUSEAXIS): {
+			case(ButtonInfo.TYPE.MOUSEAXIS): {
 				InputEventMouseMotion Event = new InputEventMouseMotion();
 				InputMap.ActionAddEvent(actionName, Event);
-				NewBind.AxisDirection = (DIRECTION)AxisDirection; //Has to cast as it is Nullable
+				NewBind.AxisDirection = (ButtonInfo.DIRECTION)AxisDirection; //Has to cast as it is Nullable
 				break;
 			}
 
-			case(TYPE.CONTROLLERAXIS): {
+			case(ButtonInfo.TYPE.CONTROLLERAXIS): {
 				InputEventJoypadMotion Event = new InputEventJoypadMotion {
 					Axis = (int)ControllerButtonValue
 				};
 				// Set which Joystick axis we're using
 				switch (AxisDirection) { // Set which direction on the axis we need to trigger the event
-					case(DIRECTION.UP): {
+					case(ButtonInfo.DIRECTION.UP): {
 						Event.AxisValue = -1; // -1, on the Vertical axis is up
 						break;
 					}
 
-					case(DIRECTION.LEFT): {
+					case(ButtonInfo.DIRECTION.LEFT): {
 						Event.AxisValue = -1; // -1, on the Horizontal axis is left
 						break;
 					}
 
-					case(DIRECTION.DOWN): {
+					case(ButtonInfo.DIRECTION.DOWN): {
 						Event.AxisValue = 1; // 1, on the Vertical axis is down
 						break;
 					}
 
-					case(DIRECTION.RIGHT): {
+					case(ButtonInfo.DIRECTION.RIGHT): {
 						Event.AxisValue = 1; // 1, on the Horizontal axis is right
 						break;
 					}
 				}
 
 				InputMap.ActionAddEvent(actionName, Event);
-				NewBind.AxisDirection = (DIRECTION)AxisDirection; //Has to cast as it is Nullable
+				NewBind.AxisDirection = (ButtonInfo.DIRECTION)AxisDirection; //Has to cast as it is Nullable
 				break;
 			}
 
-			case(TYPE.CONTROLLERBUTTON): {
+			case(ButtonInfo.TYPE.CONTROLLERBUTTON): {
 				InputEventJoypadButton Event = new InputEventJoypadButton {
 					ButtonIndex = (int) ControllerButtonValue
 				};
@@ -544,7 +348,7 @@ public class Bindings : Node
 
 		foreach(BindingObject Binding in BindingsWithArg)
 		{
-			if(Binding.Type == TYPE.SCANCODE || Binding.Type == TYPE.MOUSEBUTTON || Binding.Type == TYPE.CONTROLLERBUTTON)
+			if(Binding.Type == ButtonInfo.TYPE.SCANCODE || Binding.Type == ButtonInfo.TYPE.MOUSEBUTTON || Binding.Type == ButtonInfo.TYPE.CONTROLLERBUTTON)
 			{
 				if(Input.IsActionJustPressed(Binding.Name))
 				{
@@ -555,14 +359,14 @@ public class Bindings : Node
 					Binding.FuncWithArg.Invoke(-1);
 				}
 			}
-			else if(Binding.Type == TYPE.MOUSEWHEEL)
+			else if(Binding.Type == ButtonInfo.TYPE.MOUSEWHEEL)
 			{
 				if(Input.IsActionJustReleased(Binding.Name))
 				{
 					Binding.FuncWithArg.Invoke(1);
 				}
 			}
-			else if(Binding.Type == TYPE.CONTROLLERAXIS)
+			else if(Binding.Type == ButtonInfo.TYPE.CONTROLLERAXIS)
 			{
 				int VerticalAxis = 0;
 				int HorizontalAxis = 0;
@@ -596,16 +400,16 @@ public class Bindings : Node
 					float VerticalMovement = Input.GetJoyAxis(0,VerticalAxis);
 					switch(Binding.AxisDirection)
 					{
-						case(DIRECTION.UP):
+						case(ButtonInfo.DIRECTION.UP):
 							Binding.FuncWithArg.Invoke(-VerticalMovement);
 							break;
-						case(DIRECTION.DOWN):
+						case(ButtonInfo.DIRECTION.DOWN):
 							Binding.FuncWithArg.Invoke(VerticalMovement);
 							break;
-						case(DIRECTION.RIGHT):
+						case(ButtonInfo.DIRECTION.RIGHT):
 							Binding.FuncWithArg.Invoke(HorizontalMovement);
 							break;
-						case(DIRECTION.LEFT):
+						case(ButtonInfo.DIRECTION.LEFT):
 							Binding.FuncWithArg.Invoke(-HorizontalMovement);
 							break;
 					}
@@ -624,14 +428,14 @@ public class Bindings : Node
 
 		foreach(BindingObject Binding in BindingsWithoutArg)
 		{
-			if(Binding.Type == TYPE.SCANCODE || Binding.Type == TYPE.MOUSEBUTTON || Binding.Type == TYPE.CONTROLLERBUTTON)
+			if(Binding.Type == ButtonInfo.TYPE.SCANCODE || Binding.Type == ButtonInfo.TYPE.MOUSEBUTTON || Binding.Type == ButtonInfo.TYPE.CONTROLLERBUTTON)
 			{
 				if(Input.IsActionJustPressed(Binding.Name))
 				{
 					Binding.FuncWithoutArg.Invoke();
 				}
 			}
-			else if(Binding.Type == TYPE.MOUSEWHEEL)
+			else if(Binding.Type == ButtonInfo.TYPE.MOUSEWHEEL)
 			{
 				if(Input.IsActionJustReleased(Binding.Name))
 				{
@@ -649,20 +453,20 @@ public class Bindings : Node
 			{
 				foreach(BindingObject Binding in BindingsWithArg)
 				{
-					if(Binding.Type == TYPE.MOUSEAXIS)
+					if(Binding.Type == ButtonInfo.TYPE.MOUSEAXIS)
 					{
 						switch(Binding.AxisDirection)
 						{
-							case(DIRECTION.UP):
+							case(ButtonInfo.DIRECTION.UP):
 								Binding.FuncWithArg.Invoke(GreaterEqualZero(-MotionEvent.Relative.y));
 								break;
-							case(DIRECTION.DOWN):
+							case(ButtonInfo.DIRECTION.DOWN):
 								Binding.FuncWithArg.Invoke(GreaterEqualZero(MotionEvent.Relative.y));
 								break;
-							case(DIRECTION.RIGHT):
+							case(ButtonInfo.DIRECTION.RIGHT):
 								Binding.FuncWithArg.Invoke(GreaterEqualZero(MotionEvent.Relative.x));
 								break;
-							case(DIRECTION.LEFT):
+							case(ButtonInfo.DIRECTION.LEFT):
 								Binding.FuncWithArg.Invoke(GreaterEqualZero(-MotionEvent.Relative.x));
 								break;
 						}
@@ -671,7 +475,7 @@ public class Bindings : Node
 
 				foreach(BindingObject Binding in BindingsWithoutArg)
 				{
-					if(Binding.Type == TYPE.MOUSEAXIS)
+					if(Binding.Type == ButtonInfo.TYPE.MOUSEAXIS)
 					{
 						//Don't need to switch on the direction as it doesn't want an argument anyway
 						Binding.FuncWithoutArg.Invoke();

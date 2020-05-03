@@ -7,8 +7,8 @@ class BindingObject
 	public string Key = null;
 	public Action FuncWithoutArg = null;
 	public Action<float> FuncWithArg = null;
-	public Bindings.TYPE Type = Bindings.TYPE.UNSET;
-	public Bindings.DIRECTION AxisDirection; //Only used if Type is AXIS
+	public ButtonInfo.TYPE Type = ButtonInfo.TYPE.UNSET;
+	public ButtonInfo.DIRECTION AxisDirection; //Only used if Type is AXIS
 
 	public bool JoyWasInDeadzone = true;
 
