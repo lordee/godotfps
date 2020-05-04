@@ -20,6 +20,7 @@ public class Network : Node
 
     public List<SnapShot> Snapshots = new List<SnapShot>();
     
+    // TODO - only send entity updates if entity state has changed.  Compare it to last acknowledged packet from client
 
     public override void _Ready()
     {
