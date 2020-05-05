@@ -55,3 +55,6 @@ __meta__ = {
 position = Vector2( 512, 300 )
 scale = Vector2( 0.1, 0.1 )
 texture = ExtResource( 2 )
+
+[node name="AimAt" type="Node2D" parent="Manager"]
+position = Vector2( 512, 300 )

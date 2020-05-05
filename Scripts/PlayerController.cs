@@ -28,9 +28,12 @@ public class PlayerController : Camera
         }
     }
 
+    private Node2D _aimAt;
+
     public override void _Ready()
     {
         _game = GetTree().Root.GetNode("Game") as Game;
+        _aimAt = _game.HUD.AimAt;
     }
 
     public void Init(Player p)
@@ -44,10 +47,8 @@ public class PlayerController : Camera
         shootTo = new Vector3();
         if (attack == 1)
         {
-            float ypos = Crosshair.Position.y - (Crosshair.Texture.GetSize().y * Crosshair.Scale.y/2);
-            Vector2 pos = new Vector2(Crosshair.Position.x, ypos);
-            Vector3 origin = ProjectRayOrigin(pos);
-            Vector3 to = ProjectRayNormal(pos) * _shootRange;
+            Vector3 origin = ProjectRayOrigin(_aimAt.Position);
+            Vector3 to = ProjectRayNormal(_aimAt.Position) * _shootRange;
             shootTo = to + origin;
         }
         

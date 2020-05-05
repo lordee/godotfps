@@ -15,6 +15,8 @@ public class Player : KinematicBody
     public MeshInstance Mesh {get { return _mesh; }}
     public Peer Peer;
 
+    public Spatial Head { get { return _head; }}
+
     public bool PlayerControlled = false;
 
     // fields

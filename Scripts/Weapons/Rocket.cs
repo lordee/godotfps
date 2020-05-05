@@ -30,7 +30,7 @@ public class Rocket : KinematicBody
     public void Init(Player shooter, Vector3 vel)
     {
         this.AddCollisionExceptionWith(shooter);
-        this.GlobalTransform = shooter.GlobalTransform;
+        this.GlobalTransform = shooter.Head.GlobalTransform;
         Velocity = vel;
         this.LookAt(vel * 1000, _game.World.Up);
         _playerOwner = shooter;

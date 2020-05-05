@@ -3,11 +3,12 @@ using System;
 
 public class Lobby : Control, IUIItem
 {
-    int DEFAULT_PORT = 8910; // some random number, pick your port properly
+    int DEFAULT_PORT = 27500; // some random number, pick your port properly
 
     Button _joinBtn;
     Button _hostBtn;
     LineEdit _address;
+    LineEdit _port;
     Game _game;
     public override void _Ready()
     {
@@ -16,7 +17,9 @@ public class Lobby : Control, IUIItem
         _hostBtn.Connect("pressed", this, "_On_Host_Pressed");
         _joinBtn.Connect("pressed", this, "_On_Join_Pressed");
         _address = GetNode("panel/address") as LineEdit;
+        _port = GetNode("panel/port") as LineEdit;
         _game = GetTree().Root.GetNode("Game") as Game;
+        _port.Text = DEFAULT_PORT.ToString();
         UIManager.Open(this);
     }
 
@@ -39,13 +42,13 @@ public class Lobby : Control, IUIItem
 
     private void _On_Host_Pressed()
     {
-        _game.Network.Host(DEFAULT_PORT);
+        _game.Network.Host(Convert.ToInt32(_port.Text));
         UIManager.Close();
     }
 
     private void _On_Join_Pressed()
     {   
-        _game.Network.ConnectTo(_address.Text, DEFAULT_PORT);
+        _game.Network.ConnectTo(_address.Text, Convert.ToInt32(_port.Text));
         
         UIManager.Close();
     }

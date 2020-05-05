@@ -26,7 +26,7 @@ valign = 1
 [node name="panel" type="Panel" parent="."]
 margin_left = 210.0
 margin_top = 160.0
-margin_right = 430.0
+margin_right = 585.0
 margin_bottom = 270.0
 size_flags_horizontal = 2
 size_flags_vertical = 2
@@ -89,3 +89,19 @@ size_flags_horizontal = 2
 size_flags_vertical = 0
 custom_colors/font_color = Color( 1, 0, 0, 1 )
 align = 1
+
+[node name="port_label" type="Label" parent="panel"]
+margin_left = 223.0
+margin_top = 12.0
+margin_right = 263.0
+margin_bottom = 26.0
+text = "Port"
+
+[node name="port" type="LineEdit" parent="panel"]
+margin_left = 223.0
+margin_top = 30.0
+margin_right = 281.0
+margin_bottom = 54.0
+__meta__ = {
+"_edit_use_anchors_": false
+}

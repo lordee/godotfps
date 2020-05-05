@@ -8,6 +8,7 @@ public class HUD : CanvasLayer
     Label _armour;
     public Sprite Crosshair;
     Control _manager;
+    public Node2D AimAt;
 
     // Canvas layer currently has no visibility controls, parent a control node and use that for all other children
     private bool _visible = true;
@@ -25,6 +26,7 @@ public class HUD : CanvasLayer
         _health = _manager.GetNode("HealthLabel") as Label;
         _armour = _manager.GetNode("ArmourLabel") as Label;
         Crosshair = _manager.GetNode("Crosshair") as Sprite;
+        AimAt = _manager.GetNode("AimAt") as Node2D;
         this.Visible = false;
     }
 
