@@ -83,6 +83,12 @@ public class Settings
 																).FirstOrDefault().Key.ToLower();
 							sw.WriteLine("bind " + key + " " + a);
 						}
+                        else if (ie is InputEventMouseMotion iem)
+                        {
+                            string key = KeyTypes.List.Where(e => e.Value.Type == ButtonInfo.TYPE.MOUSEAXIS)
+                                        .FirstOrDefault().Key.ToLower();
+                            sw.WriteLine("bind " + key + " " + a);
+                        }
 					}
 				}
 			}
@@ -99,7 +105,7 @@ public class Settings
 		}
     }
 
-    private void LoadDefaultConfig()
+    public static void LoadDefaultConfig()
     {
         // kb move
         Bindings.Bind("move_forward", "W");

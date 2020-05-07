@@ -19,6 +19,11 @@ public class OptionsMenu : Control, IUIItem
         _mInvert = _controlsContainer.GetNode("InvertMouseContainer/InvertMouseCheckBox") as CheckBox;
     }
 
+    private void _on_Load_Defaults_pressed()
+    {
+        Settings.LoadDefaultConfig();
+        LoadValues();
+    }
     private void _on_Save_pressed()
     {
         Settings.Sensitivity = float.Parse(_mSensitivity.Text);

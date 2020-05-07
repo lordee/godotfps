@@ -78,6 +78,16 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="Load Defaults" type="Button" parent="TabContainer/Controls"]
+margin_left = 903.0
+margin_top = 540.0
+margin_right = 1002.0
+margin_bottom = 560.0
+text = "Load Defaults"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [node name="Other tab" type="Panel" parent="TabContainer"]
 visible = false
 anchor_right = 1.0
@@ -94,4 +104,6 @@ anchor_bottom = 1.0
 margin_right = -8.0
 margin_bottom = -36.0
 [connection signal="text_changed" from="TabContainer/Controls/ControlsContainer/SensitivityContainer/SensitivityValue" to="." method="_on_text_changed_number_only" binds= [ "mSensitivity" ]]
+[connection signal="pressed" from="TabContainer/Controls/ControlsContainer/InvertMouseContainer/InvertMouseCheckBox" to="." method="_on_InvertMouseCheckBox_pressed"]
 [connection signal="pressed" from="TabContainer/Controls/Save" to="." method="_on_Save_pressed"]
+[connection signal="pressed" from="TabContainer/Controls/Load Defaults" to="." method="_on_Load_Defaults_pressed"]
