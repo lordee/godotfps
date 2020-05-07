@@ -21,14 +21,29 @@ public class OptionsMenu : Control, IUIItem
 
     private void _on_Save_pressed()
     {
+        Settings.Sensitivity = float.Parse(_mSensitivity.Text);
+        Settings.InvertedMouse = _mInvert.Pressed;
         Commands.SaveConfig();
     }
 
     private void LoadValues()
     {
         _mSensitivity.Text = Settings.Sensitivity.ToString();
-        stringHistory.Add("msensitivity", Settings.Sensitivity.ToString());
+        UpdateHistory("msensitivity", Settings.Sensitivity.ToString());
         _mInvert.Pressed = Settings.InvertedMouse;
+        UpdateHistory("minvertmouse", Settings.InvertedMouse.ToString());
+    }
+
+    private void UpdateHistory(string key, string val)
+    {
+        if (!stringHistory.ContainsKey(key.ToLower()))
+        {
+            stringHistory.Add(key.ToLower(), val);
+        }
+        else
+        {
+            stringHistory[key.ToLower()] = val;
+        }
     }
 
     private void _on_text_changed_number_only(string text, string controlName)

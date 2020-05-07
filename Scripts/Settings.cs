@@ -33,11 +33,6 @@ public class Settings
         _game = game;
     }
 
-    public static void InvertMouse(bool val)
-    {
-        InvertedMouse = val;
-    }
-
     public void LoadConfig()
     {
         if (System.IO.File.Exists(ConfigLocation))
