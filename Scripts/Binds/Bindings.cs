@@ -36,7 +36,7 @@ public class Bindings : Node
 	private static List<WithArgInfo> WithArgMethods = null;
 	private static List<WithoutArgInfo> WithoutArgMethods = null;
 
-	private static List<BindingObject> BindingsWithArg = new List<BindingObject>();
+	public static List<BindingObject> BindingsWithArg = new List<BindingObject>();
 	private static List<BindingObject> BindingsWithoutArg = new List<BindingObject>();
 
 	private static Bindings Self;

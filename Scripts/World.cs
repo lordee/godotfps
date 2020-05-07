@@ -124,7 +124,8 @@ public class World : Node
 
     public void StartWorld()
     {
-        PackedScene main = (PackedScene)ResourceLoader.Load("res://Maps/lastresort_b5.tscn");
+        //PackedScene main = (PackedScene)ResourceLoader.Load("res://Maps/lastresort_b5.tscn");
+        PackedScene main = (PackedScene)ResourceLoader.Load("res://Maps/1on1r.tscn");
         Spatial inst = (Spatial)main.Instance();
 
         _game.Map.AddChild(inst);
@@ -144,11 +145,24 @@ public class World : Node
                     {
                         switch (kvp.Value.ToString().ToLower())
                         {
+                            case "info_player_teamspawn":
                             case "info_player_start":
                                 foreach(DictionaryEntry kvp2 in fields)
                                 {
                                     switch(kvp2.Key.ToString().ToLower())
                                     {
+                                        case "team_no":
+                                            int t = Convert.ToInt32(kvp2.Value.ToString());
+                                            switch (t)
+                                            {
+                                                case 1:
+                                                    spawnsTeam1.Add(ent);
+                                                    break;
+                                                case 2:
+                                                    spawnsTeam2.Add(ent);
+                                                    break;
+                                            }
+                                            break;
                                         case "allowteams":
                                             string team = kvp2.Value.ToString().ToLower();
                                             if (team.Contains("blue"))

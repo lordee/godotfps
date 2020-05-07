@@ -1,7 +1,7 @@
 using System;
 
 
-class BindingObject
+public class BindingObject
 {
 	public string Name = null; //Null to fail early
 	public string Key = null;

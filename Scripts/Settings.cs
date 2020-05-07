@@ -85,13 +85,23 @@ public class Settings
 						}
                         else if (ie is InputEventMouseMotion iem)
                         {
-                            string key = KeyTypes.List.Where(e => e.Value.Type == ButtonInfo.TYPE.MOUSEAXIS)
-                                        .FirstOrDefault().Key.ToLower();
-                            sw.WriteLine("bind " + key + " " + a);
+                            
                         }
 					}
 				}
 			}
+
+            var ktl = KeyTypes.List.Where(e => e.Value.Type == ButtonInfo.TYPE.MOUSEAXIS).ToList();
+            foreach (KeyValuePair<string, KeyType> kt in ktl)
+            {
+                foreach(BindingObject b in Bindings.BindingsWithArg)
+                {
+                    if (b.AxisDirection == kt.Value.Direction && b.Type == kt.Value.Type)
+                    {
+                        sw.WriteLine("bind " + b.Key + " " + b.Name);
+                    }
+                }
+            }
 
 			// do other settings
 			var props = Assembly.GetExecutingAssembly().GetTypes()
