@@ -82,8 +82,7 @@ public class UIManager : Node
         IUIItem i = Stack.Peek();
         if (i.GetType() == typeof(Console))
         {
-            i.Close();
-            Stack.Pop();
+            UIManager.Close();
         }
         else
         {

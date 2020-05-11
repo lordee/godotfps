@@ -255,7 +255,6 @@ public class World : Node
             pc.Init(player);
             pc.SetProcess(true);
             pc.Notification(NotificationReady);
-            //Input.SetMouseMode(Input.MouseMode.Visible);
             _worldOwner = player;
         }
         player.Team = 1;

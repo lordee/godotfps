@@ -5,7 +5,9 @@ using System.Linq;
 
 public class OptionsMenu : Control, IUIItem
 {
+    Game _game;
     Container _controlsContainer;
+    Container _settingsContainer;
 
     // mouse controls
     LineEdit _mSensitivity;
@@ -14,9 +16,40 @@ public class OptionsMenu : Control, IUIItem
     Dictionary<string, string> stringHistory = new Dictionary<string, string>();
     public override void _Ready()
     {
+        _game = GetTree().Root.GetNode("Game") as Game;
+        _settingsContainer = GetNode("TabContainer/Settings/SettingsContainer") as Container;
         _controlsContainer = GetNode("TabContainer/Controls/ControlsContainer") as Container;
-        _mSensitivity = _controlsContainer.GetNode("SensitivityContainer/SensitivityValue") as LineEdit;
-        _mInvert = _controlsContainer.GetNode("InvertMouseContainer/InvertMouseCheckBox") as CheckBox;
+        _mSensitivity = _settingsContainer.GetNode("SensitivityContainer/SensitivityValue") as LineEdit;
+        _mInvert = _settingsContainer.GetNode("InvertMouseContainer/InvertMouseCheckBox") as CheckBox;
+    }
+
+    public void Init()
+    {
+        AddControls();
+    }
+
+    private void AddControls()
+    {
+        foreach(KeyValuePair<string, CommandInfo> kvp in _game.Commands.List)
+        {
+            if (kvp.Value.CommandType == CT.PlayerController)
+            {
+                AddControl(kvp);
+            }
+        }
+    }
+
+    private void AddControl(KeyValuePair<string, CommandInfo> kvp)
+    {
+        HBoxContainer hb = new HBoxContainer();
+        Label lbl = new Label();
+        lbl.Text = kvp.Key;
+        LineEdit le = new LineEdit();
+        le.Name = kvp.Key;
+
+        _controlsContainer.AddChild(hb);
+        hb.AddChild(lbl);
+        hb.AddChild(le);
     }
 
     private void _on_Load_Defaults_pressed()

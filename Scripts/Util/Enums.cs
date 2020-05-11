@@ -31,3 +31,9 @@ public class ButtonInfo
 	public enum TYPE {UNSET, SCANCODE, MOUSEBUTTON, MOUSEWHEEL, MOUSEAXIS, CONTROLLERBUTTON, CONTROLLERAXIS}
 	public enum DIRECTION {UP, DOWN, RIGHT, LEFT};
 }
+
+public enum CT
+{
+    PlayerController,
+    Command
+}

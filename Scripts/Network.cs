@@ -306,7 +306,7 @@ public class Network : Node
         {
             Vector3 org = p.Player.ServerState.Origin;
             Vector3 velo = p.Player.ServerState.Velocity;
-            Vector3 rot = p.Player.Mesh.Rotation;
+            Vector3 rot = p.Player.ServerState.Rotation;
 
             PlayerSnap ps = new PlayerSnap();
             ps.Origin = org;

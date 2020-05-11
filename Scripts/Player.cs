@@ -83,24 +83,32 @@ public class Player : KinematicBody
         {
             pCmdQueue.Add(
                 new PlayerCmd{
-                    snapshot = 0,
+                    snapshot = this.Peer.LastSnapshot + 1,
                     playerID = ID,
                     move_forward = 0,
                     move_right = 0,
                     move_up = 0,
                     aim = new Basis(),
                     cam_angle = 0,
-                    rotation = Mesh.Rotation,
+                    rotation = _predictedState.Rotation,
                     attack = 0
                     }
                 );
         }
-        pCmdQueue.Sort((x,y) => x.snapshot.CompareTo(y.snapshot));
+        else
+        {
+            pCmdQueue.Sort((x,y) => x.snapshot.CompareTo(y.snapshot));
+        }
 
         foreach(PlayerCmd pCmd in pCmdQueue)
         {
             Peer p = this.Peer;
-            if (pCmd.snapshot <= p.LastSnapshot)
+            if (!PlayerControlled && IsNetworkMaster())
+            {
+                _mesh.Rotation = pCmd.rotation;
+            }
+            
+            if (pCmd.snapshot < p.LastSnapshot)
             {
                 continue;
             }
@@ -117,7 +125,6 @@ public class Player : KinematicBody
 
             p.LastSnapshot = pCmd.snapshot;
             
-            //this.ProcessCommand(pCmd, delta);
             this.ProcessAttack(pCmd, delta);
 
             if (IsNetworkMaster())
@@ -130,7 +137,7 @@ public class Player : KinematicBody
 
         if (IsNetworkMaster())
         {
-            SetServerState(_predictedState.Origin, _predictedState.Velocity, _mesh.Rotation, _currentHealth, _currentArmour);
+            SetServerState(_predictedState.Origin, _predictedState.Velocity, _predictedState.Rotation, _currentHealth, _currentArmour);
         }
         else
         {
@@ -171,10 +178,6 @@ public class Player : KinematicBody
         t.origin = predState.Origin;
         GlobalTransform = t;
 
-        if (!PlayerControlled)
-        {
-            _mesh.Rotation = pCmd.rotation;
-        }
         QueueJump(pCmd);
 
         // do air move which does gravity
@@ -193,7 +196,8 @@ public class Player : KinematicBody
         _predictedState = new State {
             StateNum = predState.StateNum + 1,
             Origin = GlobalTransform.origin,
-            Velocity = _playerVelocity
+            Velocity = _playerVelocity,
+            Rotation = _mesh.Rotation
         };
         return _predictedState;
     }
@@ -202,13 +206,14 @@ public class Player : KinematicBody
     {
         _serverState.Origin = org;
         _serverState.Velocity = velo;
+        _serverState.Rotation = rot;
         _currentHealth = health;
         _currentArmour = armour;
 
         if (!PlayerControlled)
         {
             this._mesh.Rotation = rot;
-        } 
+        }
     }
 
     public void TrimCmdQueue()

@@ -15,6 +15,7 @@ public struct CommandInfo
 	public CommandFunction Function;
 	public CommandFunction2 Function2;
 	public string FunctionName;
+	public CT CommandType;
 }
 
 public class Commands
@@ -34,8 +35,9 @@ public class Commands
                         "'help' Lists all commands",
                         "'help <command>' Displays the help message for an individual command",
                     },
-                    Function = (Args) => this.Help(Args)
-					, FunctionName = nameof(this.Help)
+                    Function = (Args) => this.Help(Args),
+					FunctionName = nameof(this.Help),
+					CommandType = CT.Command,
                 }
             },
 
@@ -45,8 +47,9 @@ public class Commands
                     HelpMessages = new string[] {
                         "'quit' Immediately closes the game",
                     },
-                    Function = (Args) => this.Quit(Args)
-					, FunctionName = nameof(this.Quit)
+                    Function = (Args) => this.Quit(Args),
+					FunctionName = nameof(this.Quit),
+					CommandType = CT.Command,
                 }
             },
 			{
@@ -55,8 +58,9 @@ public class Commands
                     HelpMessages = new string[] {
                         "'bind' Attach commands to keys 'bind w move_forward'",
                     },
-                    Function = (Args) => this.Bind(Args)
-					, FunctionName = nameof(this.Bind)
+                    Function = (Args) => this.Bind(Args),
+					FunctionName = nameof(this.Bind),
+					CommandType = CT.Command,
                 }
             },
 
@@ -67,8 +71,9 @@ public class Commands
                         "'fps_max' Prints the current max fps",
                         "'fps_max <fps>' Sets the max fps",
                     },
-                    Function = (Args) => Commands.FpsMax(Args)
-					, FunctionName = nameof(Commands.FpsMax)
+                    Function = (Args) => Commands.FpsMax(Args),
+					FunctionName = nameof(Commands.FpsMax),
+					CommandType = CT.Command,
                 }
             },
 			{
@@ -77,8 +82,9 @@ public class Commands
 					HelpMessages = new string[] {
 						"'move_forward' Moves player forward"
 					},
-					Function2 = (Args) => PlayerController.MoveForward(Args)
-					, FunctionName = nameof(PlayerController.MoveForward)
+					Function2 = (Args) => PlayerController.MoveForward(Args),
+					FunctionName = nameof(PlayerController.MoveForward),
+					CommandType = CT.PlayerController,
 				}
 			},
 			{
@@ -87,8 +93,9 @@ public class Commands
 					HelpMessages = new string[] {
 						"'move_backward' Moves player backward"
 					},
-					Function2 = (Args) => PlayerController.MoveBack(Args)
-					, FunctionName = nameof(PlayerController.MoveBack)
+					Function2 = (Args) => PlayerController.MoveBack(Args),
+					FunctionName = nameof(PlayerController.MoveBack),
+					CommandType = CT.PlayerController,
 				}
 			},
 			{
@@ -97,8 +104,9 @@ public class Commands
 					HelpMessages = new string[] {
 						"'move_left' Moves player left"
 					},
-					Function2 = (Args) => PlayerController.MoveLeft(Args)
-					, FunctionName = nameof(PlayerController.MoveLeft)
+					Function2 = (Args) => PlayerController.MoveLeft(Args),
+					FunctionName = nameof(PlayerController.MoveLeft),
+					CommandType = CT.PlayerController,
 				}
 			},
 			{
@@ -107,8 +115,9 @@ public class Commands
 					HelpMessages = new string[] {
 						"'move_right' Moves player right"
 					},
-					Function2 = (Args) => PlayerController.MoveRight(Args)
-					, FunctionName = nameof(PlayerController.MoveRight)
+					Function2 = (Args) => PlayerController.MoveRight(Args),
+					FunctionName = nameof(PlayerController.MoveRight),
+					CommandType = CT.PlayerController,
 				}
 			},
 			{
@@ -117,8 +126,9 @@ public class Commands
 					HelpMessages = new string[] {
 						"'jump' Moves player upward"
 					},
-					Function2 = (Args) => PlayerController.Jump(Args)
-					, FunctionName = nameof(PlayerController.Jump)
+					Function2 = (Args) => PlayerController.Jump(Args),
+					FunctionName = nameof(PlayerController.Jump),
+					CommandType = CT.PlayerController,
 				}
 			},
 			{
@@ -127,8 +137,9 @@ public class Commands
 					HelpMessages = new string[] {
 						"'attack' Makes player attack"
 					},
-					Function2 = (Args) => PlayerController.Attack(Args)
-					, FunctionName = nameof(PlayerController.Attack)
+					Function2 = (Args) => PlayerController.Attack(Args),
+					FunctionName = nameof(PlayerController.Attack),
+					CommandType = CT.PlayerController,
 				}
 			},
 			{
@@ -137,8 +148,9 @@ public class Commands
 					HelpMessages = new string[] {
 						"'look_up' Makes player look up"
 					},
-					Function2 = (Args) => PlayerController.LookUp(Args)
-					, FunctionName = nameof(PlayerController.LookUp)
+					Function2 = (Args) => PlayerController.LookUp(Args),
+					FunctionName = nameof(PlayerController.LookUp),
+					CommandType = CT.PlayerController,
 				}
 			},
 			{
@@ -147,8 +159,9 @@ public class Commands
 					HelpMessages = new string[] {
 						"'look_down' Makes player look down"
 					},
-					Function2 = (Args) => PlayerController.LookDown(Args)
-					, FunctionName = nameof(PlayerController.LookDown)
+					Function2 = (Args) => PlayerController.LookDown(Args),
+					FunctionName = nameof(PlayerController.LookDown),
+					CommandType = CT.PlayerController,
 				}
 			},
 			{
@@ -157,8 +170,9 @@ public class Commands
 					HelpMessages = new string[] {
 						"'look_right' Makes player look right"
 					},
-					Function2 = (Args) => PlayerController.LookRight(Args)
-					, FunctionName = nameof(PlayerController.LookRight)
+					Function2 = (Args) => PlayerController.LookRight(Args),
+					FunctionName = nameof(PlayerController.LookRight),
+					CommandType = CT.PlayerController,
 				}
 			},
 			{
@@ -167,8 +181,9 @@ public class Commands
 					HelpMessages = new string[] {
 						"'look_left' Makes player look left"
 					},
-					Function2 = (Args) => PlayerController.LookLeft(Args)
-					, FunctionName = nameof(PlayerController.LookLeft)
+					Function2 = (Args) => PlayerController.LookLeft(Args),
+					FunctionName = nameof(PlayerController.LookLeft),
+					CommandType = CT.PlayerController,
 				}
 			},
 			{
@@ -177,8 +192,9 @@ public class Commands
 					HelpMessages = new string[] {
 						"'mousemode_toggle' Toggles mouse mode"
 					},
-					Function2 = (Args) => PlayerController.MouseModeToggle()
-					, FunctionName = nameof(PlayerController.MouseModeToggle)
+					Function2 = (Args) => PlayerController.MouseModeToggle(),
+					FunctionName = nameof(PlayerController.MouseModeToggle),
+					CommandType = CT.Command,
 				}
 			},
 			{
@@ -187,8 +203,9 @@ public class Commands
 					HelpMessages = new string[] {
 						"'mainmenu_toggle' Toggles main menu"
 					},
-					Function2 = (Args) => MainMenu.MainMenuToggle()
-					, FunctionName = nameof(MainMenu.MainMenuToggle)
+					Function2 = (Args) => MainMenu.MainMenuToggle(),
+					FunctionName = nameof(MainMenu.MainMenuToggle),
+					CommandType = CT.Command,
 				}
 			},
 			{
@@ -197,8 +214,9 @@ public class Commands
 					HelpMessages = new string[] {
 						"'console_toggle' Toggles console"
 					},
-					Function2 = (Args) => Console.ConsoleToggle()
-					, FunctionName = nameof(Console.ConsoleToggle)
+					Function2 = (Args) => Console.ConsoleToggle(),
+					FunctionName = nameof(Console.ConsoleToggle),
+					CommandType = CT.Command,
 				}
 			},
 			{
@@ -207,8 +225,9 @@ public class Commands
 					HelpMessages = new string[] {
 						"'save_cfg' saves all current binds and settings to config.cfg"
 					},
-					Function = (Args) => Commands.SaveConfig()
-					, FunctionName = nameof(Commands.SaveConfig)
+					Function = (Args) => Commands.SaveConfig(),
+					FunctionName = nameof(Commands.SaveConfig),
+					CommandType = CT.Command,
 				}
 			}
         };

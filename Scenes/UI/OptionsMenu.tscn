@@ -18,7 +18,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Controls" type="Panel" parent="TabContainer"]
+[node name="Settings" type="Panel" parent="TabContainer"]
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_left = 4.0
@@ -26,7 +26,7 @@ margin_top = 32.0
 margin_right = -4.0
 margin_bottom = -4.0
 
-[node name="ControlsContainer" type="GridContainer" parent="TabContainer/Controls"]
+[node name="SettingsContainer" type="GridContainer" parent="TabContainer/Settings"]
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_left = 5.0
@@ -37,58 +37,54 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="SensitivityContainer" type="HBoxContainer" parent="TabContainer/Controls/ControlsContainer"]
-margin_right = 128.0
+[node name="SensitivityContainer" type="HBoxContainer" parent="TabContainer/Settings/SettingsContainer"]
+margin_right = 151.0
 margin_bottom = 24.0
 
-[node name="Label" type="Label" parent="TabContainer/Controls/ControlsContainer/SensitivityContainer"]
+[node name="Label" type="Label" parent="TabContainer/Settings/SettingsContainer/SensitivityContainer"]
 margin_top = 5.0
 margin_right = 66.0
 margin_bottom = 19.0
 text = "Sensitivity"
 
-[node name="SensitivityValue" type="LineEdit" parent="TabContainer/Controls/ControlsContainer/SensitivityContainer"]
+[node name="SensitivityValue" type="LineEdit" parent="TabContainer/Settings/SettingsContainer/SensitivityContainer"]
 margin_left = 70.0
 margin_right = 128.0
 margin_bottom = 24.0
 
-[node name="InvertMouseContainer" type="HBoxContainer" parent="TabContainer/Controls/ControlsContainer"]
+[node name="InvertMouseContainer" type="HBoxContainer" parent="TabContainer/Settings/SettingsContainer"]
 margin_top = 28.0
-margin_right = 128.0
+margin_right = 151.0
 margin_bottom = 52.0
 
-[node name="Label" type="Label" parent="TabContainer/Controls/ControlsContainer/InvertMouseContainer"]
+[node name="Label" type="Label" parent="TabContainer/Settings/SettingsContainer/InvertMouseContainer"]
 margin_top = 5.0
 margin_right = 85.0
 margin_bottom = 19.0
 text = "Invert Mouse"
 
-[node name="InvertMouseCheckBox" type="CheckBox" parent="TabContainer/Controls/ControlsContainer/InvertMouseContainer"]
+[node name="InvertMouseCheckBox" type="CheckBox" parent="TabContainer/Settings/SettingsContainer/InvertMouseContainer"]
 margin_left = 89.0
 margin_right = 113.0
 margin_bottom = 24.0
 
-[node name="Save" type="Button" parent="TabContainer/Controls"]
-margin_left = 848.0
-margin_top = 541.0
-margin_right = 889.0
-margin_bottom = 561.0
-text = "Save"
-__meta__ = {
-"_edit_use_anchors_": false
-}
+[node name="HBoxContainer" type="HBoxContainer" parent="TabContainer/Settings/SettingsContainer"]
+margin_top = 56.0
+margin_right = 151.0
+margin_bottom = 80.0
 
-[node name="Load Defaults" type="Button" parent="TabContainer/Controls"]
-margin_left = 903.0
-margin_top = 540.0
-margin_right = 1002.0
-margin_bottom = 560.0
-text = "Load Defaults"
-__meta__ = {
-"_edit_use_anchors_": false
-}
+[node name="Label" type="Label" parent="TabContainer/Settings/SettingsContainer/HBoxContainer"]
+margin_top = 5.0
+margin_right = 89.0
+margin_bottom = 19.0
+text = "move_forward"
 
-[node name="Other tab" type="Panel" parent="TabContainer"]
+[node name="LineEdit" type="LineEdit" parent="TabContainer/Settings/SettingsContainer/HBoxContainer"]
+margin_left = 93.0
+margin_right = 151.0
+margin_bottom = 24.0
+
+[node name="Controls" type="Panel" parent="TabContainer"]
 visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -97,13 +93,33 @@ margin_top = 32.0
 margin_right = -4.0
 margin_bottom = -4.0
 
-[node name="GridContainer2" type="GridContainer" parent="TabContainer/Other tab"]
+[node name="ControlsContainer" type="GridContainer" parent="TabContainer/Controls"]
 visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_right = -8.0
 margin_bottom = -36.0
-[connection signal="text_changed" from="TabContainer/Controls/ControlsContainer/SensitivityContainer/SensitivityValue" to="." method="_on_text_changed_number_only" binds= [ "mSensitivity" ]]
-[connection signal="pressed" from="TabContainer/Controls/ControlsContainer/InvertMouseContainer/InvertMouseCheckBox" to="." method="_on_InvertMouseCheckBox_pressed"]
-[connection signal="pressed" from="TabContainer/Controls/Save" to="." method="_on_Save_pressed"]
-[connection signal="pressed" from="TabContainer/Controls/Load Defaults" to="." method="_on_Load_Defaults_pressed"]
+
+[node name="Save" type="Button" parent="."]
+margin_left = 852.0
+margin_top = 573.0
+margin_right = 893.0
+margin_bottom = 593.0
+text = "Save"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Load Defaults" type="Button" parent="."]
+margin_left = 907.0
+margin_top = 572.0
+margin_right = 1006.0
+margin_bottom = 592.0
+text = "Load Defaults"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+[connection signal="text_changed" from="TabContainer/Settings/SettingsContainer/SensitivityContainer/SensitivityValue" to="." method="_on_text_changed_number_only" binds= [ "mSensitivity" ]]
+[connection signal="pressed" from="TabContainer/Settings/SettingsContainer/InvertMouseContainer/InvertMouseCheckBox" to="." method="_on_InvertMouseCheckBox_pressed"]
+[connection signal="pressed" from="Save" to="." method="_on_Save_pressed"]
+[connection signal="pressed" from="Load Defaults" to="." method="_on_Load_Defaults_pressed"]

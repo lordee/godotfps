@@ -60,6 +60,7 @@ public class PlayerController : Camera
         pCmd.move_up = move_up;
         pCmd.aim = this.GlobalTransform.basis;
         pCmd.cam_angle = _cameraAngle;
+        // FIXME - basis.z.angleto(up vector) instead of rotation value
         pCmd.rotation = _player.Mesh.Rotation;
         pCmd.attack = attack;
         pCmd.attackDir = shootTo;
@@ -70,37 +71,55 @@ public class PlayerController : Camera
     [InputWithArg(typeof(PlayerController), nameof(MoveForward))]
     public static void MoveForward(float val)
     {
-        Game.Client.move_forward += val;
+        if (Game.Client != null)
+        {
+            Game.Client.move_forward += val;
+        }
     }
 
     [InputWithArg(typeof(PlayerController), nameof(MoveBack))]
     public static void MoveBack(float val)
     {
-        Game.Client.move_forward -= val;
+        if (Game.Client != null)
+        {
+            Game.Client.move_forward -= val;
+        }
     }
 
     [InputWithArg(typeof(PlayerController), nameof(MoveRight))]
     public static void MoveRight(float val)
     {
-        Game.Client.move_right += val;
+        if (Game.Client != null)
+        {
+            Game.Client.move_right += val;
+        }
     }
 
     [InputWithArg(typeof(PlayerController), nameof(MoveLeft))]
     public static void MoveLeft(float val)
     {
-        Game.Client.move_right -= val;
+        if (Game.Client != null)
+        {
+            Game.Client.move_right -= val;
+        }
     }
 
     [InputWithArg(typeof(PlayerController), nameof(Jump))]
     public static void Jump(float val)
     {
-        Game.Client.move_up = val;
+        if (Game.Client != null)
+        {
+            Game.Client.move_up = val;
+        }
     }
 
     [InputWithArg(typeof(PlayerController), nameof(Attack))]
     public static void Attack(float val)
     {
-        if (Input.GetMouseMode() == Input.MouseMode.Captured)
+        // FIXME
+        // setinputashandle is not working on closing of UI, breaks the game when in lobby and click with mouse to close something
+        // sets off an attack command while client is null
+        if (Game.Client != null)
         {
             Game.Client.attack = val;
         }
@@ -123,13 +142,16 @@ public class PlayerController : Camera
     [InputWithArg(typeof(PlayerController), nameof(LookUp))]
 	public static void LookUp(float val)
 	{
-        if (val > 0)
+        if (Game.Client != null)
         {
-            float change = val * Settings.Sensitivity * Settings.InvertMouseValue;
-            if (Game.Client._cameraAngle + change < 90f && Game.Client._cameraAngle + change > -90f)
+            if (val > 0)
             {
-                Game.Client._cameraAngle += change;
-                Game.Client.RotateX(Mathf.Deg2Rad(change));
+                float change = val * Settings.Sensitivity * Settings.InvertMouseValue;
+                if (Game.Client._cameraAngle + change < 90f && Game.Client._cameraAngle + change > -90f)
+                {
+                    Game.Client._cameraAngle += change;
+                    Game.Client.RotateX(Mathf.Deg2Rad(change));
+                }
             }
         }
 	}
@@ -138,13 +160,16 @@ public class PlayerController : Camera
 	[InputWithArg(typeof(PlayerController), nameof(LookDown))]
 	public static void LookDown(float val)
 	{
-        if (val > 0)
+        if (Game.Client != null)
         {
-            float change = -val * Settings.Sensitivity * Settings.InvertMouseValue;
-            if (Game.Client._cameraAngle + change < 90f && Game.Client._cameraAngle + change > -90f)
+            if (val > 0)
             {
-                Game.Client._cameraAngle += change;
-                Game.Client.RotateX(Mathf.Deg2Rad(change));
+                float change = -val * Settings.Sensitivity * Settings.InvertMouseValue;
+                if (Game.Client._cameraAngle + change < 90f && Game.Client._cameraAngle + change > -90f)
+                {
+                    Game.Client._cameraAngle += change;
+                    Game.Client.RotateX(Mathf.Deg2Rad(change));
+                }
             }
         }
 	}
@@ -153,10 +178,13 @@ public class PlayerController : Camera
 	[InputWithArg(typeof(PlayerController), nameof(LookRight))]
 	public static void LookRight(float val)
 	{
-		if (val > 0)
+        if (Game.Client != null)
         {
-            float change = Mathf.Deg2Rad(-val * Settings.Sensitivity);
-            Game.Client.Player.RotateHead(change);
+            if (val > 0)
+            {
+                float change = Mathf.Deg2Rad(-val * Settings.Sensitivity);
+                Game.Client.Player.RotateHead(change);
+            }
         }
 	}
 
@@ -164,10 +192,13 @@ public class PlayerController : Camera
 	[InputWithArg(typeof(PlayerController), nameof(LookLeft))]
 	public static void LookLeft(float val)
 	{
-		if (val > 0)
+        if (Game.Client != null)
         {
-            float change = Mathf.Deg2Rad(val * Settings.Sensitivity);
-            Game.Client.Player.RotateHead(change);
+            if (val > 0)
+            {
+                float change = Mathf.Deg2Rad(val * Settings.Sensitivity);
+                Game.Client.Player.RotateHead(change);
+            }
         }
 	}
 }

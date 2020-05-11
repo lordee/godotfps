@@ -49,7 +49,6 @@ public class Lobby : Control, IUIItem
     private void _On_Join_Pressed()
     {   
         _game.Network.ConnectTo(_address.Text, Convert.ToInt32(_port.Text));
-        
         UIManager.Close();
     }
 

@@ -22,7 +22,14 @@ public class Game : Node
         UIManager = GetNode("UIManager") as UIManager;
         Settings = new Settings(this);
 
+        this.FirstLoad();
         Settings.LoadConfig();
+    }
+
+    private void FirstLoad()
+    {
+        // Game is last loaded node, we need it to reference other nodes
+        UIManager.OptionsMenu.Init();
     }
 
     public void Quit()
