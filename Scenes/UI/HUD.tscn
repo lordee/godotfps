@@ -58,3 +58,10 @@ texture = ExtResource( 2 )
 
 [node name="AimAt" type="Node2D" parent="Manager"]
 position = Vector2( 512, 300 )
+
+[node name="FPS" type="Label" parent="Manager"]
+margin_right = 40.0
+margin_bottom = 14.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
