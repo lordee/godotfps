@@ -63,6 +63,8 @@ public class Player : KinematicBody
     private float _currentHealth;
     public float CurrentHealth { get { return _currentHealth; }}
 
+    private MT _moveType = MT.NORMAL;
+
     // test rocket stuff
     float _lastRocketShot = 0f;
     float _rocketCD = .5f;
@@ -83,7 +85,8 @@ public class Player : KinematicBody
         {
             pCmdQueue.Add(
                 new PlayerCmd{
-                    snapshot = this.Peer.LastSnapshot + 1,
+                    //snapshot = this.Peer.LastSnapshot + 1,
+                    snapshot = 0,
                     playerID = ID,
                     move_forward = 0,
                     move_right = 0,
@@ -100,6 +103,10 @@ public class Player : KinematicBody
             pCmdQueue.Sort((x,y) => x.snapshot.CompareTo(y.snapshot));
         }
 
+        Transform t = GlobalTransform;
+        t.origin = _predictedState.Origin; // by this point it's a new serverstate
+        GlobalTransform = t;
+
         foreach(PlayerCmd pCmd in pCmdQueue)
         {
             Peer p = this.Peer;
@@ -110,6 +117,13 @@ public class Player : KinematicBody
             
             if (pCmd.snapshot < p.LastSnapshot)
             {
+                continue;
+            }
+
+            // FIXME - want a clear delay before spawn allowed
+            if (_moveType == MT.DEAD)
+            {
+                _game.World.Spawn(this);
                 continue;
             }
 
@@ -124,7 +138,7 @@ public class Player : KinematicBody
             }
 
             p.LastSnapshot = pCmd.snapshot;
-            
+          
             this.ProcessAttack(pCmd, delta);
 
             if (IsNetworkMaster())
@@ -173,10 +187,6 @@ public class Player : KinematicBody
     public State ProcessMovement(State predState, PlayerCmd pCmd, float delta)
     {
         _playerVelocity = predState.Velocity;
-        Transform t = new Transform();
-        t = GlobalTransform;
-        t.origin = predState.Origin;
-        GlobalTransform = t;
 
         QueueJump(pCmd);
 
@@ -511,21 +521,19 @@ public class Player : KinematicBody
 
     public void Spawn(Vector3 spawnPoint)
     {
+        _moveType = MT.NORMAL;
         this.Translation = spawnPoint;
 
         this.SetServerState(this.GlobalTransform.origin, this._playerVelocity, this._mesh.Rotation, _maxHealth, _maxArmour);
-        _currentHealth = _maxHealth;
-        _currentArmour = _maxArmour;
+        _predictedState = _serverState;
     }
 
     private void Die()
     {
+        _moveType = MT.DEAD;
         // FIXME
         // death sound
         // orientation change
-        // respawn on input
         // log the death
-
-        _game.World.Spawn(this);
     }
 }
