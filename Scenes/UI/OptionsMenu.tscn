@@ -38,7 +38,7 @@ __meta__ = {
 }
 
 [node name="SensitivityContainer" type="HBoxContainer" parent="TabContainer/Settings/SettingsContainer"]
-margin_right = 151.0
+margin_right = 128.0
 margin_bottom = 24.0
 
 [node name="Label" type="Label" parent="TabContainer/Settings/SettingsContainer/SensitivityContainer"]
@@ -54,7 +54,7 @@ margin_bottom = 24.0
 
 [node name="InvertMouseContainer" type="HBoxContainer" parent="TabContainer/Settings/SettingsContainer"]
 margin_top = 28.0
-margin_right = 151.0
+margin_right = 128.0
 margin_bottom = 52.0
 
 [node name="Label" type="Label" parent="TabContainer/Settings/SettingsContainer/InvertMouseContainer"]
@@ -68,22 +68,6 @@ margin_left = 89.0
 margin_right = 113.0
 margin_bottom = 24.0
 
-[node name="HBoxContainer" type="HBoxContainer" parent="TabContainer/Settings/SettingsContainer"]
-margin_top = 56.0
-margin_right = 151.0
-margin_bottom = 80.0
-
-[node name="Label" type="Label" parent="TabContainer/Settings/SettingsContainer/HBoxContainer"]
-margin_top = 5.0
-margin_right = 89.0
-margin_bottom = 19.0
-text = "move_forward"
-
-[node name="LineEdit" type="LineEdit" parent="TabContainer/Settings/SettingsContainer/HBoxContainer"]
-margin_left = 93.0
-margin_right = 151.0
-margin_bottom = 24.0
-
 [node name="Controls" type="Panel" parent="TabContainer"]
 visible = false
 anchor_right = 1.0
@@ -94,7 +78,6 @@ margin_right = -4.0
 margin_bottom = -4.0
 
 [node name="ControlsContainer" type="GridContainer" parent="TabContainer/Controls"]
-visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_right = -8.0

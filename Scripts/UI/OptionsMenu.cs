@@ -9,6 +9,9 @@ public class OptionsMenu : Control, IUIItem
     Container _controlsContainer;
     Container _settingsContainer;
 
+    // player controls
+    List<LineEdit> _playerControls = new List<LineEdit>();
+
     // mouse controls
     LineEdit _mSensitivity;
     CheckBox _mInvert;
@@ -47,9 +50,10 @@ public class OptionsMenu : Control, IUIItem
         LineEdit le = new LineEdit();
         le.Name = kvp.Key;
 
-        _controlsContainer.AddChild(hb);
         hb.AddChild(lbl);
         hb.AddChild(le);
+        _controlsContainer.AddChild(hb);
+        _playerControls.Add(le);
     }
 
     private void _on_Load_Defaults_pressed()
@@ -61,6 +65,12 @@ public class OptionsMenu : Control, IUIItem
     {
         Settings.Sensitivity = float.Parse(_mSensitivity.Text);
         Settings.InvertedMouse = _mInvert.Pressed;
+
+        foreach (LineEdit le in _playerControls)
+        {
+            Bindings.Bind(le.Name, le.Text);
+        }
+
         Commands.SaveConfig();
     }
 
@@ -70,6 +80,26 @@ public class OptionsMenu : Control, IUIItem
         UpdateHistory("msensitivity", Settings.Sensitivity.ToString());
         _mInvert.Pressed = Settings.InvertedMouse;
         UpdateHistory("minvertmouse", Settings.InvertedMouse.ToString());
+
+        foreach (LineEdit le in _playerControls)
+        {
+            Godot.Collections.Array actionList = InputMap.GetActionList(le.Name);
+            foreach(InputEvent ie in actionList)
+            {
+                if (ie is InputEventKey iek)
+                {
+                    // FIXME - this only does 1 key per command
+                    string key = OS.GetScancodeString(iek.Scancode).ToLower();
+                    le.Text = key;
+                    break;
+                }
+                else if (ie is InputEventMouseButton iem)
+                {
+                    // FIXME - append mouse to index number, interpret it for save too
+                    le.Text = iem.ButtonIndex.ToString();
+                }
+            }
+        }
     }
 
     private void UpdateHistory(string key, string val)
@@ -83,6 +113,8 @@ public class OptionsMenu : Control, IUIItem
             stringHistory[key.ToLower()] = val;
         }
     }
+
+    // FIXME - filter control assignments to take single key press etc
 
     private void _on_text_changed_number_only(string text, string controlName)
     {
