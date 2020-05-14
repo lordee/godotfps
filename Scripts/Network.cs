@@ -11,6 +11,7 @@ public class Network : Node
     private int maxPlayers = 8;
     
     PlayerController _pc;
+    public PlayerController PlayerController { get { return _pc; }}
     private int _id;
     public List<Peer> PeerList = new List<Peer>();
 
@@ -137,7 +138,6 @@ public class Network : Node
     
     private void SyncWorld(int id)
     {
-        // TODO - send over all ents to new player?
         foreach(Peer p in PeerList)
         {
             RpcId(id, nameof(SyncWorldReceive), _game.World.LocalSnapNum, ET.PLAYER, p.ID);

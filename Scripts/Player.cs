@@ -64,6 +64,7 @@ public class Player : KinematicBody
     public float CurrentHealth { get { return _currentHealth; }}
 
     private MT _moveType = MT.NORMAL;
+    private float _timeDead = 0;
 
     // test rocket stuff
     float _lastRocketShot = 0f;
@@ -123,30 +124,45 @@ public class Player : KinematicBody
             // FIXME - want a clear delay before spawn allowed
             if (_moveType == MT.DEAD)
             {
-                _game.World.Spawn(this);
-                continue;
-            }
-
-            if (IsNetworkMaster())
-            {
-                int diff = _game.World.LocalSnapNum - pCmd.snapshot;
-                if (diff < 0)
+                if (_touchingGround)
                 {
-                    return;
+                    _timeDead += delta; // have to wait time after touching ground to respawn
                 }
-                _game.World.RewindPlayers(diff, delta);
+
+                if (_timeDead > .5)
+                {
+                    if (pCmd.attack == 1 || pCmd.move_up == 1)
+                    {
+                        _game.World.Spawn(this);
+                        _timeDead = 0;
+                    }
+                }
             }
-
-            p.LastSnapshot = pCmd.snapshot;
-          
-            this.ProcessAttack(pCmd, delta);
-
-            if (IsNetworkMaster())
+            else
             {
-                _game.World.FastForwardPlayers();
+                if (IsNetworkMaster())
+                {
+                    int diff = _game.World.LocalSnapNum - pCmd.snapshot;
+                    if (diff < 0)
+                    {
+                        return;
+                    }
+                    _game.World.RewindPlayers(diff, delta);
+                }
+
+                p.LastSnapshot = pCmd.snapshot;
+            
+                this.ProcessAttack(pCmd, delta);
+
+                if (IsNetworkMaster())
+                {
+                    _game.World.FastForwardPlayers();
+                }
+
+                this.ProcessMovementCmd(_predictedState, pCmd, delta);
             }
 
-            this.ProcessMovement(_predictedState, pCmd, delta);
+            this.ProcessMovement(delta);
         }
 
         if (IsNetworkMaster())
@@ -167,10 +183,28 @@ public class Player : KinematicBody
         _mesh.RotateY(rad);
     }
 
-    public void ProcessCommand(PlayerCmd pCmd, float delta)
+    private void ProcessMovement(float delta)
     {
-        ProcessAttack(pCmd, delta);
-        ProcessMovement(_predictedState, pCmd, delta);
+        ApplyGravity(delta);
+        if (!_wishJump)
+        {
+            ApplyFriction(1.0f, delta);
+        }
+        else
+        {
+            ApplyFriction(0, delta);
+            _wishJump = false;
+        }
+
+        _playerVelocity = this.MoveAndSlide(_playerVelocity, _game.World.Up);
+        _touchingGround = IsOnFloor();
+
+        _predictedState = new State {
+            StateNum = _predictedState.StateNum + 1,
+            Origin = GlobalTransform.origin,
+            Velocity = _playerVelocity,
+            Rotation = _mesh.Rotation
+        };
     }
 
     public void ProcessAttack(PlayerCmd pCmd, float delta)
@@ -184,11 +218,19 @@ public class Player : KinematicBody
         }
     }
 
-    public State ProcessMovement(State predState, PlayerCmd pCmd, float delta)
+    public void ProcessMovementCmd(State predState, PlayerCmd pCmd, float delta)
     {
         _playerVelocity = predState.Velocity;
 
-        QueueJump(pCmd);
+        // queue jump
+        if (pCmd.move_up == 1 && !_wishJump)
+        {
+            _wishJump = true;
+        }
+        if (pCmd.move_up <= 0)
+        {
+            _wishJump = false;
+        }
 
         // do air move which does gravity
         if (_touchingGround || _climbLadder)
@@ -199,17 +241,6 @@ public class Player : KinematicBody
         {
             AirMove(delta, pCmd);
         }
-
-        _playerVelocity = this.MoveAndSlide(_playerVelocity, _game.World.Up);
-        _touchingGround = IsOnFloor();
-
-        _predictedState = new State {
-            StateNum = predState.StateNum + 1,
-            Origin = GlobalTransform.origin,
-            Velocity = _playerVelocity,
-            Rotation = _mesh.Rotation
-        };
-        return _predictedState;
     }
 
     public void SetServerState(Vector3 org, Vector3 velo, Vector3 rot, float health, float armour)
@@ -243,15 +274,6 @@ public class Player : KinematicBody
     {
         Vector3 wishDir = new Vector3();
 
-        if (!_wishJump)
-        {
-            ApplyFriction(1.0f, delta);
-        }
-        else
-        {
-            ApplyFriction(0, delta);
-        }
-
         float scale = CmdScale(pCmd);
 
         wishDir += pCmd.aim.x * pCmd.move_right;
@@ -279,10 +301,6 @@ public class Player : KinematicBody
                 _playerVelocity.z = 0;
             }
         }
-        /*else
-        {
-            _playerVelocity.y = 0;
-        }*/
 
         // walk up stairs
         if (wishSpeed > 0 && _stairCatcher.IsColliding())
@@ -297,8 +315,8 @@ public class Player : KinematicBody
 
         if (_wishJump && IsOnFloor())
         {
+            // FIXME - if we add jump speed velocity we enable trimping right?
             _playerVelocity.y = _jumpSpeed;
-            _wishJump = false;
         }
     }
 
@@ -342,24 +360,15 @@ public class Player : KinematicBody
         {
             AirControl(wishdir, wishspeed2, delta);
         }*/
-        // !CPM: Aircontrol
+        // !CPM: Aircontrol       
+    }
 
-        // Apply gravity
+    // TODO - move this to world
+    private void ApplyGravity(float delta)
+    {
         if (!_climbLadder)
         {
             _playerVelocity.y -= _game.World.Gravity * delta;
-        }
-    }
-
-    private void QueueJump(PlayerCmd pCmd)
-    {
-        if (pCmd.move_up == 1 && !_wishJump)
-        {
-            _wishJump = true;
-        }
-        if (pCmd.move_up <= 0)
-        {
-            _wishJump = false;
         }
     }
 
@@ -521,7 +530,13 @@ public class Player : KinematicBody
 
     public void Spawn(Vector3 spawnPoint)
     {
-        _moveType = MT.NORMAL;
+        if (_moveType == MT.DEAD)
+        {
+            _stairCatcher.RemoveChild(_game.Network.PlayerController);
+            _head.AddChild(_game.Network.PlayerController);
+            _moveType = MT.NORMAL;
+        }
+        
         this.Translation = spawnPoint;
 
         this.SetServerState(this.GlobalTransform.origin, this._playerVelocity, this._mesh.Rotation, _maxHealth, _maxArmour);
@@ -530,10 +545,17 @@ public class Player : KinematicBody
 
     private void Die()
     {
+        _currentHealth = 0;
+        _currentArmour = 0;
         _moveType = MT.DEAD;
-        // FIXME
-        // death sound
-        // orientation change
-        // log the death
+        if (PlayerControlled)
+        {
+            // orientation change
+            // FIXME - pc should be on player if available
+            _head.RemoveChild(_game.Network.PlayerController);
+            _stairCatcher.AddChild(_game.Network.PlayerController);
+        }
+        pCmdQueue.Clear();
+        // TODO - death sound
     }
 }
