@@ -532,8 +532,9 @@ public class Player : KinematicBody
     {
         if (_moveType == MT.DEAD)
         {
-            _stairCatcher.RemoveChild(_game.Network.PlayerController);
-            _head.AddChild(_game.Network.PlayerController);
+            PlayerController pc = _game.Network.PlayerController;
+            pc.Translation = new Vector3(pc.Translation.x, _head.Translation.y, pc.Translation.z);
+
             _moveType = MT.NORMAL;
         }
         
@@ -552,8 +553,8 @@ public class Player : KinematicBody
         {
             // orientation change
             // FIXME - pc should be on player if available
-            _head.RemoveChild(_game.Network.PlayerController);
-            _stairCatcher.AddChild(_game.Network.PlayerController);
+            PlayerController pc = _game.Network.PlayerController;
+            pc.Translation = new Vector3(pc.Translation.x, _stairCatcher.Translation.y, pc.Translation.z);
         }
         pCmdQueue.Clear();
         // TODO - death sound
