@@ -552,7 +552,7 @@ public class Player : KinematicBody
         if (PlayerControlled)
         {
             // orientation change
-            // FIXME - pc should be on player if available
+            // TODO - pc should be on player if available
             PlayerController pc = _game.Network.PlayerController;
             pc.Translation = new Vector3(pc.Translation.x, _stairCatcher.Translation.y, pc.Translation.z);
         }

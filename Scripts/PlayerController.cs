@@ -47,6 +47,7 @@ public class PlayerController : Camera
         shootTo = new Vector3();
         if (attack == 1)
         {
+            // FIXME - spawn projectile from middle of player, not camera
             Vector3 origin = ProjectRayOrigin(_aimAt.Position);
             Vector3 to = ProjectRayNormal(_aimAt.Position) * _shootRange;
             shootTo = to + origin;
