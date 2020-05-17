@@ -69,7 +69,10 @@ public class TeamMenu : VBoxContainer, IUIItem
 
     public void UI_Cancel()
     {
-        UIManager.Close();
+        if (Game.Client.Player.Team != 0)
+        {
+            UIManager.Close();
+        }
     }
 
     public void UI_Accept()
