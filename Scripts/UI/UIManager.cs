@@ -6,20 +6,26 @@ using System.Reflection;
 
 public class UIManager : Node
 {
+    public static Game Game;
     public static MainMenu MainMenu;
     public static OptionsMenu OptionsMenu;
     public static Console Console;
     public static Lobby Lobby;
+    public static TeamMenu TeamMenu;
+    public static ClassMenu ClassMenu;
 
     private static Stack<IUIItem> Stack = new Stack<IUIItem>();
 
     // Called when the node enters the scene tree for the first time.
     public override void _Ready()
     {
+        Game = GetTree().Root.GetNode("Game") as Game;
         MainMenu = GetNode("MainMenu") as MainMenu;
         OptionsMenu = GetNode("OptionsMenu") as OptionsMenu;
         Console = GetNode("Console") as Console;
         Lobby = GetNode("Console") as Lobby;
+        TeamMenu = GetNode("TeamMenu") as TeamMenu;
+        ClassMenu = GetNode("ClassMenu") as ClassMenu;
     }
 
     public static void MouseModeToggle()

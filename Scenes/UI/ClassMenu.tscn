@@ -1,0 +1,102 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://Scripts/UI/ClassMenu.cs" type="Script" id=1]
+
+[node name="ClassMenu" type="VBoxContainer"]
+margin_right = 40.0
+margin_bottom = 40.0
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Scout" type="Button" parent="." groups=[
+"classbutton",
+]]
+margin_right = 143.0
+margin_bottom = 20.0
+size_flags_vertical = 3
+text = "Scout"
+
+[node name="Sniper" type="Button" parent="." groups=[
+"classbutton",
+]]
+margin_top = 24.0
+margin_right = 143.0
+margin_bottom = 44.0
+size_flags_vertical = 3
+text = "Sniper"
+
+[node name="Soldier" type="Button" parent="." groups=[
+"classbutton",
+]]
+margin_top = 48.0
+margin_right = 143.0
+margin_bottom = 68.0
+text = "Soldier"
+
+[node name="Demoman" type="Button" parent="." groups=[
+"classbutton",
+]]
+margin_top = 72.0
+margin_right = 143.0
+margin_bottom = 92.0
+text = "Demoman"
+
+[node name="Medic" type="Button" parent="." groups=[
+"classbutton",
+]]
+margin_top = 96.0
+margin_right = 143.0
+margin_bottom = 116.0
+text = "Medic"
+
+[node name="HWGuy" type="Button" parent="." groups=[
+"classbutton",
+]]
+margin_top = 120.0
+margin_right = 143.0
+margin_bottom = 140.0
+text = "Heavy Weapons Guy"
+
+[node name="Pyro" type="Button" parent="." groups=[
+"classbutton",
+]]
+margin_top = 144.0
+margin_right = 143.0
+margin_bottom = 164.0
+text = "Pyro"
+
+[node name="Spy" type="Button" parent="." groups=[
+"classbutton",
+]]
+margin_top = 168.0
+margin_right = 143.0
+margin_bottom = 188.0
+text = "Spy"
+
+[node name="Engineer" type="Button" parent="." groups=[
+"classbutton",
+]]
+margin_top = 192.0
+margin_right = 143.0
+margin_bottom = 212.0
+text = "Engineer"
+
+[node name="RandomPC" type="Button" parent="." groups=[
+"classbutton",
+]]
+margin_top = 216.0
+margin_right = 143.0
+margin_bottom = 236.0
+text = "Random"
+[connection signal="pressed" from="Scout" to="." method="_on_Button_Pressed" binds= [ 1 ]]
+[connection signal="pressed" from="Sniper" to="." method="_on_Button_Pressed" binds= [ 2 ]]
+[connection signal="pressed" from="Soldier" to="." method="_on_Button_Pressed" binds= [ 3 ]]
+[connection signal="pressed" from="Demoman" to="." method="_on_Button_Pressed" binds= [ 4 ]]
+[connection signal="pressed" from="Medic" to="." method="_on_Button_Pressed" binds= [ 5 ]]
+[connection signal="pressed" from="HWGuy" to="." method="_on_Button_Pressed" binds= [ 6 ]]
+[connection signal="pressed" from="Pyro" to="." method="_on_Button_Pressed" binds= [ 7 ]]
+[connection signal="pressed" from="Spy" to="." method="_on_Button_Pressed" binds= [ 8 ]]
+[connection signal="pressed" from="Engineer" to="." method="_on_Button_Pressed" binds= [ 9 ]]
+[connection signal="pressed" from="RandomPC" to="." method="_on_Button_Pressed" binds= [ 10 ]]

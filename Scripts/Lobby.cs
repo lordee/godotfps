@@ -42,8 +42,8 @@ public class Lobby : Control, IUIItem
 
     private void _On_Host_Pressed()
     {
-        _game.Network.Host(Convert.ToInt32(_port.Text));
         UIManager.Close();
+        _game.Network.Host(Convert.ToInt32(_port.Text));
     }
 
     private void _On_Join_Pressed()

@@ -257,7 +257,6 @@ public class World : Node
             pc.Notification(NotificationReady);
             _worldOwner = player;
         }
-        player.Team = 1;
 
         if (IsNetworkMaster())
         {
@@ -293,9 +292,9 @@ public class World : Node
                     spawn = (Spatial)spawnsTeam2[currentSpawnTeam2];
                     currentSpawnTeam2++;
                 break;
-                case 9:
+                default:
                     // nothing for now, just break
-                    
+                    teamID = 9;
                 break;
             }
             return teamID == 9 ? new Vector3(0,10,0) : spawn.Translation;

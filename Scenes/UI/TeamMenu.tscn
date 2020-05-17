@@ -1,0 +1,33 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://Scripts/UI/TeamMenu.cs" type="Script" id=1]
+
+[node name="TeamMenu" type="VBoxContainer"]
+alignment = 1
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Team1" type="Button" parent="."]
+margin_right = 72.0
+margin_bottom = 20.0
+size_flags_vertical = 3
+text = "Team 1"
+
+[node name="Team2" type="Button" parent="."]
+margin_top = 24.0
+margin_right = 72.0
+margin_bottom = 44.0
+size_flags_vertical = 3
+text = "Team 2"
+
+[node name="Spectator" type="Button" parent="."]
+margin_top = 48.0
+margin_right = 72.0
+margin_bottom = 68.0
+size_flags_vertical = 3
+text = "Spectator"
+[connection signal="pressed" from="Team1" to="." method="_on_btn_pressed" binds= [ 1 ]]
+[connection signal="pressed" from="Team2" to="." method="_on_btn_pressed" binds= [ 2 ]]
+[connection signal="pressed" from="Spectator" to="." method="_on_btn_pressed" binds= [ 3 ]]

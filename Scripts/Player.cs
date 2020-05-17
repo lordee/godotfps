@@ -22,6 +22,7 @@ public class Player : KinematicBody
     // fields
     public int Team;
     public int ID;
+    public PlayerClass PlayerClass;
     
     // movement
     private bool _wishJump;
@@ -121,7 +122,6 @@ public class Player : KinematicBody
                 continue;
             }
 
-            // FIXME - want a clear delay before spawn allowed
             if (_moveType == MT.DEAD)
             {
                 if (_touchingGround)
@@ -544,7 +544,7 @@ public class Player : KinematicBody
         _predictedState = _serverState;
     }
 
-    private void Die()
+    public void Die()
     {
         _currentHealth = 0;
         _currentArmour = 0;

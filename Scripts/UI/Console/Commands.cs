@@ -232,6 +232,17 @@ public class Commands
 			}
         };
     }
+
+	public void JoinTeam(int teamID)
+	{
+		// send packet to server requesting join
+		_game.Network.JoinTeam(Game.Client.Player.ID, teamID);
+	}
+
+	public void ChooseClass(int classNum)
+	{
+		_game.Network.ChooseClass(Game.Client.Player.ID, classNum);
+	}
 	
 	public static void SaveConfig()
 	{

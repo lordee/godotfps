@@ -58,7 +58,7 @@ public class Network : Node
 
     public void Disconnect()
     {
-        // TODO - implement
+        // TODO - implement disconnect
     }
 
     public void ClientConnected(string ids)
@@ -119,6 +119,102 @@ public class Network : Node
         _active = true;
 	}
 
+    // TODO - move this to another node
+    public void ServerJoinTeam(int playerID, int teamID)
+    {
+        // TODO - team limits etc
+        Player p = _game.World.GetNode(playerID.ToString()) as Player;
+
+        if (p != null)
+        {
+            if (p.Team != teamID)
+            {
+                if (p.Team != 0)
+                {
+                    p.Die();
+                }
+                p.Team = teamID;
+                SendPlayerInfo(p);
+            }
+        }
+    }
+
+    [Remote]
+    public void JoinTeam(int playerID, int teamID)
+    {
+        // TODO - need to resend choice if it fails
+        if (IsNetworkMaster())
+        {
+            ServerJoinTeam(playerID, teamID);
+        }
+        else
+        {
+            RpcId(1, nameof(ServerJoinTeam), playerID, teamID);
+        }
+    }
+
+    private void SendPlayerInfo(Player p)
+    {
+        foreach(var pe in PeerList)
+        {
+            if (pe.ID != 1)
+            {
+                RpcId(pe.ID, nameof(ReceivePlayerInfo), p.ID, p.Team, (int)p.PlayerClass);
+            }
+        }
+    }
+
+    [Slave]
+    public void ReceivePlayerInfo(int peerID, int teamID, int classNum)
+    {
+        Peer pe = PeerList.Where(e => e.ID == peerID).FirstOrDefault();
+        if (pe != null)
+        {
+            pe.Player.Team = teamID;
+            pe.Player.PlayerClass = (PlayerClass)classNum;
+        }
+    }
+
+    // FIXME - move to different node
+    public void ServerChooseClass(int playerID, int classNum)
+    {
+        // TODO - class limits etc
+        Player p = _game.World.GetNode(playerID.ToString()) as Player;
+
+        if (p != null)
+        {
+            if (p.PlayerClass != (PlayerClass)classNum)
+            {
+                bool spawn = false;
+                if (p.PlayerClass == PlayerClass.NONE)
+                {
+                    spawn = true;
+                }
+                p.PlayerClass = (PlayerClass)classNum;
+                SendPlayerInfo(p);
+                if (spawn)
+                {
+                    _game.World.Spawn(p);
+                }
+            }
+        }
+    }
+
+    [Remote]
+    public void ChooseClass(int playerID, int classNum)
+    {
+        if (IsNetworkMaster())
+        {
+            ServerChooseClass(playerID, classNum);
+        }
+        else
+        {
+            // TODO - need to resend choice if it fails
+            RpcId(1, nameof(ServerChooseClass), playerID, classNum);
+        }
+    }
+
+    // FIXME - wrong class
     private void AddPlayer(int id, bool playerControlled)
     {
         PlayerController c = _game.World.AddPlayer(id, playerControlled);
@@ -127,6 +223,7 @@ public class Network : Node
         {
             _pc = c;
             _game.LoadUI(_pc);
+            UIManager.Open(UIManager.TeamMenu);
         }
 
         Player p = _game.World.GetNode(id.ToString()) as Player;

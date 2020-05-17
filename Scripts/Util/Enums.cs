@@ -37,3 +37,18 @@ public enum CT
     PlayerController,
     Command
 }
+
+public enum PlayerClass
+{
+    NONE = 0,
+    SCOUT = 1,
+    SNIPER = 2,
+    SOLDIER = 3,
+    DEMOMAN = 4,
+    MEDIC = 5,
+    HWGUY = 6,
+    PYRO = 7,
+    SPY = 8,
+    ENGINEER = 9
+
+}

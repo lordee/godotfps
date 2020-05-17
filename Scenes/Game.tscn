@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=2]
+[gd_scene load_steps=14 format=2]
 
 [ext_resource path="res://Scripts/Network.cs" type="Script" id=1]
 [ext_resource path="res://Scripts/ProjectileManager.cs" type="Script" id=2]
@@ -11,6 +11,8 @@
 [ext_resource path="res://Scenes/Lobby.tscn" type="PackedScene" id=9]
 [ext_resource path="res://Scenes/UI/MainMenu.tscn" type="PackedScene" id=10]
 [ext_resource path="res://Scenes/UI/OptionsMenu.tscn" type="PackedScene" id=11]
+[ext_resource path="res://Scenes/UI/TeamMenu.tscn" type="PackedScene" id=12]
+[ext_resource path="res://Scenes/UI/ClassMenu.tscn" type="PackedScene" id=13]
 
 [node name="Game" type="Node"]
 script = ExtResource( 4 )
@@ -44,4 +46,10 @@ visible = false
 visible = false
 
 [node name="Console" parent="UIManager" instance=ExtResource( 7 )]
+visible = false
+
+[node name="TeamMenu" parent="UIManager" instance=ExtResource( 12 )]
+visible = false
+
+[node name="ClassMenu" parent="UIManager" instance=ExtResource( 13 )]
 visible = false

@@ -58,9 +58,11 @@
     <Compile Include="Scripts\Player.cs" />
     <Compile Include="Scripts\PlayerController.cs" />
     <Compile Include="Scripts\ProjectileManager.cs" />
+    <Compile Include="Scripts\UI\ClassMenu.cs" />
     <Compile Include="Scripts\UI\HUD.cs" />
     <Compile Include="Scripts\UI\MainMenu.cs" />
     <Compile Include="Scripts\UI\OptionsMenu.cs" />
+    <Compile Include="Scripts\UI\TeamMenu.cs" />
     <Compile Include="Scripts\UI\UIManager.cs" />
     <Compile Include="Scripts\UI\IUIItem.cs" />
     <Compile Include="Scripts\Weapons\Rocket.cs" />
