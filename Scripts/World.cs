@@ -8,6 +8,7 @@ public class World : Node
 {
     private Godot.Collections.Array spawnsTeam1 = new Godot.Collections.Array();
     private Godot.Collections.Array spawnsTeam2 = new Godot.Collections.Array();
+    private Spatial _observerStart;
     private int currentSpawnTeam1 = 0;
     private int currentSpawnTeam2 = 0;
 
@@ -149,6 +150,7 @@ public class World : Node
                             case "info_player_start":
                                 foreach(DictionaryEntry kvp2 in fields)
                                 {
+                                    bool teamSet = false;
                                     switch(kvp2.Key.ToString().ToLower())
                                     {
                                         case "team_no":
@@ -156,9 +158,11 @@ public class World : Node
                                             switch (t)
                                             {
                                                 case 1:
+                                                    teamSet = true;
                                                     spawnsTeam1.Add(ent);
                                                     break;
                                                 case 2:
+                                                    teamSet = true;
                                                     spawnsTeam2.Add(ent);
                                                     break;
                                             }
@@ -167,13 +171,19 @@ public class World : Node
                                             string team = kvp2.Value.ToString().ToLower();
                                             if (team.Contains("blue"))
                                             {
+                                                teamSet = true;
                                                 spawnsTeam1.Add(ent);
                                             }
                                             if (team.Contains("red"))
                                             {
+                                                teamSet = true;
                                                 spawnsTeam2.Add(ent);
                                             }
                                             break;
+                                    }
+                                    if (!teamSet)
+                                    {
+                                        _observerStart = ent;
                                     }
                                 }
                                 break;
@@ -276,6 +286,9 @@ public class World : Node
         Spatial spawn = null;
         switch (teamID)
             {
+                case 0:
+                    spawn = _observerStart;
+                    break;
                 case 1:
                     if (spawnsTeam1.Count <= currentSpawnTeam1)
                     {
@@ -283,7 +296,7 @@ public class World : Node
                     }
                     spawn = (Spatial)spawnsTeam1[currentSpawnTeam1];
                     currentSpawnTeam1++;
-                break;
+                    break;
                 case 2:
                     if (spawnsTeam2.Count <= currentSpawnTeam2)
                     {
@@ -291,11 +304,11 @@ public class World : Node
                     }
                     spawn = (Spatial)spawnsTeam2[currentSpawnTeam2];
                     currentSpawnTeam2++;
-                break;
+                    break;
                 default:
                     // nothing for now, just break
                     teamID = 9;
-                break;
+                    break;
             }
             return teamID == 9 ? new Vector3(0,10,0) : spawn.Translation;
     }

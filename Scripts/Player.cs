@@ -64,7 +64,7 @@ public class Player : KinematicBody
     private float _currentHealth;
     public float CurrentHealth { get { return _currentHealth; }}
 
-    private MT _moveType = MT.NORMAL;
+    public MT MoveType = MT.SPECTATOR;
     private float _timeDead = 0;
 
     // test rocket stuff
@@ -111,55 +111,32 @@ public class Player : KinematicBody
 
         foreach(PlayerCmd pCmd in pCmdQueue)
         {
-            Peer p = this.Peer;
             if (!PlayerControlled && IsNetworkMaster())
             {
                 _mesh.Rotation = pCmd.rotation;
             }
             
-            if (pCmd.snapshot < p.LastSnapshot)
+            if (pCmd.snapshot < Peer.LastSnapshot)
             {
                 continue;
             }
 
-            if (_moveType == MT.DEAD)
+            Peer.LastSnapshot = pCmd.snapshot;
+
+            switch (MoveType)
             {
-                if (_touchingGround)
-                {
-                    _timeDead += delta; // have to wait time after touching ground to respawn
-                }
-
-                if (_timeDead > .5)
-                {
-                    if (pCmd.attack == 1 || pCmd.move_up == 1)
-                    {
-                        _game.World.Spawn(this);
-                        _timeDead = 0;
-                    }
-                }
-            }
-            else
-            {
-                if (IsNetworkMaster())
-                {
-                    int diff = _game.World.LocalSnapNum - pCmd.snapshot;
-                    if (diff < 0)
-                    {
-                        return;
-                    }
-                    _game.World.RewindPlayers(diff, delta);
-                }
-
-                p.LastSnapshot = pCmd.snapshot;
-            
-                this.ProcessAttack(pCmd, delta);
-
-                if (IsNetworkMaster())
-                {
-                    _game.World.FastForwardPlayers();
-                }
-
-                this.ProcessMovementCmd(_predictedState, pCmd, delta);
+                case MT.DEAD:
+                    DeadProcess(pCmd, delta);
+                    break;
+                case MT.SPECTATOR:
+                    SpectatorProcess(pCmd, delta);
+                    break;
+                case MT.NORMAL:
+                    NormalProcess(pCmd, delta);
+                    break;
+                default:
+                    Console.ThrowPrint("No movement type set");
+                    break;
             }
 
             this.ProcessMovement(delta);
@@ -175,6 +152,50 @@ public class Player : KinematicBody
             _game.Network.SendPMovement(1, ID, pCmdQueue);
         }
         TrimCmdQueue();
+    }
+
+    private void SpectatorProcess(PlayerCmd pCmd, float delta)
+    {
+
+    }
+
+    private void NormalProcess(PlayerCmd pCmd, float delta)
+    {
+        if (IsNetworkMaster())
+        {
+            int diff = _game.World.LocalSnapNum - pCmd.snapshot;
+            if (diff < 0)
+            {
+                return;
+            }
+            _game.World.RewindPlayers(diff, delta);
+        }
+   
+        this.ProcessAttack(pCmd, delta);
+
+        if (IsNetworkMaster())
+        {
+            _game.World.FastForwardPlayers();
+        }
+
+        this.ProcessMovementCmd(_predictedState, pCmd, delta);
+    }
+
+    private void DeadProcess(PlayerCmd pCmd, float delta)
+    {
+        if (_touchingGround)
+        {
+            _timeDead += delta; // have to wait time after touching ground to respawn
+        }
+
+        if (_timeDead > .5)
+        {
+            if (pCmd.attack == 1 || pCmd.move_up == 1)
+            {
+                _game.World.Spawn(this);
+                _timeDead = 0;
+            }
+        }
     }
 
     public void RotateHead(float rad)
@@ -232,7 +253,6 @@ public class Player : KinematicBody
             _wishJump = false;
         }
 
-        // do air move which does gravity
         if (_touchingGround || _climbLadder)
         {
             GroundMove(delta, pCmd);
@@ -366,7 +386,7 @@ public class Player : KinematicBody
     // TODO - move this to world
     private void ApplyGravity(float delta)
     {
-        if (!_climbLadder)
+        if (!_climbLadder && MoveType != MT.SPECTATOR)
         {
             _playerVelocity.y -= _game.World.Gravity * delta;
         }
@@ -530,12 +550,20 @@ public class Player : KinematicBody
 
     public void Spawn(Vector3 spawnPoint)
     {
-        if (_moveType == MT.DEAD)
+        if (Team == 0)
+        {
+            MoveType = MT.SPECTATOR;
+        }
+        else if (MoveType == MT.DEAD)
         {
             PlayerController pc = _game.Network.PlayerController;
             pc.Translation = new Vector3(pc.Translation.x, _head.Translation.y, pc.Translation.z);
 
-            _moveType = MT.NORMAL;
+            MoveType = MT.NORMAL;
+        }
+        else
+        {
+            MoveType = MT.NORMAL;
         }
         
         this.Translation = spawnPoint;
@@ -548,7 +576,7 @@ public class Player : KinematicBody
     {
         _currentHealth = 0;
         _currentArmour = 0;
-        _moveType = MT.DEAD;
+        MoveType = MT.DEAD;
         if (PlayerControlled)
         {
             // orientation change
