@@ -12,7 +12,7 @@ public enum STATE
     CLOSING = 7
 }
 
-public enum MT // movetype
+public enum MOVETYPE // movetype
 {
     FLY,
     NORMAL,
@@ -22,7 +22,7 @@ public enum MT // movetype
     LOCK,
 }
 
-public enum ET // entity type
+public enum ENTITYTYPE // entity type
 {
     PLAYER = 1,
     PROJECTILE = 2,

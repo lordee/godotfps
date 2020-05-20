@@ -70,7 +70,7 @@ public class Player : KinematicBody
         }
 
     
-    public MT MoveType = MT.SPECTATOR;
+    public MOVETYPE MoveType = MOVETYPE.SPECTATOR;
     private float _timeDead = 0;
 
     public override void _Ready()
@@ -131,13 +131,13 @@ public class Player : KinematicBody
 
             switch (MoveType)
             {
-                case MT.DEAD:
+                case MOVETYPE.DEAD:
                     DeadProcess(pCmd, delta);
                     break;
-                case MT.SPECTATOR:
+                case MOVETYPE.SPECTATOR:
                     SpectatorProcess(pCmd, delta);
                     break;
-                case MT.NORMAL:
+                case MOVETYPE.NORMAL:
                     NormalProcess(pCmd, delta);
                     break;
                 default:
@@ -235,14 +235,9 @@ public class Player : KinematicBody
 
     public void ProcessAttack(PlayerCmd pCmd, float delta)
     {
-        //_lastRocketShot += delta;
-        //if (pCmd.attack == 1 && _lastRocketShot >= _rocketCD)
         if (pCmd.attack == 1)
         {
             _weapon1.Shoot(pCmd, delta);
-            /*string name = _game.World.ProjectileManager.AddProjectile(this, pCmd.attackDir, pCmd.projName);
-            pCmd.projName = name;
-            _lastRocketShot = 0f;*/
         }
     }
 
@@ -393,7 +388,7 @@ public class Player : KinematicBody
     // TODO - move this to world
     private void ApplyGravity(float delta)
     {
-        if (!_climbLadder && MoveType != MT.SPECTATOR)
+        if (!_climbLadder && MoveType != MOVETYPE.SPECTATOR)
         {
             _playerVelocity.y -= _game.World.Gravity * delta;
         }
@@ -557,7 +552,7 @@ public class Player : KinematicBody
 
     public void Spawn(Vector3 spawnPoint)
     {
-        if (MoveType == MT.DEAD)
+        if (MoveType == MOVETYPE.DEAD)
         {
             PlayerController pc = _game.Network.PlayerController;
             pc.Translation = new Vector3(pc.Translation.x, _head.Translation.y, pc.Translation.z);
@@ -565,11 +560,11 @@ public class Player : KinematicBody
 
         if (Team == 0)
         {
-            MoveType = MT.SPECTATOR;
+            MoveType = MOVETYPE.SPECTATOR;
         }
         else
         {
-            MoveType = MT.NORMAL;
+            MoveType = MOVETYPE.NORMAL;
         }
 
         SetupClass();
@@ -581,9 +576,10 @@ public class Player : KinematicBody
 
         this.SetServerState(this.GlobalTransform.origin, this._playerVelocity, this._mesh.Rotation, _maxHealth, _maxArmour);
         _predictedState = _serverState;
+        _game.Network.SendPlayerInfo(this);
     }
 
-    private void SetupClass()
+    public void SetupClass()
     {
         switch (PlayerClass)
         {
@@ -634,7 +630,7 @@ public class Player : KinematicBody
     {
         _currentHealth = 0;
         _currentArmour = 0;
-        MoveType = MT.DEAD;
+        MoveType = MOVETYPE.DEAD;
         if (PlayerControlled)
         {
             // orientation change

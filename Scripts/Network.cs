@@ -135,7 +135,7 @@ public class Network : Node
                     p.Die();
                 }
                 p.Team = teamID;
-                SendPlayerInfo(p);
+                //SendPlayerInfo(p);
             }
         }
     }
@@ -153,25 +153,30 @@ public class Network : Node
         }
     }
 
-    private void SendPlayerInfo(Player p)
+    public void SendPlayerInfo(Player p)
     {
         foreach(var pe in PeerList)
         {
             if (pe.ID != 1)
             {
-                RpcId(pe.ID, nameof(ReceivePlayerInfo), p.ID, p.Team, (int)p.PlayerClass);
+                RpcId(pe.ID, nameof(ReceivePlayerInfo), p.ID, p.Team, (int)p.PlayerClass, (int)p.MoveType);
             }
         }
     }
 
     [Slave]
-    public void ReceivePlayerInfo(int peerID, int teamID, int classNum)
+    public void ReceivePlayerInfo(int peerID, int teamID, int classNum, int moveType)
     {
         Peer pe = PeerList.Where(e => e.ID == peerID).FirstOrDefault();
         if (pe != null)
         {
             pe.Player.Team = teamID;
             pe.Player.PlayerClass = (PLAYERCLASS)classNum;
+            if (peerID == _id)
+            {
+                pe.Player.SetupClass();
+            }
+            pe.Player.MoveType = (MOVETYPE)moveType;
         }
     }
 
@@ -192,7 +197,8 @@ public class Network : Node
                     spawn = true;
                 }
                 p.PlayerClass = (PLAYERCLASS)classNum;
-                SendPlayerInfo(p);
+                // FIXME - this should be on spawning
+                //SendPlayerInfo(p);
                 if (spawn)
                 {
                     _game.World.Spawn(p);
@@ -237,18 +243,18 @@ public class Network : Node
     {
         foreach(Peer p in PeerList)
         {
-            RpcId(id, nameof(SyncWorldReceive), _game.World.LocalSnapNum, ET.PLAYER, p.ID);
+            RpcId(id, nameof(SyncWorldReceive), _game.World.LocalSnapNum, ENTITYTYPE.PLAYER, p.ID);
         }
     }
 
     // only clients receive this, only on first connect?
     [Remote]
-    public void SyncWorldReceive(int serverSnapNum, ET entType, int id)
+    public void SyncWorldReceive(int serverSnapNum, ENTITYTYPE entType, int id)
     {
         _game.World.ServerSnapNum = serverSnapNum;
         switch (entType)
         {
-            case ET.PLAYER:
+            case ENTITYTYPE.PLAYER:
                 if (id == GetTree().GetNetworkUniqueId())
                 {
                     _game.World.StartWorld();
@@ -331,13 +337,13 @@ public class Network : Node
 
         for (int i = 1; i < split.Length; i++)
         {
-            ET type = (ET)Convert.ToInt32(split[i++]);
+            ENTITYTYPE type = (ENTITYTYPE)Convert.ToInt32(split[i++]);
             switch(type)
             {
-                case ET.PLAYER:
+                case ENTITYTYPE.PLAYER:
                     ProcessPlayerPacket(split, ref i);
                     break;
-                case ET.PROJECTILE:
+                case ENTITYTYPE.PROJECTILE:
                     ProcessProjectilePacket(split, ref i);
                     break;
             }
@@ -414,7 +420,7 @@ public class Network : Node
             ps.CmdQueue = p.Player.pCmdQueue;
             sn.PlayerSnap.Add(ps);
 
-            sb.Append((int)ET.PLAYER);
+            sb.Append((int)ENTITYTYPE.PLAYER);
             sb.Append(",");
             sb.Append(p.ID);
             sb.Append(",");
@@ -446,7 +452,7 @@ public class Network : Node
         // projectiles
         foreach(Projectile p in _game.World.ProjectileManager.Projectiles)
         {
-            sb.Append((int)ET.PROJECTILE);
+            sb.Append((int)ENTITYTYPE.PROJECTILE);
             sb.Append(",");
             sb.Append(p.Name);
             sb.Append(",");
