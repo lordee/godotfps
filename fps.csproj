@@ -65,8 +65,7 @@
     <Compile Include="Scripts\UI\TeamMenu.cs" />
     <Compile Include="Scripts\UI\UIManager.cs" />
     <Compile Include="Scripts\UI\IUIItem.cs" />
-    <Compile Include="Scripts\Weapons\Rocket.cs" />
-    <Compile Include="Scripts\Weapons\RocketExplosion.cs" />
+    <Compile Include="Scripts\Weapons\NailTink.cs" />
     <Compile Include="Scripts\World.cs" />
     <Compile Include="Scripts\Util\Math.cs" />
     <Compile Include="Scripts\Trigger_Door.cs" />
@@ -83,6 +82,12 @@
     <Compile Include="Scripts\UI\Console\Console.cs" />
     <Compile Include="Scripts\UI\Console\Commands.cs" />
     <Compile Include="Scripts\Settings.cs" />
+    <Compile Include="Scripts\PlayerClass\PlayerClasses.cs" />
+    <Compile Include="Scripts\Weapons\RocketExplosion.cs" />
+    <Compile Include="Scripts\Weapons\Weapon.cs" />
+    <Compile Include="Scripts\Weapons\NailGun.cs" />
+    <Compile Include="Scripts\Weapons\Nail.cs" />
+    <Compile Include="Scripts\Weapons\Projectile.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -120,6 +120,7 @@ public class Network : Node
 	}
 
     // TODO - move this to another node
+    [Remote]
     public void ServerJoinTeam(int playerID, int teamID)
     {
         // TODO - team limits etc
@@ -139,7 +140,6 @@ public class Network : Node
         }
     }
 
-    [Remote]
     public void JoinTeam(int playerID, int teamID)
     {
         // TODO - need to resend choice if it fails
@@ -171,11 +171,12 @@ public class Network : Node
         if (pe != null)
         {
             pe.Player.Team = teamID;
-            pe.Player.PlayerClass = (PlayerClass)classNum;
+            pe.Player.PlayerClass = (PLAYERCLASS)classNum;
         }
     }
 
     // FIXME - move to different node
+    [Remote]
     public void ServerChooseClass(int playerID, int classNum)
     {
         // TODO - class limits etc
@@ -183,14 +184,14 @@ public class Network : Node
 
         if (p != null)
         {
-            if (p.PlayerClass != (PlayerClass)classNum)
+            if (p.PlayerClass != (PLAYERCLASS)classNum)
             {
                 bool spawn = false;
-                if (p.PlayerClass == PlayerClass.NONE)
+                if (p.PlayerClass == PLAYERCLASS.NONE)
                 {
                     spawn = true;
                 }
-                p.PlayerClass = (PlayerClass)classNum;
+                p.PlayerClass = (PLAYERCLASS)classNum;
                 SendPlayerInfo(p);
                 if (spawn)
                 {
@@ -200,7 +201,6 @@ public class Network : Node
         }
     }
 
-    [Remote]
     public void ChooseClass(int playerID, int classNum)
     {
         if (IsNetworkMaster())
@@ -349,6 +349,7 @@ public class Network : Node
     {
         string pName = split[i++];
         string pID = split[i++];
+        WEAPON weapon = (WEAPON)Convert.ToInt16(split[i++]);
         Vector3 porg = new Vector3(
             float.Parse(split[i++],  System.Globalization.CultureInfo.InvariantCulture)
             , float.Parse(split[i++],  System.Globalization.CultureInfo.InvariantCulture)
@@ -365,7 +366,7 @@ public class Network : Node
             , float.Parse(split[i++],  System.Globalization.CultureInfo.InvariantCulture)
             , float.Parse(split[i],  System.Globalization.CultureInfo.InvariantCulture)
         );
-        _game.World.ProjectileManager.AddNetworkedProjectile(pName, pID, porg, pvel, prot);
+        _game.World.ProjectileManager.AddNetworkedProjectile(pName, pID, porg, pvel, prot, weapon);
     }
 
     private void ProcessPlayerPacket(string[] split, ref int i)
@@ -443,13 +444,15 @@ public class Network : Node
             sb.Append(",");
         }
         // projectiles
-        foreach(Rocket p in _game.World.ProjectileManager.Projectiles)
+        foreach(Projectile p in _game.World.ProjectileManager.Projectiles)
         {
             sb.Append((int)ET.PROJECTILE);
             sb.Append(",");
             sb.Append(p.Name);
             sb.Append(",");
             sb.Append(p.PlayerOwner.ID);
+            sb.Append(",");
+            sb.Append(p.Weapon);
             sb.Append(",");
             sb.Append(p.GlobalTransform.origin.x);
             sb.Append(",");

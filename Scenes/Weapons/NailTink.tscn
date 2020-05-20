@@ -1,0 +1,29 @@
+[gd_scene load_steps=5 format=2]
+
+[ext_resource path="res://Scripts/Weapons/NailTink.cs" type="Script" id=1]
+
+[sub_resource type="ParticlesMaterial" id=1]
+initial_velocity = 1.0
+color = Color( 0.152039, 0.828125, 0.19446, 1 )
+
+[sub_resource type="ParticlesMaterial" id=2]
+next_pass = SubResource( 1 )
+gravity = Vector3( 0, 0, 0 )
+initial_velocity = 10.0
+scale = 0.1
+color = Color( 0.9375, 0.128174, 0.128174, 1 )
+
+[sub_resource type="CubeMesh" id=3]
+
+[node name="Particles" type="Particles"]
+transform = Transform( 0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 0, 0 )
+cast_shadow = 0
+emitting = false
+amount = 5
+lifetime = 0.1
+one_shot = true
+speed_scale = 2.0
+explosiveness = 1.0
+process_material = SubResource( 2 )
+draw_pass_1 = SubResource( 3 )
+script = ExtResource( 1 )

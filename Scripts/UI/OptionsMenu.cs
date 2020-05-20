@@ -35,7 +35,7 @@ public class OptionsMenu : Control, IUIItem
     {
         foreach(KeyValuePair<string, CommandInfo> kvp in _game.Commands.List)
         {
-            if (kvp.Value.CommandType == CT.PlayerController)
+            if (kvp.Value.CommandType == CT.PLAYERCONTROLLER)
             {
                 AddControl(kvp);
             }

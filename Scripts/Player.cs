@@ -22,7 +22,19 @@ public class Player : KinematicBody
     // fields
     public int Team;
     public int ID;
-    public PlayerClass PlayerClass;
+    public PLAYERCLASS PlayerClass;
+    private Weapon _activeWeapon;
+    private Weapon _weapon1;
+    private Weapon _weapon2;
+    private Weapon _weapon3;
+    private Weapon _weapon4;
+    private int _maxArmour = 200;
+    private float _currentArmour;
+    public float CurrentArmour { get { return _currentArmour; }}
+    private int _maxHealth = 100;
+    private float _currentHealth;
+    public float CurrentHealth { get { return _currentHealth; }}
+
     
     // movement
     private bool _wishJump;
@@ -57,20 +69,9 @@ public class Player : KinematicBody
         set { _predictedState = value; }
         }
 
-    private int _maxArmour = 200;
-    private float _currentArmour;
-    public float CurrentArmour { get { return _currentArmour; }}
-    private int _maxHealth = 100;
-    private float _currentHealth;
-    public float CurrentHealth { get { return _currentHealth; }}
-
+    
     public MT MoveType = MT.SPECTATOR;
     private float _timeDead = 0;
-
-    // test rocket stuff
-    float _lastRocketShot = 0f;
-    float _rocketCD = .5f;
-    //float _shootRange = 1000f;
 
     public override void _Ready()
     {
@@ -82,6 +83,11 @@ public class Player : KinematicBody
 
     public override void _PhysicsProcess(float delta)
     {
+        if (_weapon1 != null)
+        {
+            _weapon1.PhysicsProcess(delta);
+        }
+        
         _predictedState = _serverState;
         if (pCmdQueue.Count == 0)
         {
@@ -116,7 +122,7 @@ public class Player : KinematicBody
                 _mesh.Rotation = pCmd.rotation;
             }
             
-            if (pCmd.snapshot < Peer.LastSnapshot)
+            if (pCmd.snapshot <= Peer.LastSnapshot)
             {
                 continue;
             }
@@ -138,9 +144,8 @@ public class Player : KinematicBody
                     Console.ThrowPrint("No movement type set");
                     break;
             }
-
-            this.ProcessMovement(delta);
         }
+        this.ProcessMovement(delta);
 
         if (IsNetworkMaster())
         {
@@ -230,12 +235,14 @@ public class Player : KinematicBody
 
     public void ProcessAttack(PlayerCmd pCmd, float delta)
     {
-        _lastRocketShot += delta;
-        if (pCmd.attack == 1 && _lastRocketShot >= _rocketCD)
+        //_lastRocketShot += delta;
+        //if (pCmd.attack == 1 && _lastRocketShot >= _rocketCD)
+        if (pCmd.attack == 1)
         {
-            string name = _game.World.ProjectileManager.AddProjectile(this, pCmd.attackDir, pCmd.projName);
+            _weapon1.Shoot(pCmd, delta);
+            /*string name = _game.World.ProjectileManager.AddProjectile(this, pCmd.attackDir, pCmd.projName);
             pCmd.projName = name;
-            _lastRocketShot = 0f;
+            _lastRocketShot = 0f;*/
         }
     }
 
@@ -506,10 +513,10 @@ public class Player : KinematicBody
         return scale;
     }
 
-    public void TakeDamage(Rocket inflictor, float damage)
+    public void TakeDamage(Player attacker, Vector3 inflictorOrigin, float damage)
     {       
         float vel = damage;
-        damage = inflictor.PlayerOwner == this ? damage * .5f : damage;
+        damage = attacker == this ? damage * .5f : damage;
 
         // take from armour and health
         float a = _currentArmour;
@@ -537,7 +544,7 @@ public class Player : KinematicBody
         }
 
         // add velocity
-        AddVelocity(inflictor.GlobalTransform.origin, vel);
+        AddVelocity(inflictorOrigin, vel);
     }
 
     private void AddVelocity(Vector3 org, float velocity)
@@ -550,26 +557,77 @@ public class Player : KinematicBody
 
     public void Spawn(Vector3 spawnPoint)
     {
-        if (Team == 0)
-        {
-            MoveType = MT.SPECTATOR;
-        }
-        else if (MoveType == MT.DEAD)
+        if (MoveType == MT.DEAD)
         {
             PlayerController pc = _game.Network.PlayerController;
             pc.Translation = new Vector3(pc.Translation.x, _head.Translation.y, pc.Translation.z);
+        }
 
-            MoveType = MT.NORMAL;
+        if (Team == 0)
+        {
+            MoveType = MT.SPECTATOR;
         }
         else
         {
             MoveType = MT.NORMAL;
         }
+
+        SetupClass();
+
+        _activeWeapon = _weapon1;
+        
         
         this.Translation = spawnPoint;
 
         this.SetServerState(this.GlobalTransform.origin, this._playerVelocity, this._mesh.Rotation, _maxHealth, _maxArmour);
         _predictedState = _serverState;
+    }
+
+    private void SetupClass()
+    {
+        switch (PlayerClass)
+        {
+            case PLAYERCLASS.NONE:
+
+                break;
+            case PLAYERCLASS.SCOUT:
+                _maxHealth = Scout.Health;
+                _maxArmour = Scout.Armour;
+                _weapon1 = Scout.Weapon1;
+                _weapon1.Init(_game);
+                _weapon2 = Scout.Weapon2;
+                _weapon3 = Scout.Weapon3;
+                _weapon4 = Scout.Weapon4;
+                Scout.SpawnWeapons(this);
+                // FIXME - weapon not showing, but it's there and when toggled manually it shows
+                _weapon1.Show();
+                break;
+            case PLAYERCLASS.SNIPER:
+
+                break;
+            case PLAYERCLASS.SOLDIER:
+
+                break;
+            case PLAYERCLASS.DEMOMAN:
+
+                break;
+            case PLAYERCLASS.MEDIC:
+
+                break;
+            case PLAYERCLASS.HWGUY:
+
+                break;
+            case PLAYERCLASS.PYRO:
+
+                break;
+            case PLAYERCLASS.SPY:
+
+                break;
+            case PLAYERCLASS.ENGINEER:
+
+                break;
+        }
+        
     }
 
     public void Die()

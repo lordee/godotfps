@@ -36,7 +36,7 @@ public class ClassMenu : VBoxContainer, IUIItem
 
     public void UI_Cancel()
     {
-        if (Game.Client.Player.PlayerClass != PlayerClass.NONE)
+        if (Game.Client.Player.PlayerClass != PLAYERCLASS.NONE)
         {
             UIManager.Close();
         }

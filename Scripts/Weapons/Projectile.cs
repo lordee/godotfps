@@ -1,48 +1,71 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 
-public class Rocket : KinematicBody
+public class Projectile : KinematicBody
 {
-    string _particleResource = "res://Scenes/Weapons/RocketExplosion.tscn";
+    protected Vector3 _direction = new Vector3();
+    protected Vector3 _up = new Vector3(0,1,0);
+    protected float _speed;
+    public float Speed { get { return _speed; }}
+    protected float _damage;
+    public float Damage { get { return _damage; }}
 
-    public float Speed = 90;
-    public float Damage = 100;
-    private float _areaOfEffectRadius = 0;
-    PackedScene _particleScene;
-    private Game _game;
-
-    public Vector3 Velocity = new Vector3();
-
-    private Player _playerOwner;
+    protected string _particleResource;
+    protected PackedScene _particleScene;
+    protected bool _areaOfEffect;
+    protected float _areaOfEffectRadius;
+    protected Player _playerOwner;
     public Player PlayerOwner { get { return _playerOwner; }}
+
+    private Game _game;
     private State _serverState;
     public State ServerState { get { return _serverState; }}
-
     public State PredictedState;
+    public Vector3 Velocity = new Vector3();
+
+    public WEAPON Weapon;
+
 
     public override void _Ready()
     {
         _game = GetTree().Root.GetNode("Game") as Game;
-        _particleScene = ResourceLoader.Load(_particleResource) as PackedScene;
-        _areaOfEffectRadius = Damage / 10;
     }
 
-    public void Init(Player shooter, Vector3 vel)
+    public Projectile()
     {
+    }
+
+    public void Init(Player shooter, Vector3 vel, WEAPON weapon, Game game)
+    {   
+        // FIXME - ready is not being called before init in addprojectile, so game var not set
+        _game = game;
         this.AddCollisionExceptionWith(shooter);
         this.GlobalTransform = shooter.Head.GlobalTransform;
         Velocity = vel;
         this.LookAt(vel * 1000, _game.World.Up);
         _playerOwner = shooter;
+        switch (weapon)
+        {
+            case WEAPON.NAILGUN:
+                _damage = NailGun.Damage;
+                _speed = NailGun.Speed;
+                break;
+        }
+
+        _particleScene = (PackedScene)ResourceLoader.Load(_particleResource);
     }
 
     public void Explode(Player ignore, float damage)
     {
-        this.FindRadius(ignore, damage);
+        if (_areaOfEffect)
+        {
+            this.FindRadius(ignore, damage);
+        }
         
         Particles p = (Particles)_particleScene.Instance();
         p.Transform = this.Transform;
-        _game.World.AddChild(p);
+        _game.World.ProjectileManager.AddChild(p);
         p.Emitting = true;
         
         // remove projectile
@@ -77,7 +100,7 @@ public class Rocket : KinematicBody
                     float d = damage * pc;
 
                     // inflict damage
-                    pl.TakeDamage(this, d);
+                    pl.TakeDamage(_playerOwner, this.GlobalTransform.origin, d);
                 }
             }
         }
@@ -90,5 +113,4 @@ public class Rocket : KinematicBody
         _serverState.Velocity = velo;
         this.Rotation = rot;
     }
-    
 }

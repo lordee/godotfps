@@ -37,7 +37,7 @@ public class Commands
                     },
                     Function = (Args) => this.Help(Args),
 					FunctionName = nameof(this.Help),
-					CommandType = CT.Command,
+					CommandType = CT.COMMAND,
                 }
             },
 
@@ -49,7 +49,7 @@ public class Commands
                     },
                     Function = (Args) => this.Quit(Args),
 					FunctionName = nameof(this.Quit),
-					CommandType = CT.Command,
+					CommandType = CT.COMMAND,
                 }
             },
 			{
@@ -60,7 +60,7 @@ public class Commands
                     },
                     Function = (Args) => this.Bind(Args),
 					FunctionName = nameof(this.Bind),
-					CommandType = CT.Command,
+					CommandType = CT.COMMAND,
                 }
             },
 
@@ -73,7 +73,7 @@ public class Commands
                     },
                     Function = (Args) => Commands.FpsMax(Args),
 					FunctionName = nameof(Commands.FpsMax),
-					CommandType = CT.Command,
+					CommandType = CT.COMMAND,
                 }
             },
 			{
@@ -84,7 +84,7 @@ public class Commands
 					},
 					Function2 = (Args) => PlayerController.MoveForward(Args),
 					FunctionName = nameof(PlayerController.MoveForward),
-					CommandType = CT.PlayerController,
+					CommandType = CT.PLAYERCONTROLLER,
 				}
 			},
 			{
@@ -95,7 +95,7 @@ public class Commands
 					},
 					Function2 = (Args) => PlayerController.MoveBack(Args),
 					FunctionName = nameof(PlayerController.MoveBack),
-					CommandType = CT.PlayerController,
+					CommandType = CT.PLAYERCONTROLLER,
 				}
 			},
 			{
@@ -106,7 +106,7 @@ public class Commands
 					},
 					Function2 = (Args) => PlayerController.MoveLeft(Args),
 					FunctionName = nameof(PlayerController.MoveLeft),
-					CommandType = CT.PlayerController,
+					CommandType = CT.PLAYERCONTROLLER,
 				}
 			},
 			{
@@ -117,7 +117,7 @@ public class Commands
 					},
 					Function2 = (Args) => PlayerController.MoveRight(Args),
 					FunctionName = nameof(PlayerController.MoveRight),
-					CommandType = CT.PlayerController,
+					CommandType = CT.PLAYERCONTROLLER,
 				}
 			},
 			{
@@ -128,7 +128,7 @@ public class Commands
 					},
 					Function2 = (Args) => PlayerController.Jump(Args),
 					FunctionName = nameof(PlayerController.Jump),
-					CommandType = CT.PlayerController,
+					CommandType = CT.PLAYERCONTROLLER,
 				}
 			},
 			{
@@ -139,7 +139,7 @@ public class Commands
 					},
 					Function2 = (Args) => PlayerController.Attack(Args),
 					FunctionName = nameof(PlayerController.Attack),
-					CommandType = CT.PlayerController,
+					CommandType = CT.PLAYERCONTROLLER,
 				}
 			},
 			{
@@ -150,7 +150,7 @@ public class Commands
 					},
 					Function2 = (Args) => PlayerController.LookUp(Args),
 					FunctionName = nameof(PlayerController.LookUp),
-					CommandType = CT.PlayerController,
+					CommandType = CT.PLAYERCONTROLLER,
 				}
 			},
 			{
@@ -161,7 +161,7 @@ public class Commands
 					},
 					Function2 = (Args) => PlayerController.LookDown(Args),
 					FunctionName = nameof(PlayerController.LookDown),
-					CommandType = CT.PlayerController,
+					CommandType = CT.PLAYERCONTROLLER,
 				}
 			},
 			{
@@ -172,7 +172,7 @@ public class Commands
 					},
 					Function2 = (Args) => PlayerController.LookRight(Args),
 					FunctionName = nameof(PlayerController.LookRight),
-					CommandType = CT.PlayerController,
+					CommandType = CT.PLAYERCONTROLLER,
 				}
 			},
 			{
@@ -183,7 +183,7 @@ public class Commands
 					},
 					Function2 = (Args) => PlayerController.LookLeft(Args),
 					FunctionName = nameof(PlayerController.LookLeft),
-					CommandType = CT.PlayerController,
+					CommandType = CT.PLAYERCONTROLLER,
 				}
 			},
 			{
@@ -194,7 +194,7 @@ public class Commands
 					},
 					Function2 = (Args) => PlayerController.MouseModeToggle(),
 					FunctionName = nameof(PlayerController.MouseModeToggle),
-					CommandType = CT.Command,
+					CommandType = CT.COMMAND,
 				}
 			},
 			{
@@ -205,7 +205,7 @@ public class Commands
 					},
 					Function2 = (Args) => MainMenu.MainMenuToggle(),
 					FunctionName = nameof(MainMenu.MainMenuToggle),
-					CommandType = CT.Command,
+					CommandType = CT.COMMAND,
 				}
 			},
 			{
@@ -216,7 +216,7 @@ public class Commands
 					},
 					Function2 = (Args) => Console.ConsoleToggle(),
 					FunctionName = nameof(Console.ConsoleToggle),
-					CommandType = CT.Command,
+					CommandType = CT.COMMAND,
 				}
 			},
 			{
@@ -227,7 +227,7 @@ public class Commands
 					},
 					Function = (Args) => Commands.SaveConfig(),
 					FunctionName = nameof(Commands.SaveConfig),
-					CommandType = CT.Command,
+					CommandType = CT.COMMAND,
 				}
 			}
         };

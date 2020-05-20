@@ -5,22 +5,26 @@ using System.Linq;
 
 public class ProjectileManager : Node
 {
-    private List<Rocket> _projectiles = new List<Rocket>();
-    public List<Rocket> Projectiles { get { return _projectiles; }}
-    HashSet<Rocket> _remove = new HashSet<Rocket>();
+    private List<Projectile> _projectiles = new List<Projectile>();
+    public List<Projectile> Projectiles { get { return _projectiles; }}
+    HashSet<Projectile> _remove = new HashSet<Projectile>();
+    Dictionary<ProjectileInfo.PROJECTILE, PackedScene> ProjectileScenes = new Dictionary<ProjectileInfo.PROJECTILE, PackedScene>();
     private Game _game;
-
-    PackedScene _rocketScene;
 
     public override void _Ready()
     {
         _game = GetTree().Root.GetNode("Game") as Game;
-        _rocketScene = ResourceLoader.Load("res://Scenes/Weapons/Rocket.tscn") as PackedScene;
+
+        foreach (KeyValuePair<ProjectileInfo.PROJECTILE, string> kvp in ProjectileInfo.Scenes)
+        {
+            PackedScene s = (PackedScene)ResourceLoader.Load(kvp.Value);
+            ProjectileScenes.Add(kvp.Key, s);
+        }
     }
 
     public override void _PhysicsProcess(float delta)
     {
-        foreach (Rocket proj in _projectiles)
+        foreach (Projectile proj in _projectiles)
         {
             ProcessProjectile(proj, delta);
         }
@@ -29,12 +33,13 @@ public class ProjectileManager : Node
     }
 
     // when a player attacks
-    public string AddProjectile(Player shooter, Vector3 dest, string projName)
+    public string AddProjectile(Player shooter, Vector3 dest, string projName, WEAPON weapon)
     {
-        Rocket proj = _rocketScene.Instance() as Rocket;
+        ProjectileInfo.PROJECTILE projType = ProjectileInfo.Weapons[weapon];
+        Projectile proj = (Projectile)ProjectileScenes[projType].Instance();
+
         _projectiles.Add(proj);
         this.AddChild(proj);
-        Vector3 vel = dest.Normalized() * proj.Speed;
         Peer p = _game.Network.PeerList.Where(e => e.ID == shooter.ID).SingleOrDefault();
         float ping = 0f;
         if (p != null)
@@ -42,7 +47,8 @@ public class ProjectileManager : Node
             ping = IsNetworkMaster() ? p.Ping : 0f;
         }
         
-        proj.Init(shooter, vel);
+        proj.Init(shooter, dest.Normalized(), weapon, _game);
+        proj.Velocity *= proj.Speed;
         proj.Name = projName.Length > 0 ? projName : shooter.ID + "!" + proj.Name;
         
         // godot inserts @ signs and numbers to non unique names that can happen due to sync issues
@@ -52,26 +58,25 @@ public class ProjectileManager : Node
         // if this is too slow we need to track unique projectile count on client and set that as name, but i worry about uniqueness still
         proj.Name = proj.Name.Replace("@", "");
 
-        //ProcessProjectile(proj, ping);
         return proj.Name;
     }
 
-    public void AddNetworkedProjectile(string name, string pID, Vector3 org, Vector3 vel, Vector3 rot)
+    public void AddNetworkedProjectile(string name, string pID, Vector3 org, Vector3 vel, Vector3 rot, WEAPON weapon)
     {
-        Rocket proj = _projectiles.Where(p => p.Name.Replace("@", "") == name).SingleOrDefault();
+        Projectile proj = _projectiles.Where(p => p.Name.Replace("@", "") == name).SingleOrDefault();
         
         if (proj == null)
         {
             Peer p = _game.Network.PeerList.Where(e => e.ID == Convert.ToInt64(pID)).SingleOrDefault();
             if (p != null)
             {
-                proj = _rocketScene.Instance() as Rocket;
+                ProjectileInfo.PROJECTILE projType = ProjectileInfo.Weapons[weapon];
+                proj = (Projectile)ProjectileScenes[projType].Instance();
                 proj.Name = name;
                 _projectiles.Add(proj);
                 this.AddChild(proj);
                 float ping = IsNetworkMaster() ? 0 : p.Ping;
-                proj.Init(p.Player, vel);
-                //ProcessProjectile(proj, ping);
+                proj.Init(p.Player, vel, weapon, _game);
             }
             else
             {
@@ -90,7 +95,7 @@ public class ProjectileManager : Node
         }
     }
 
-    public void ProcessProjectile(Rocket proj, float delta)
+    public void ProcessProjectile(Projectile proj, float delta)
     {
         State predictedState = proj.ServerState;
         predictedState = ProcessMovement(predictedState, delta, proj);
@@ -101,7 +106,7 @@ public class ProjectileManager : Node
         }*/
     }
 
-    private State ProcessMovement(State newState, float delta, Rocket proj)
+    private State ProcessMovement(State newState, float delta, Projectile proj)
     {
         Vector3 motion = proj.Velocity * delta;
         KinematicCollision c = proj.MoveAndCollide(motion);
@@ -112,7 +117,7 @@ public class ProjectileManager : Node
             // if c collider is kinematic body (direct hit)
             if (c.Collider is Player pl)
             {
-                pl.TakeDamage(proj, damage);
+                pl.TakeDamage(proj.PlayerOwner, proj.GlobalTransform.origin, damage);
                 proj.Explode(pl, damage);
             }
             else {

@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 public enum STATE
 {
     TOP = 0,
@@ -34,11 +36,11 @@ public class ButtonInfo
 
 public enum CT
 {
-    PlayerController,
-    Command
+    PLAYERCONTROLLER,
+    COMMAND
 }
 
-public enum PlayerClass
+public enum PLAYERCLASS
 {
     NONE = 0,
     SCOUT = 1,
@@ -51,4 +53,45 @@ public enum PlayerClass
     SPY = 8,
     ENGINEER = 9
 
+}
+
+public enum WEAPONTYPE
+{
+    MELEE,
+    SPREAD,
+    HITSCAN,
+    PROJECTILE,
+    GRENADE,
+}
+
+public enum WEAPON
+{
+    NAILGUN,
+}
+
+public enum AMMUNITION 
+{
+    NONE,
+    SHELLS,
+    NAILS,
+    ROCKETS,
+    CELLS,
+}
+
+public class ProjectileInfo
+{
+    public enum PROJECTILE
+    {
+        NAIL = 1,
+        ROCKET = 2,
+        GRENADE = 3
+    }
+
+    static public Dictionary<WEAPON, PROJECTILE> Weapons = new Dictionary<WEAPON, PROJECTILE> {
+        {WEAPON.NAILGUN, ProjectileInfo.PROJECTILE.NAIL}
+    };
+
+    static public Dictionary<PROJECTILE, string> Scenes = new Dictionary<PROJECTILE, string> {
+        {ProjectileInfo.PROJECTILE.NAIL, "res://Scenes/Weapons/Nail.tscn"}
+    };
 }
