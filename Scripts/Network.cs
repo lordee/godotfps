@@ -452,7 +452,7 @@ public class Network : Node
             sb.Append(",");
             sb.Append(p.PlayerOwner.ID);
             sb.Append(",");
-            sb.Append(p.Weapon);
+            sb.Append((int)p.Weapon);
             sb.Append(",");
             sb.Append(p.GlobalTransform.origin.x);
             sb.Append(",");
