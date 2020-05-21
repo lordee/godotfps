@@ -11,6 +11,7 @@ public class Player : KinematicBody
     Game _game;
     Spatial _head;
     RayCast _stairCatcher;
+    RayCast _feet;
     MeshInstance _mesh;
     public MeshInstance Mesh {get { return _mesh; }}
     public Peer Peer;
@@ -79,6 +80,7 @@ public class Player : KinematicBody
         _head = (Spatial)GetNode("Head");
         _stairCatcher = (RayCast)GetNode("StairCatcher");
         _mesh = GetNode("MeshInstance") as MeshInstance;
+        _feet = GetNode("Feet") as RayCast;
     }
 
     public override void _PhysicsProcess(float delta)
@@ -555,7 +557,7 @@ public class Player : KinematicBody
         if (MoveType == MOVETYPE.DEAD)
         {
             PlayerController pc = _game.Network.PlayerController;
-            pc.Translation = new Vector3(pc.Translation.x, _head.Translation.y, pc.Translation.z);
+            pc.Translation = new Vector3(pc.Translation.x, 0, pc.Translation.z);
         }
 
         if (Team == 0)
@@ -636,7 +638,7 @@ public class Player : KinematicBody
             // orientation change
             // TODO - pc should be on player if available
             PlayerController pc = _game.Network.PlayerController;
-            pc.Translation = new Vector3(pc.Translation.x, _stairCatcher.Translation.y, pc.Translation.z);
+            pc.Translation = new Vector3(pc.Translation.x, _feet.Translation.y, pc.Translation.z);
         }
         pCmdQueue.Clear();
         // TODO - death sound
