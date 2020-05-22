@@ -13,6 +13,7 @@ public class Player : KinematicBody
     RayCast _stairCatcher;
     RayCast _feet;
     MeshInstance _mesh;
+    AudioStreamPlayer3D _dieSound;
     public MeshInstance Mesh {get { return _mesh; }}
     public Peer Peer;
 
@@ -81,6 +82,7 @@ public class Player : KinematicBody
         _stairCatcher = (RayCast)GetNode("StairCatcher");
         _mesh = GetNode("MeshInstance") as MeshInstance;
         _feet = GetNode("Feet") as RayCast;
+        _dieSound = GetNode("DieSound") as AudioStreamPlayer3D;
     }
 
     public override void _PhysicsProcess(float delta)
@@ -512,6 +514,10 @@ public class Player : KinematicBody
 
     public void TakeDamage(Player attacker, Vector3 inflictorOrigin, float damage)
     {       
+        if (this.MoveType == MOVETYPE.DEAD)
+        {
+            return;
+        }
         float vel = damage;
         damage = attacker == this ? damage * .5f : damage;
 
@@ -641,6 +647,6 @@ public class Player : KinematicBody
             pc.Translation = new Vector3(pc.Translation.x, _feet.Translation.y, pc.Translation.z);
         }
         pCmdQueue.Clear();
-        // TODO - death sound
+        _dieSound.Play();
     }
 }

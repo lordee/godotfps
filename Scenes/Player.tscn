@@ -1,8 +1,9 @@
-[gd_scene load_steps=6 format=2]
+[gd_scene load_steps=7 format=2]
 
 [ext_resource path="res://Scripts/Player.cs" type="Script" id=1]
 [ext_resource path="res://Assets/Models/player/dwarf2.obj" type="ArrayMesh" id=2]
 [ext_resource path="res://Assets/Sounds/grentimer.wav" type="AudioStream" id=3]
+[ext_resource path="res://Assets/Sounds/player/die.wav" type="AudioStream" id=4]
 
 [sub_resource type="CapsuleShape" id=1]
 radius = 0.6
@@ -48,3 +49,6 @@ stream = ExtResource( 3 )
 [node name="CollisionShape" type="CollisionShape" parent="TouchArea"]
 transform = Transform( 1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0 )
 shape = SubResource( 2 )
+
+[node name="DieSound" type="AudioStreamPlayer3D" parent="."]
+stream = ExtResource( 4 )
