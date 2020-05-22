@@ -49,7 +49,7 @@ public class ProjectileManager : Node
         
         proj.Init(shooter, dest.Normalized(), weapon, _game);
         proj.Velocity *= proj.Speed;
-        proj.Name = projName.Length > 0 ? projName : shooter.ID + "!" + proj.Name;
+        proj.Name = projName.Replace("\"", "").Length > 0 ? projName : shooter.ID + "!" + proj.Name;
         
         // godot inserts @ signs and numbers to non unique names that can happen due to sync issues
         // it also currently doesn't allow you to manually insert them, so server sets wrong name! and sends back wrong name!

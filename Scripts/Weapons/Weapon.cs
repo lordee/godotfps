@@ -110,7 +110,14 @@ abstract public class Weapon : MeshInstance
                         break;
                     case WEAPONTYPE.PROJECTILE:
                     case WEAPONTYPE.GRENADE:
-                        _game.World.ProjectileManager.AddProjectile(_playerOwner, pCmd.attackDir, pCmd.projName, _weapon);
+                        // FIXME - i think attack button is set still and due to sync differences the client attack time is still useable?  projname is empty because client never used it.
+                        // this will be an issue for hitscan weapons?
+                        if (_game.Network.ID == 1 && pCmd.playerID != 1 && pCmd.projName.Length <= 2)
+                        {
+                            return false;
+                        }
+                        string name =_game.World.ProjectileManager.AddProjectile(_playerOwner, pCmd.attackDir, pCmd.projName, _weapon);
+                        pCmd.projName = name;
                         break;
                 }
             }

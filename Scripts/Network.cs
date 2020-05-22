@@ -13,6 +13,7 @@ public class Network : Node
     PlayerController _pc;
     public PlayerController PlayerController { get { return _pc; }}
     private int _id;
+    public int ID { get { return _id; }}
     public List<Peer> PeerList = new List<Peer>();
 
     private bool _active = false;
