@@ -587,8 +587,23 @@ public class Player : KinematicBody
         _game.Network.SendPlayerInfo(this);
     }
 
+    private void Delete(Weapon weapon)
+    {
+        if (weapon != null)
+        {
+            weapon.GetParent().RemoveChild(weapon);
+            weapon.Free();
+        }
+    }
+
     public void SetupClass()
     {
+        // remove old weapon nodes for readd
+        Delete(_weapon1);
+        Delete(_weapon2);
+        Delete(_weapon3);
+        Delete(_weapon4);
+
         switch (PlayerClass)
         {
             case PLAYERCLASS.NONE:
@@ -603,8 +618,7 @@ public class Player : KinematicBody
                 _weapon3 = Scout.Weapon3;
                 _weapon4 = Scout.Weapon4;
                 Scout.SpawnWeapons(this);
-                // FIXME - weapon not showing, but it's there and when toggled manually it shows
-                _weapon1.Show();
+                _weapon1.WeaponMesh.Visible = true;
                 break;
             case PLAYERCLASS.SNIPER:
 

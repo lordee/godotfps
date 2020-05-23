@@ -59,10 +59,11 @@ abstract public class Weapon : MeshInstance
 
     protected string _weaponResource;
     protected MeshInstance _weaponMesh;
+    public MeshInstance WeaponMesh { get { return _weaponMesh; }}
     protected string _projectileResource;
     //protected Projectile _projectileMesh;
     protected PackedScene _projectileScene;
-    private Vector3 _weaponPosition = new Vector3(.5f, 1f, -1f);
+    private Vector3 _weaponPosition = new Vector3(.5f, -.3f, -1f);
     private Sprite3D _muzzleFlash;
     private AudioStreamPlayer3D _shootSound;
     private AudioStreamPlayer3D _reloadSound;
@@ -156,7 +157,7 @@ abstract public class Weapon : MeshInstance
     {
         PackedScene PackedScene = (PackedScene)ResourceLoader.Load(_weaponResource);
         _weaponMesh = (MeshInstance)PackedScene.Instance();
-        p.AddChild(_weaponMesh);
+        p.Head.AddChild(_weaponMesh);
         _playerOwner = p;
         _weaponMesh.Translation = _weaponPosition;
         _weaponMesh.Name = nodeName;
