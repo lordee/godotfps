@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 
 public class BindingObject
@@ -7,6 +8,7 @@ public class BindingObject
 	public string Key = null;
 	public Action FuncWithoutArg = null;
 	public Action<float> FuncWithArg = null;
+	public Action<List<string>> CommandWithArg = null;
 	public ButtonInfo.TYPE Type = ButtonInfo.TYPE.UNSET;
 	public ButtonInfo.DIRECTION AxisDirection; //Only used if Type is AXIS
 

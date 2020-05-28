@@ -229,6 +229,17 @@ public class Commands
 					FunctionName = nameof(Commands.SaveConfig),
 					CommandType = CT.COMMAND,
 				}
+			},
+			{
+				"weapon",
+				new CommandInfo {
+					HelpMessages = new string[] {
+						"'weapon x' where x is a number, changes to that particular weapon"
+					},
+					Function = (Args) => Commands.Weapon(Args),
+					FunctionName = nameof(Commands.Weapon),
+					CommandType = CT.COMMAND,
+				}
 			}
         };
     }
@@ -247,6 +258,24 @@ public class Commands
 	public static void SaveConfig()
 	{
 		Settings.SaveConfig();
+	}
+
+	[CommandWithArg(typeof(Commands), nameof(Weapon))]
+	public static void Weapon(List<string> Args)
+	{
+		if (Args.Count != 1)
+		{
+			Console.ThrowPrint("Incorrect argument count");
+		}
+		int result = 0;
+		if (int.TryParse(Args[0], out result))
+		{
+			Game.Client.ChangeWeapon(result);
+		}
+		else
+		{
+			Console.ThrowPrint("Argument must be a number");
+		}
 	}
 
 	public void RunCommand(string Line)
@@ -460,19 +489,27 @@ public class Commands
 				}
 			}
 		}
-		else if (Args.Count == 2)
-		{
-			// bind command to key
-			Bindings.Bind(Args[1], Args[0]);
-		}
 		else if (Args.Count == 0)
 		{
 			Help(new List<string>() {"bind"});
 		}
+		else //if (Args.Count >= 2)
+		{
+			string cmd = "";
+			for (int i = 1; i < Args.Count; i++)
+			{
+				cmd += Args[i];
+			}
+			cmd.Trim();
+			// bind command to key
+			Bindings.Bind(cmd, Args[0]);
+		}
+		/*
 		else
 		{
 			Console.ThrowPrint("Too many arguments provided to bind command");
 		}
+		*/
 	}
 
 	public static void FpsMax(List<string> Args)

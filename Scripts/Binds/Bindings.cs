@@ -20,6 +20,17 @@ public class Bindings : Node
 		}
 	}
 
+	public struct WithArgCommandInfo
+	{
+		public string Name;
+		public CommandWithArg Tag;
+
+		public WithArgCommandInfo(string NameArg, CommandWithArg TagArg)
+		{
+			Name = NameArg;
+			Tag = TagArg;
+		}
+	}
 
 	public struct WithoutArgInfo
 	{
@@ -33,6 +44,7 @@ public class Bindings : Node
 		}
 	}
 
+	private static List<WithArgCommandInfo> WithArgCommands = null;
 	private static List<WithArgInfo> WithArgMethods = null;
 	private static List<WithoutArgInfo> WithoutArgMethods = null;
 
@@ -56,9 +68,11 @@ public class Bindings : Node
 	{
 		string FunctionName;
 		actionName = actionName.ToLower();
+		// TODO - support multiple commands with semicolon
+		string searchname = actionName.Split(" ")[0];
 		KeyName = KeyName.ToLower();
 		
-		var kvp = _game.Commands.List.Where(e => e.Key.ToLower() == actionName).FirstOrDefault();
+		var kvp = _game.Commands.List.Where(e => e.Key.ToLower() == searchname).FirstOrDefault();
 		CommandInfo ci = kvp.Value;
 		FunctionName = ci.FunctionName;
 		
@@ -116,6 +130,32 @@ public class Bindings : Node
 			{
 				Found = true;
 				NewBind.FuncWithoutArg = Method.Tag.Function;
+				break;
+			}
+		}
+		if(WithArgCommands == null)
+		{
+			var Methods = Assembly.GetExecutingAssembly().GetTypes()
+				.SelectMany(t => t.GetMethods())
+				.Where(m => m.GetCustomAttributes(typeof(CommandWithArg), false).Length > 0);
+
+			WithArgCommands = new List<WithArgCommandInfo>();
+			foreach(MethodInfo Method in Methods)
+			{
+				WithArgCommands.Add(
+					new WithArgCommandInfo(
+						Method.Name,
+						Attribute.GetCustomAttribute(Method, typeof(CommandWithArg)) as CommandWithArg
+					)
+				);
+			}
+		}
+		foreach(WithArgCommandInfo Method in WithArgCommands)
+		{
+			if(Method.Name == FunctionName)
+			{
+				Found = true;
+				NewBind.CommandWithArg = Method.Tag.Function;
 				break;
 			}
 		}
@@ -241,7 +281,7 @@ public class Bindings : Node
 			}
 		}
 
-		if(NewBind.FuncWithArg != null)
+		if(NewBind.FuncWithArg != null || NewBind.CommandWithArg != null)
 		{
 			BindingsWithArg.Add(NewBind);
 		}
@@ -348,7 +388,16 @@ public class Bindings : Node
 
 		foreach(BindingObject Binding in BindingsWithArg)
 		{
-			if(Binding.Type == ButtonInfo.TYPE.SCANCODE || Binding.Type == ButtonInfo.TYPE.MOUSEBUTTON || Binding.Type == ButtonInfo.TYPE.CONTROLLERBUTTON)
+			if (Binding.CommandWithArg != null)
+			{
+				if (Input.IsActionJustPressed(Binding.Name))
+				{
+					string arg = Binding.Name.Replace(Binding.CommandWithArg.Method.Name.ToLower(), "").Trim();
+					List<string> args = new List<string>{arg};
+					Binding.CommandWithArg.Invoke(args);
+				}
+			}
+			else if(Binding.Type == ButtonInfo.TYPE.SCANCODE || Binding.Type == ButtonInfo.TYPE.MOUSEBUTTON || Binding.Type == ButtonInfo.TYPE.CONTROLLERBUTTON)
 			{
 				if(Input.IsActionJustPressed(Binding.Name))
 				{
