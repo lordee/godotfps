@@ -498,7 +498,7 @@ public class Commands
 			string cmd = "";
 			for (int i = 1; i < Args.Count; i++)
 			{
-				cmd += Args[i];
+				cmd += Args[i] + " ";
 			}
 			cmd.Trim();
 			// bind command to key
