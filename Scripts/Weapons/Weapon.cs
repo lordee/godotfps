@@ -1,4 +1,6 @@
 using Godot;
+using System;
+using System.Collections.Generic;
 
 abstract public class Weapon : MeshInstance
 {
@@ -26,8 +28,10 @@ abstract public class Weapon : MeshInstance
             _timeSinceLastShot = value;
         }
     }
-    public int AmmoLeft;
+    public int AmmoLeft = 100;
     public bool Reloading = false;
+    protected int _pelletCount = 1;
+    protected Vector3 _spread = new Vector3();
 
     protected int _clipLeft = 0;
     public int ClipLeft
@@ -61,12 +65,15 @@ abstract public class Weapon : MeshInstance
     protected MeshInstance _weaponMesh;
     public MeshInstance WeaponMesh { get { return _weaponMesh; }}
     protected string _projectileResource;
-    //protected Projectile _projectileMesh;
     protected PackedScene _projectileScene;
     private Vector3 _weaponPosition = new Vector3(.5f, -.3f, -1f);
     private Sprite3D _muzzleFlash;
     private AudioStreamPlayer3D _shootSound;
     private AudioStreamPlayer3D _reloadSound;
+    string puffResource = "res://Scenes/Weapons/Puff.tscn";
+    string bloodResource = "res://Scenes/Weapons/BloodPuff.tscn";
+    PackedScene puffScene;
+    PackedScene bloodScene;
 
     // Nodes
     Game _game;
@@ -76,12 +83,74 @@ abstract public class Weapon : MeshInstance
     public void Init(Game game)
     {
         _game = game;
+        // TODO - manage these in projectile manager or some other manager instead of constantly loading the scene
+        puffScene = (PackedScene)ResourceLoader.Load(puffResource);
+        bloodScene = (PackedScene)ResourceLoader.Load(bloodResource);
     }
 
     virtual public void PhysicsProcess(float delta)
     {
         this.TimeSinceLastShot += delta;
         this.TimeSinceReloaded += delta;
+    }
+
+    private void DoHit(Vector3 shootTo)
+    {
+        PhysicsDirectSpaceState spaceState = _playerOwner.GetWorld().DirectSpaceState;
+        Godot.Collections.Dictionary res = spaceState.IntersectRay(_playerOwner.GlobalTransform.origin, shootTo, new Godot.Collections.Array { this, _playerOwner }, 1);
+        if (res.Count > 0)
+        {
+            Vector3 pos = (Vector3)res["position"];
+            float dam = 0;
+            // track if collides, track puff counts
+            // leave this for fun
+            if (res["collider"] is RigidBody rb)
+            {           
+                Vector3 impulse = (pos - _playerOwner.GlobalTransform.origin).Normalized();
+                Vector3 position = pos - rb.GlobalTransform.origin;
+                rb.ApplyImpulse(position, impulse * 10);
+
+                MakePuff(PUFFTYPE.PUFF, pos, (Node)rb);
+            } 
+            else if (res["collider"] is KinematicBody kb)
+            {
+                Player pl = (Player)kb;
+                dam = Damage / _pelletCount;
+
+                pl.TakeDamage(_playerOwner, _playerOwner.GlobalTransform.origin, dam);
+                MakePuff(PUFFTYPE.BLOOD, pos, (Node)kb);
+            }
+            else
+            {
+                MakePuff(PUFFTYPE.PUFF, pos, null);
+            }
+        }
+    }
+
+    private void MakePuff(PUFFTYPE puff, Vector3 pos, Node puffOwner)
+    {
+        Particles puffPart = null;
+        switch (puff)
+        {
+            case PUFFTYPE.BLOOD:
+                puffPart = (Particles)bloodScene.Instance();
+            break;
+            case PUFFTYPE.PUFF:
+                puffPart = (Particles)puffScene.Instance();
+            break;
+        }
+
+        puffPart.Translation = pos;
+        if (puffOwner != null)
+        {
+            puffOwner.AddChild(puffPart);
+        }
+        else
+        {
+            _game.World.AddChild(puffPart);
+        }
+        
+        puffPart.Emitting = true;
     }
 
     virtual public bool Shoot(PlayerCmd pCmd, float delta)
@@ -107,7 +176,23 @@ abstract public class Weapon : MeshInstance
                     case WEAPONTYPE.HITSCAN:
                     case WEAPONTYPE.MELEE:
                     case WEAPONTYPE.SPREAD:
+                        Random ran = new Random();
+                        
+                        float pc = _pelletCount;
+                        float random = 0f;
+                        while (pc > 0)
+                        {
+                            Vector3 newTo = pCmd.attackDir;
+                            if (_weaponType == WEAPONTYPE.SPREAD)
+                            {
+                                random = (float)ran.Next(0,100);
+                                newTo = new Vector3(newTo.x + random * _spread.x, newTo.y + random * _spread.y, newTo.z);
+                            }
 
+                            this.DoHit(newTo);
+
+                            pc -= 1;
+                        }
                         break;
                     case WEAPONTYPE.PROJECTILE:
                     case WEAPONTYPE.GRENADE:
@@ -177,7 +262,5 @@ abstract public class Weapon : MeshInstance
         {
             _projectileScene = (PackedScene)ResourceLoader.Load(_projectileResource);
         }
-        
-        GD.Print("Loaded " + nodeName);
     }
 }

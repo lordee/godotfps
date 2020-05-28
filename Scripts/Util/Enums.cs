@@ -55,6 +55,12 @@ public enum PLAYERCLASS
 
 }
 
+public enum PUFFTYPE
+{
+    BLOOD,
+    PUFF
+}
+
 public enum WEAPONTYPE
 {
     MELEE,
@@ -67,6 +73,7 @@ public enum WEAPONTYPE
 public enum WEAPON
 {
     NAILGUN,
+    SHOTGUN,
 }
 
 public enum AMMUNITION 

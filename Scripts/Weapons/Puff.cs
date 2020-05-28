@@ -1,9 +1,8 @@
 using Godot;
 using System;
 
-public class NailTink : Particles
+public class Puff : Particles
 {
-
     // particles don't emit unless you're looking at them....?
     private float _lifeTime = 0f;
     private float _maxLifeTime = 1f;

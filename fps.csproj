@@ -88,6 +88,8 @@
     <Compile Include="Scripts\Weapons\NailGun.cs" />
     <Compile Include="Scripts\Weapons\Nail.cs" />
     <Compile Include="Scripts\Weapons\Projectile.cs" />
+    <Compile Include="Scripts\Weapons\Shotgun.cs" />
+    <Compile Include="Scripts\Weapons\Puff.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

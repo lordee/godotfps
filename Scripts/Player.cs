@@ -30,6 +30,14 @@ public class Player : KinematicBody
     private Weapon _weapon2;
     private Weapon _weapon3;
     private Weapon _weapon4;
+    public Weapon Weapon1 { get { return _weapon1; }}
+    public Weapon Weapon2 { get { return _weapon2; }}
+    public Weapon Weapon3 { get { return _weapon3; }}
+    public Weapon Weapon4 { get { return _weapon4; }}
+    public Weapon ActiveWeapon { 
+        get { return _activeWeapon; }
+        set { _activeWeapon = value; }
+    }
     private int _maxArmour = 200;
     private float _currentArmour;
     public float CurrentArmour { get { return _currentArmour; }}
@@ -91,7 +99,19 @@ public class Player : KinematicBody
         {
             _weapon1.PhysicsProcess(delta);
         }
-        
+        if (_weapon2 != null)
+        {
+            _weapon2.PhysicsProcess(delta);
+        }
+        if (_weapon3 != null)
+        {
+            _weapon3.PhysicsProcess(delta);
+        }
+        if (_weapon4 != null)
+        {
+            _weapon4.PhysicsProcess(delta);
+        }
+
         _predictedState = _serverState;
         if (pCmdQueue.Count == 0)
         {
@@ -241,7 +261,7 @@ public class Player : KinematicBody
     {
         if (pCmd.attack == 1)
         {
-            _weapon1.Shoot(pCmd, delta);
+            _activeWeapon.Shoot(pCmd, delta);
         }
     }
 
@@ -615,6 +635,7 @@ public class Player : KinematicBody
                 _weapon1 = Scout.Weapon1;
                 _weapon1.Init(_game);
                 _weapon2 = Scout.Weapon2;
+                _weapon2.Init(_game);
                 _weapon3 = Scout.Weapon3;
                 _weapon4 = Scout.Weapon4;
                 Scout.SpawnWeapons(this);

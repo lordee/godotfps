@@ -6,7 +6,7 @@ public class Scout
     static public int Health = 100;
     static public int Armour = 25;
     static public Weapon Weapon1 = new NailGun();
-    static public Weapon Weapon2;
+    static public Weapon Weapon2 = new Shotgun();
     static public Weapon Weapon3;
     static public Weapon Weapon4;
     //static public IHandGrenade Gren1;
@@ -21,6 +21,7 @@ public class Scout
     static public void SpawnWeapons(Player p)
     {
         Weapon1.Spawn(p, nameof(Weapon1));
+        Weapon2.Spawn(p, nameof(Weapon2));
     }
 }
 /*

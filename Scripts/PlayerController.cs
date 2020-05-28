@@ -69,6 +69,46 @@ public class PlayerController : Camera
         _player.pCmdQueue.Add(pCmd);
     }
 
+    public void ChangeWeapon(int arg)
+    {
+        
+        switch (arg)
+        {
+            case 1:
+                if (_player.Weapon1 != null)
+                {
+                    _player.ActiveWeapon.WeaponMesh.Visible = false;
+                    _player.ActiveWeapon = _player.Weapon1;
+                    _player.ActiveWeapon.WeaponMesh.Visible = true;
+                }
+                break;
+            case 2:
+                if (_player.Weapon2 != null)
+                {
+                    _player.ActiveWeapon.WeaponMesh.Visible = false;
+                    _player.ActiveWeapon = _player.Weapon2;
+                    _player.ActiveWeapon.WeaponMesh.Visible = true;
+                }
+                break;
+            case 3:
+                if (_player.Weapon3 != null)
+                {
+                    _player.ActiveWeapon.WeaponMesh.Visible = false;
+                    _player.ActiveWeapon = _player.Weapon3;
+                    _player.ActiveWeapon.WeaponMesh.Visible = true;
+                }
+                break;
+            case 4:
+                if (_player.Weapon4 != null)
+                {
+                    _player.ActiveWeapon.WeaponMesh.Visible = false;
+                    _player.ActiveWeapon = _player.Weapon4;
+                    _player.ActiveWeapon.WeaponMesh.Visible = true;
+                }
+                break;
+        }
+    }
+
     [InputWithArg(typeof(PlayerController), nameof(MoveForward))]
     public static void MoveForward(float val)
     {
