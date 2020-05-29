@@ -500,9 +500,13 @@ public class Commands
 			{
 				cmd += Args[i] + " ";
 			}
-			cmd.Trim();
+			cmd = cmd.Trim();
 			// bind command to key
-			Bindings.Bind(cmd, Args[0]);
+			if (cmd.Length > 0)
+			{
+				Bindings.Bind(cmd, Args[0]);
+			}
+			
 		}
 		/*
 		else
