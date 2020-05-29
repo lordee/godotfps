@@ -94,6 +94,76 @@ abstract public class Weapon : MeshInstance
         this.TimeSinceReloaded += delta;
     }
 
+    
+
+    virtual public bool Shoot(PlayerCmd pCmd, float delta)
+    {
+        bool shot = false;
+        if (ClipLeft >= _minAmmoRequired)
+        {
+            if (_timeSinceLastShot >= _coolDown)
+            {
+                shot = true;
+                ClipLeft -= _minAmmoRequired;
+
+                if (_muzzleFlash != null)
+                {
+                    _muzzleFlash.Show();
+                }
+                _shootSound.Play();
+                TimeSinceLastShot = 0;
+
+                // TODO - should we move to weapon classes? Maybe for pipebomb launcher at least
+                switch (_weaponType)
+                {
+                    case WEAPONTYPE.HITSCAN:
+                    case WEAPONTYPE.MELEE:
+                    case WEAPONTYPE.SPREAD:
+                        Random ran = new Random();
+                        
+                        float pc = _pelletCount;
+                        while (pc > 0)
+                        {
+                            Vector3 newTo = pCmd.attackDir.Normalized();
+                            if (_weaponType == WEAPONTYPE.SPREAD)
+                            {
+                                float ranX = (float)ran.Next(0,1) == 0 ? -1 : 1;
+                                float ranY = (float)ran.Next(0,1) == 0 ? -1 : 1;
+                                newTo = new Vector3(
+                                    newTo.x + (float)ran.Next(0,100) * _spread.x * ranX / 100
+                                    , newTo.y + (float)ran.Next(0,100) * _spread.y * ranY / 100
+                                    , newTo.z);
+                                
+                                newTo *= 2048;
+                            }
+
+                            this.DoHit(newTo);
+
+                            pc -= 1;
+                        }
+                        break;
+                    case WEAPONTYPE.PROJECTILE:
+                    case WEAPONTYPE.GRENADE:
+                        // FIXME - i think attack button is set still and due to sync differences the client attack time is still useable?  projname is empty because client never used it.
+                        // this will be an issue for hitscan weapons?
+                        if (_game.Network.ID == 1 && pCmd.playerID != 1 && pCmd.projName.Length <= 2)
+                        {
+                            return false;
+                        }
+                        string name =_game.World.ProjectileManager.AddProjectile(_playerOwner, pCmd.attackDir, pCmd.projName, _weapon);
+                        pCmd.projName = name;
+                        break;
+                }
+            }
+        }
+        else
+        {
+            // force a reload
+            this.Reload(false);
+        }
+        return shot;
+    }
+
     private void DoHit(Vector3 shootTo)
     {
         PhysicsDirectSpaceState spaceState = _playerOwner.GetWorld().DirectSpaceState;
@@ -125,95 +195,6 @@ abstract public class Weapon : MeshInstance
                 MakePuff(PUFFTYPE.PUFF, pos, null);
             }
         }
-    }
-
-    private void MakePuff(PUFFTYPE puff, Vector3 pos, Node puffOwner)
-    {
-        Particles puffPart = null;
-        switch (puff)
-        {
-            case PUFFTYPE.BLOOD:
-                puffPart = (Particles)bloodScene.Instance();
-            break;
-            case PUFFTYPE.PUFF:
-                puffPart = (Particles)puffScene.Instance();
-            break;
-        }
-
-        puffPart.Translation = pos;
-        if (puffOwner != null)
-        {
-            puffOwner.AddChild(puffPart);
-        }
-        else
-        {
-            _game.World.AddChild(puffPart);
-        }
-        
-        puffPart.Emitting = true;
-    }
-
-    virtual public bool Shoot(PlayerCmd pCmd, float delta)
-    {
-        bool shot = false;
-        if (ClipLeft >= _minAmmoRequired)
-        {
-            if (_timeSinceLastShot >= _coolDown)
-            {
-                shot = true;
-                ClipLeft -= _minAmmoRequired;
-
-                if (_muzzleFlash != null)
-                {
-                    _muzzleFlash.Show();
-                }
-                _shootSound.Play();
-                TimeSinceLastShot = 0;
-
-                // TODO - should we move to weapon classes? Maybe for pipebomb launcher at least
-                switch (_weaponType)
-                {
-                    case WEAPONTYPE.HITSCAN:
-                    case WEAPONTYPE.MELEE:
-                    case WEAPONTYPE.SPREAD:
-                        Random ran = new Random();
-                        
-                        float pc = _pelletCount;
-                        float random = 0f;
-                        while (pc > 0)
-                        {
-                            Vector3 newTo = pCmd.attackDir;
-                            if (_weaponType == WEAPONTYPE.SPREAD)
-                            {
-                                random = (float)ran.Next(0,100);
-                                newTo = new Vector3(newTo.x + random * _spread.x, newTo.y + random * _spread.y, newTo.z);
-                            }
-
-                            this.DoHit(newTo);
-
-                            pc -= 1;
-                        }
-                        break;
-                    case WEAPONTYPE.PROJECTILE:
-                    case WEAPONTYPE.GRENADE:
-                        // FIXME - i think attack button is set still and due to sync differences the client attack time is still useable?  projname is empty because client never used it.
-                        // this will be an issue for hitscan weapons?
-                        if (_game.Network.ID == 1 && pCmd.playerID != 1 && pCmd.projName.Length <= 2)
-                        {
-                            return false;
-                        }
-                        string name =_game.World.ProjectileManager.AddProjectile(_playerOwner, pCmd.attackDir, pCmd.projName, _weapon);
-                        pCmd.projName = name;
-                        break;
-                }
-            }
-        }
-        else
-        {
-            // force a reload
-            this.Reload(false);
-        }
-        return shot;
     }
 
     public void Reload(bool reloadFinished)
@@ -262,5 +243,31 @@ abstract public class Weapon : MeshInstance
         {
             _projectileScene = (PackedScene)ResourceLoader.Load(_projectileResource);
         }
+    }
+
+        private void MakePuff(PUFFTYPE puff, Vector3 pos, Node puffOwner)
+    {
+        Particles puffPart = null;
+        switch (puff)
+        {
+            case PUFFTYPE.BLOOD:
+                puffPart = (Particles)bloodScene.Instance();
+            break;
+            case PUFFTYPE.PUFF:
+                puffPart = (Particles)puffScene.Instance();
+            break;
+        }
+
+        puffPart.Translation = pos;
+        if (puffOwner != null)
+        {
+            puffOwner.AddChild(puffPart);
+        }
+        else
+        {
+            _game.World.AddChild(puffPart);
+        }
+        
+        puffPart.Emitting = true;
     }
 }
