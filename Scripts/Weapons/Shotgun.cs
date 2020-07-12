@@ -11,7 +11,7 @@ public class Shotgun : Weapon
         _coolDown = 0.5f;
         _reloadTime = 2.0f;
         _weaponType = WEAPONTYPE.SPREAD;
-        _shootRange = 100;
+        _weaponRange = 2048;
         _pelletCount = 6;
         _spread = new Vector3(.04f, .04f, 0f);
         _ammoType = AMMUNITION.SHELLS;

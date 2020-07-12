@@ -12,7 +12,7 @@ abstract public class Weapon : MeshInstance
     protected WEAPON _weapon;
     protected WEAPONTYPE _weaponType;
     protected AMMUNITION _ammoType;
-    protected int _shootRange;
+    protected int _weaponRange;
     protected float _reloadTime;
     private float _timeSinceLastShot;
     public float TimeSinceLastShot
@@ -94,8 +94,6 @@ abstract public class Weapon : MeshInstance
         this.TimeSinceReloaded += delta;
     }
 
-    
-
     virtual public bool Shoot(PlayerCmd pCmd, float delta)
     {
         bool shot = false;
@@ -133,10 +131,8 @@ abstract public class Weapon : MeshInstance
                                     newTo.x + (float)ran.Next(0,100) * _spread.x * ranX / 100
                                     , newTo.y + (float)ran.Next(0,100) * _spread.y * ranY / 100
                                     , newTo.z);
-                                
-                                newTo *= 2048;
                             }
-
+                            newTo *= _weaponRange;
                             this.DoHit(newTo);
 
                             pc -= 1;
@@ -245,7 +241,7 @@ abstract public class Weapon : MeshInstance
         }
     }
 
-        private void MakePuff(PUFFTYPE puff, Vector3 pos, Node puffOwner)
+    private void MakePuff(PUFFTYPE puff, Vector3 pos, Node puffOwner)
     {
         Particles puffPart = null;
         switch (puff)

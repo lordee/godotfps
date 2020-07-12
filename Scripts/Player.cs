@@ -637,6 +637,7 @@ public class Player : KinematicBody
                 _weapon2 = Scout.Weapon2;
                 _weapon2.Init(_game);
                 _weapon3 = Scout.Weapon3;
+                _weapon3.Init(_game);
                 _weapon4 = Scout.Weapon4;
                 Scout.SpawnWeapons(this);
                 _weapon1.WeaponMesh.Visible = true;
