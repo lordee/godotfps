@@ -596,10 +596,7 @@ public class Player : KinematicBody
         }
 
         SetupClass();
-
-        _activeWeapon = _weapon1;
-        
-        
+       
         this.Translation = spawnPoint;
 
         this.SetServerState(this.GlobalTransform.origin, this._playerVelocity, this._mesh.Rotation, _maxHealth, _maxArmour);
@@ -632,8 +629,10 @@ public class Player : KinematicBody
             case PLAYERCLASS.SCOUT:
                 _maxHealth = Scout.Health;
                 _maxArmour = Scout.Armour;
-                _weapon1 = Scout.Weapon1;
+                //_weapon1 = Scout.Weapon1;
+                _weapon1 = new NailGun();
                 _weapon1.Init(_game);
+                _weapon1.Spawn(this, nameof(Weapon1));
                 _weapon2 = Scout.Weapon2;
                 _weapon2.Init(_game);
                 _weapon3 = Scout.Weapon3;
@@ -641,6 +640,7 @@ public class Player : KinematicBody
                 _weapon4 = Scout.Weapon4;
                 Scout.SpawnWeapons(this);
                 _weapon1.WeaponMesh.Visible = true;
+                _activeWeapon = _weapon1;
                 break;
             case PLAYERCLASS.SNIPER:
 

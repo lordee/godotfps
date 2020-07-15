@@ -20,7 +20,7 @@ public class Scout
 
     static public void SpawnWeapons(Player p)
     {
-        Weapon1.Spawn(p, nameof(Weapon1));
+        //Weapon1.Spawn(p, nameof(Weapon1));
         Weapon2.Spawn(p, nameof(Weapon2));
         Weapon3.Spawn(p, nameof(Weapon3));
     }
