@@ -608,8 +608,9 @@ public class Player : KinematicBody
     {
         if (weapon != null)
         {
-            weapon.GetParent().RemoveChild(weapon);
-            weapon.Free();
+            weapon.WeaponMesh.GetParent().RemoveChild(weapon.WeaponMesh);
+            weapon.WeaponMesh.Free();
+            weapon = null;
         }
     }
 
@@ -629,16 +630,16 @@ public class Player : KinematicBody
             case PLAYERCLASS.SCOUT:
                 _maxHealth = Scout.Health;
                 _maxArmour = Scout.Armour;
-                //_weapon1 = Scout.Weapon1;
                 _weapon1 = new NailGun();
                 _weapon1.Init(_game);
                 _weapon1.Spawn(this, nameof(Weapon1));
-                _weapon2 = Scout.Weapon2;
+                _weapon2 = new Shotgun();
                 _weapon2.Init(_game);
-                _weapon3 = Scout.Weapon3;
+                _weapon2.Spawn(this, nameof(Weapon2));
+                _weapon3 = new Axe();
                 _weapon3.Init(_game);
-                _weapon4 = Scout.Weapon4;
-                Scout.SpawnWeapons(this);
+                _weapon3.Spawn(this, nameof(Weapon3));
+                _weapon4 = null;
                 _weapon1.WeaponMesh.Visible = true;
                 _activeWeapon = _weapon1;
                 break;

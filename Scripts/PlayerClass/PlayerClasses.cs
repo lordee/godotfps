@@ -17,13 +17,6 @@ public class Scout
     static public int Cells = 100;
     static public int MaxGren1 = 4;
     static public int MaxGren2 = 4;
-
-    static public void SpawnWeapons(Player p)
-    {
-        //Weapon1.Spawn(p, nameof(Weapon1));
-        Weapon2.Spawn(p, nameof(Weapon2));
-        Weapon3.Spawn(p, nameof(Weapon3));
-    }
 }
 /*
 public class Observer : TFClass
