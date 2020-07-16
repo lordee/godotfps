@@ -116,6 +116,8 @@ abstract public class Weapon : MeshInstance
                 {
                     case WEAPONTYPE.HITSCAN:
                     case WEAPONTYPE.MELEE:
+                        this.DoHit(pCmd.attackDir.Normalized() * _weaponRange);
+                        break;
                     case WEAPONTYPE.SPREAD:
                         Random ran = new Random();
                         
@@ -160,8 +162,9 @@ abstract public class Weapon : MeshInstance
         return shot;
     }
 
-    private void DoHit(Vector3 shootTo)
+    private void DoHit(Vector3 dir)
     {
+        Vector3 shootTo = _playerOwner.GlobalTransform.origin + dir;
         PhysicsDirectSpaceState spaceState = _playerOwner.GetWorld().DirectSpaceState;
         Godot.Collections.Dictionary res = spaceState.IntersectRay(_playerOwner.GlobalTransform.origin, shootTo, new Godot.Collections.Array { this, _playerOwner }, 1);
         if (res.Count > 0)
