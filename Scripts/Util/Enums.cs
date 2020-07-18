@@ -20,6 +20,8 @@ public enum MOVETYPE // movetype
     DEAD,
     NONE,
     LOCK,
+    TOSS,
+    BOUNCE,
 }
 
 public enum ENTITYTYPE // entity type
@@ -38,6 +40,16 @@ public enum CT
 {
     PLAYERCONTROLLER,
     COMMAND
+}
+
+public enum IMPULSE
+{
+    WEAPONONE = 1,
+    WEAPONTWO = 2,
+    WEAPONTHREE = 3,
+    WEAPONFOUR = 4, 
+    GRENONE = 5,
+    GRENTWO = 6,
 }
 
 public enum PLAYERCLASS
@@ -72,8 +84,13 @@ public enum WEAPONTYPE
 
 public enum WEAPON
 {
+    NONE,
+    AXE,
     NAILGUN,
     SHOTGUN,
+    FRAG,
+    FLASH,
+    CONCUSSION,
 }
 
 public enum AMMUNITION 
@@ -91,14 +108,22 @@ public class ProjectileInfo
     {
         NAIL = 1,
         ROCKET = 2,
-        GRENADE = 3
+        GRENADE = 3,
+        FRAG = 4,
+        FLASH = 5,
+        CONCUSSION = 6,
     }
 
     static public Dictionary<WEAPON, PROJECTILE> Weapons = new Dictionary<WEAPON, PROJECTILE> {
-        {WEAPON.NAILGUN, ProjectileInfo.PROJECTILE.NAIL}
+        {WEAPON.NAILGUN, ProjectileInfo.PROJECTILE.NAIL},
+        {WEAPON.FRAG, ProjectileInfo.PROJECTILE.FRAG},
+        {WEAPON.FLASH, ProjectileInfo.PROJECTILE.FLASH},
+        {WEAPON.CONCUSSION, ProjectileInfo.PROJECTILE.CONCUSSION},
+        
     };
 
     static public Dictionary<PROJECTILE, string> Scenes = new Dictionary<PROJECTILE, string> {
-        {ProjectileInfo.PROJECTILE.NAIL, "res://Scenes/Weapons/Nail.tscn"}
+        {ProjectileInfo.PROJECTILE.NAIL, "res://Scenes/Weapons/Nail.tscn"},
+        {ProjectileInfo.PROJECTILE.CONCUSSION, "res://Scenes/Weapons/ConcussionGrenade.tscn"}
     };
 }

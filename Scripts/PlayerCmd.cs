@@ -17,4 +17,5 @@ public class PlayerCmd
         get { return _projName; }
         set { _projName = value; }
         }
+    public float impulse;
 }

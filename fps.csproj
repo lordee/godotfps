@@ -91,6 +91,8 @@
     <Compile Include="Scripts\Weapons\Shotgun.cs" />
     <Compile Include="Scripts\Weapons\Puff.cs" />
     <Compile Include="Scripts\Weapons\Axe.cs" />
+    <Compile Include="Scripts\Weapons\HandGrenades\HandGrenade.cs" />
+    <Compile Include="Scripts\Weapons\HandGrenades\ConcussionGrenade.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

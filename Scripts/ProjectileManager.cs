@@ -38,8 +38,9 @@ public class ProjectileManager : Node
         ProjectileInfo.PROJECTILE projType = ProjectileInfo.Weapons[weapon];
         Projectile proj = (Projectile)ProjectileScenes[projType].Instance();
 
-        _projectiles.Add(proj);
         this.AddChild(proj);
+        _projectiles.Add(proj);
+        
         Peer p = _game.Network.PeerList.Where(e => e.ID == shooter.ID).SingleOrDefault();
         float ping = 0f;
         if (p != null)
@@ -49,8 +50,13 @@ public class ProjectileManager : Node
         
         proj.Init(shooter, dest.Normalized(), weapon, _game);
         proj.Velocity *= proj.Speed;
+        if (proj is HandGrenade h)
+        {
+            h.Visible = false;
+            shooter.PrimingGren = h;
+        }
         proj.Name = projName.Replace("\"", "").Length > 0 ? projName : shooter.ID + "!" + proj.Name;
-        
+
         // godot inserts @ signs and numbers to non unique names that can happen due to sync issues
         // it also currently doesn't allow you to manually insert them, so server sets wrong name! and sends back wrong name!
         // great architecture!
@@ -108,22 +114,62 @@ public class ProjectileManager : Node
 
     private State ProcessMovement(State newState, float delta, Projectile proj)
     {
-        Vector3 motion = proj.Velocity * delta;
+        Vector3 motion = new Vector3();
+        switch (proj.MoveType)
+        {
+            case MOVETYPE.FLY:
+                motion = proj.Velocity * delta;
+                break;
+            case MOVETYPE.BOUNCE:
+                if (proj is HandGrenade h)
+                {
+                    if (h.Thrown && h.Stage == 1)
+                    {
+                        motion = h.Velocity * delta;
+                    }
+                }
+                break;
+        }
+        
         KinematicCollision c = proj.MoveAndCollide(motion);
+        
         if (c != null)
         {
-            Random ran = new Random();
-            float damage = proj.Damage + ran.Next(0,20);
-            // if c collider is kinematic body (direct hit)
-            if (c.Collider is Player pl)
+            switch (proj.MoveType)
             {
-                pl.TakeDamage(proj.PlayerOwner, proj.GlobalTransform.origin, damage);
-                proj.Explode(pl, damage);
+                case MOVETYPE.FLY:
+                    Random ran = new Random();
+                    float damage = proj.Damage + ran.Next(0,20);
+                    // if c collider is kinematic body (direct hit)
+                    if (c.Collider is Player pl)
+                    {
+                        pl.TakeDamage(proj.PlayerOwner, proj.GlobalTransform.origin, damage);
+                        proj.Explode(pl, damage);
+                    }
+                    else {
+                        proj.Explode(null, damage);
+                    }
+                    _remove.Add(proj);
+                    break;
+                case MOVETYPE.BOUNCE:
+                    proj.Speed *= .95f;
+                    proj.VerticalSpeed *= .95f;
+                    Vector3 v = motion.Bounce(c.Normal);
+                    v.y *= proj.VerticalSpeed;
+                    v.x *= proj.Speed;
+                    v.z *= proj.Speed;
+                    proj.Velocity =  v;
+                    break;
             }
-            else {
-                proj.Explode(null, damage);
+        }
+        else
+        {
+            switch (proj.MoveType)
+            {
+                case MOVETYPE.BOUNCE:
+                    proj.Velocity.y -= _game.World.Gravity/2 * delta;
+                    break;
             }
-            _remove.Add(proj);
         }
 
         proj.PredictedState = new State {

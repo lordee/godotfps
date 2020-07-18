@@ -16,6 +16,7 @@ public class PlayerController : Camera
     private float _cameraAngle = 0f;
     private Vector3 shootTo = new Vector3();
     private float _shootRange = 100000f;
+    private float impulse = 0;
 
     private Sprite _crosshair;
     public Sprite Crosshair {
@@ -45,13 +46,13 @@ public class PlayerController : Camera
     public override void _PhysicsProcess(float delta)
     {
         shootTo = new Vector3();
-        if (attack == 1)
-        {
+        //if (attack == 1)
+        //{
             // FIXME - spawn projectile from middle of player, not camera
             Vector3 origin = ProjectRayOrigin(_aimAt.Position);
             Vector3 to = ProjectRayNormal(_aimAt.Position) * _shootRange;
             shootTo = to + origin;
-        }
+        //}
         
         PlayerCmd pCmd = new PlayerCmd();
         pCmd.playerID = _player.ID;
@@ -66,45 +67,44 @@ public class PlayerController : Camera
         pCmd.attack = attack;
         pCmd.attackDir = shootTo;
         pCmd._projName = "";
+        pCmd.impulse = impulse;
+        impulse = 0;
         _player.pCmdQueue.Add(pCmd);
     }
 
+    // FIXME - network packet to change weapons
     public void ChangeWeapon(int arg)
     {
-        
         switch (arg)
         {
             case 1:
-                if (_player.Weapon1 != null)
-                {
-                    _player.ActiveWeapon.WeaponMesh.Visible = false;
-                    _player.ActiveWeapon = _player.Weapon1;
-                    _player.ActiveWeapon.WeaponMesh.Visible = true;
-                }
+                impulse = (float)IMPULSE.WEAPONONE;
                 break;
             case 2:
-                if (_player.Weapon2 != null)
-                {
-                    _player.ActiveWeapon.WeaponMesh.Visible = false;
-                    _player.ActiveWeapon = _player.Weapon2;
-                    _player.ActiveWeapon.WeaponMesh.Visible = true;
-                }
+                impulse = (float)IMPULSE.WEAPONTWO;
                 break;
             case 3:
-                if (_player.Weapon3 != null)
-                {
-                    _player.ActiveWeapon.WeaponMesh.Visible = false;
-                    _player.ActiveWeapon = _player.Weapon3;
-                    _player.ActiveWeapon.WeaponMesh.Visible = true;
-                }
+                impulse = (float)IMPULSE.WEAPONTHREE;
                 break;
             case 4:
-                if (_player.Weapon4 != null)
-                {
-                    _player.ActiveWeapon.WeaponMesh.Visible = false;
-                    _player.ActiveWeapon = _player.Weapon4;
-                    _player.ActiveWeapon.WeaponMesh.Visible = true;
-                }
+                impulse = (float)IMPULSE.WEAPONFOUR;
+                break;
+        }
+    }
+
+    // TODO - implement
+    public void Prime(int arg)
+    {
+        switch (arg)
+        {
+            case 1:
+                impulse = (float)IMPULSE.GRENONE;
+                break;
+            case 2:
+                impulse = (float)IMPULSE.GRENTWO;
+                break;
+            default:
+                GD.Print("Grenade type does not exist");
                 break;
         }
     }

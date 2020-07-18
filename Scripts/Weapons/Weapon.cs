@@ -148,7 +148,7 @@ abstract public class Weapon : MeshInstance
                         {
                             return false;
                         }
-                        string name =_game.World.ProjectileManager.AddProjectile(_playerOwner, pCmd.attackDir, pCmd.projName, _weapon);
+                        string name = _game.World.ProjectileManager.AddProjectile(_playerOwner, pCmd.attackDir, pCmd.projName, _weapon);
                         pCmd.projName = name;
                         break;
                 }

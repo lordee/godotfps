@@ -18,8 +18,9 @@ public class Player : KinematicBody
     public Peer Peer;
 
     public Spatial Head { get { return _head; }}
-
+    public PlayerController PlayerController = null;
     public bool PlayerControlled = false;
+    AudioStreamPlayer _grenTimer = null;
 
     // fields
     public int Team;
@@ -38,12 +39,20 @@ public class Player : KinematicBody
         get { return _activeWeapon; }
         set { _activeWeapon = value; }
     }
+    private HandGrenade _activeGrenade;
+    private WEAPON _gren1Type;
+    private WEAPON _gren2Type;
+    private int _gren1Count = 0;
+    private int _gren2Count = 0;
+    public HandGrenade PrimingGren = null;
+
     private int _maxArmour = 200;
     private float _currentArmour;
     public float CurrentArmour { get { return _currentArmour; }}
     private int _maxHealth = 100;
     private float _currentHealth;
     public float CurrentHealth { get { return _currentHealth; }}
+    
 
     
     // movement
@@ -78,7 +87,6 @@ public class Player : KinematicBody
         get { return _predictedState; }
         set { _predictedState = value; }
         }
-
     
     public MOVETYPE MoveType = MOVETYPE.SPECTATOR;
     private float _timeDead = 0;
@@ -91,6 +99,7 @@ public class Player : KinematicBody
         _mesh = GetNode("MeshInstance") as MeshInstance;
         _feet = GetNode("Feet") as RayCast;
         _dieSound = GetNode("DieSound") as AudioStreamPlayer3D;
+        _grenTimer = GetNode("GrenTimer") as AudioStreamPlayer;
     }
 
     public override void _PhysicsProcess(float delta)
@@ -199,7 +208,8 @@ public class Player : KinematicBody
             }
             _game.World.RewindPlayers(diff, delta);
         }
-   
+
+        this.ProcessImpulse(pCmd);
         this.ProcessAttack(pCmd, delta);
 
         if (IsNetworkMaster())
@@ -208,6 +218,130 @@ public class Player : KinematicBody
         }
 
         this.ProcessMovementCmd(_predictedState, pCmd, delta);
+    }
+
+    private void ProcessImpulse(PlayerCmd pCmd)
+    {
+        if (pCmd.impulse > 0)
+        {
+            IMPULSE i = (IMPULSE)pCmd.impulse;
+            switch (i)
+            {
+                case IMPULSE.WEAPONONE:
+                    if (_weapon1 != null)
+                    {
+                        ActiveWeapon.WeaponMesh.Visible = false;
+                        ActiveWeapon = Weapon1;
+                        ActiveWeapon.WeaponMesh.Visible = true;
+                    }
+                    break;
+                case IMPULSE.WEAPONTWO:
+                    if (Weapon2 != null)
+                    {
+                        ActiveWeapon.WeaponMesh.Visible = false;
+                        ActiveWeapon = Weapon2;
+                        ActiveWeapon.WeaponMesh.Visible = true;
+                    }
+                    break;
+                case IMPULSE.WEAPONTHREE:
+                    if (Weapon3 != null)
+                    {
+                        ActiveWeapon.WeaponMesh.Visible = false;
+                        ActiveWeapon = Weapon3;
+                        ActiveWeapon.WeaponMesh.Visible = true;
+                    }
+                    break;
+                case IMPULSE.WEAPONFOUR:
+                    if (Weapon4 != null)
+                    {
+                        ActiveWeapon.WeaponMesh.Visible = false;
+                        ActiveWeapon = Weapon4;
+                        ActiveWeapon.WeaponMesh.Visible = true;
+                    }
+                    break;
+                case IMPULSE.GRENONE:
+                case IMPULSE.GRENTWO:
+                    UseHandGrenade(pCmd);
+                    break;
+            }
+        }
+    }
+
+    private void UseHandGrenade(PlayerCmd pCmd)
+    {
+        if (PrimingGren != null)
+        {
+            ThrowGren(pCmd.attackDir);
+        }
+        else
+        {
+            int grenCount = 0;
+            switch ((IMPULSE)pCmd.impulse)
+            {
+                case IMPULSE.GRENONE:
+                    grenCount = _gren1Count;
+                    break;
+                case IMPULSE.GRENTWO:
+                    grenCount = _gren2Count;
+                    break;
+            }
+
+            if (grenCount > 0)
+            {
+                // play timer
+                if (this.ID == _game.Network.ID && _grenTimer != null)
+                {
+                    _grenTimer.Play();
+                }
+
+                WEAPON grenType = WEAPON.NONE;
+
+                switch ((IMPULSE)pCmd.impulse)
+                {
+                    case IMPULSE.GRENONE:
+                        _gren1Count -= 1;
+                        grenType = _gren1Type;
+                        break;
+                    case IMPULSE.GRENTWO:
+                        _gren2Count -= 1;
+                        grenType = _gren2Type;
+                        break;
+                }
+
+                string name = _game.World.ProjectileManager.AddProjectile(this, pCmd.attackDir, pCmd.projName, grenType);
+                // FIXME - need projnames to be an array, shooting + gren on same frame
+                pCmd.projName = name;
+            }
+            else
+            {
+                PrintGrenCount((IMPULSE)pCmd.impulse);
+            }
+        }
+    }
+
+    private void PrintGrenCount(IMPULSE imp)
+    {
+        int grenCount = 0;
+        WEAPON grenType = WEAPON.NONE;
+
+        switch (imp)
+        {
+            case IMPULSE.GRENONE:
+                grenCount = _gren1Count;
+                grenType = _gren1Type;
+                break;
+            case IMPULSE.GRENTWO:
+                grenCount = _gren2Count;
+                grenType = _gren2Type;
+                break;
+        }
+        Console.Print("You have " + grenCount + " " + grenType + "s left.");
+    }
+
+    private void ThrowGren(Vector3 dir)
+    {
+        PrimingGren.Throw(dir);
+        this.PrimingGren = null;
     }
 
     private void DeadProcess(PlayerCmd pCmd, float delta)
@@ -642,6 +776,11 @@ public class Player : KinematicBody
                 _weapon4 = null;
                 _weapon1.WeaponMesh.Visible = true;
                 _activeWeapon = _weapon1;
+
+                _gren1Type = WEAPON.FLASH;
+                _gren2Type = WEAPON.CONCUSSION;
+                _gren1Count = Scout.MaxGren1;
+                _gren2Count = Scout.MaxGren2;
                 break;
             case PLAYERCLASS.SNIPER:
 

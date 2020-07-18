@@ -240,7 +240,20 @@ public class Commands
 					FunctionName = nameof(Commands.Weapon),
 					CommandType = CT.COMMAND,
 				}
+			},
+			{
+				"prime",
+				new CommandInfo {
+					HelpMessages = new string[] {
+						"'prime x' where x is a number, primes that particular grenade"
+					},
+					Function = (Args) => Commands.Prime(Args),
+					FunctionName = nameof(Commands.Prime),
+					CommandType = CT.COMMAND,
+				}
 			}
+			// TODO - implement unbind and bind key "" (empty string)
+			// TODO - give feedback on save_cfg command
         };
     }
 
@@ -271,6 +284,24 @@ public class Commands
 		if (int.TryParse(Args[0], out result))
 		{
 			Game.Client.ChangeWeapon(result);
+		}
+		else
+		{
+			Console.ThrowPrint("Argument must be a number");
+		}
+	}
+
+	[CommandWithArg(typeof(Commands), nameof(Prime))]
+	public static void Prime(List<string> Args)
+	{
+		if (Args.Count != 1)
+		{
+			Console.ThrowPrint("Incorrect argument count");
+		}
+		int result = 0;
+		if (int.TryParse(Args[0], out result))
+		{
+			Game.Client.Prime(result);
 		}
 		else
 		{

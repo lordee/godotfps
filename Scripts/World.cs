@@ -265,6 +265,7 @@ public class World : Node
             pc.Init(player);
             pc.SetProcess(true);
             pc.Notification(NotificationReady);
+            player.PlayerController = pc;
             _worldOwner = player;
         }
 
@@ -311,5 +312,23 @@ public class World : Node
                     break;
             }
             return teamID == 9 ? new Vector3(0,10,0) : spawn.Translation;
+    }
+
+    public Godot.Collections.Array FindRadius(KinematicBody body, float radius)
+    {
+        // test for radius damage
+        SphereShape s = new SphereShape();
+        s.Radius = radius;
+
+        // Get space and state of the subject body
+        RID space = PhysicsServer.BodyGetSpace(body.GetRid());
+        PhysicsDirectSpaceState state = PhysicsServer.SpaceGetDirectState(space);
+
+        // Setup shape query parameters
+        PhysicsShapeQueryParameters par = new PhysicsShapeQueryParameters();
+        par.ShapeRid = s.GetRid();
+        par.Transform = body.Transform;
+
+        return state.IntersectShape(par);
     }
 }
