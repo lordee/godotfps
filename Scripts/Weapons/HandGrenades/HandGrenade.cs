@@ -18,7 +18,6 @@ abstract public class HandGrenade : Projectile
 
     public HandGrenade()
     {
-        
     }
 
     public override void Init(Player shooter, Vector3 vel, WEAPON weapon, Game game)
@@ -29,7 +28,7 @@ abstract public class HandGrenade : Projectile
         _areaOfEffectRadius = 5f;
         _moveType = MOVETYPE.BOUNCE;
         _areaOfEffect = true;
-        _speed = 60;
+        _speed = 40;
         _verticalSpeed = 20;
     }
 

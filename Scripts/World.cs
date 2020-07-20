@@ -314,9 +314,11 @@ public class World : Node
             return teamID == 9 ? new Vector3(0,10,0) : spawn.Translation;
     }
 
+    // FIXME - increase max number of results
+    // this has a max number of results that get filled with static bodies...
     public Godot.Collections.Array FindRadius(KinematicBody body, float radius)
     {
-        // test for radius damage
+        // test for radius
         SphereShape s = new SphereShape();
         s.Radius = radius;
 
@@ -329,6 +331,6 @@ public class World : Node
         par.ShapeRid = s.GetRid();
         par.Transform = body.Transform;
 
-        return state.IntersectShape(par);
+        return state.IntersectShape(par, 100);
     }
 }

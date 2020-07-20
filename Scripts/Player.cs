@@ -178,6 +178,7 @@ public class Player : KinematicBody
                     break;
             }
         }
+
         this.ProcessMovement(delta);
 
         if (IsNetworkMaster())
@@ -704,9 +705,9 @@ public class Player : KinematicBody
         AddVelocity(inflictorOrigin, vel);
     }
 
-    private void AddVelocity(Vector3 org, float velocity)
+    public void AddVelocity(Vector3 org, float velocity)
     {
-        Vector3 dir = this.Transform.origin - org;
+        Vector3 dir = this.GlobalTransform.origin - org;
         dir = dir.Normalized();
         dir = dir * (velocity / 2); // random magic divisor number, i thought it was 10:1...
         _serverState.Velocity += dir;
