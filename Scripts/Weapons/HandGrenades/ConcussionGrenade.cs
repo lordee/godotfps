@@ -36,7 +36,7 @@ public class ConcussionGrenade : HandGrenade
                 float dist = this.Transform.origin.DistanceTo(pl.Transform.origin);
                 dist = dist > this._areaOfEffectRadius ? (this._areaOfEffectRadius*.99f) : dist;
                 float pc = ((this._areaOfEffectRadius - dist) / this._areaOfEffectRadius);
-                //pl.Inflict("concussiongrenade", _inflictLength, _playerOwner);
+                pl.Inflict(WEAPON.CONCUSSION, _inflictLength, _playerOwner);
                 pl.AddVelocity(this.GlobalTransform.origin, pow * (1 - pc));
             }
         }

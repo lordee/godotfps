@@ -45,6 +45,7 @@ public class Player : KinematicBody
     private int _gren1Count = 0;
     private int _gren2Count = 0;
     public HandGrenade PrimingGren = null;
+    public List<Debuff> Debuffs = new List<Debuff>();
 
     private int _maxArmour = 200;
     private float _currentArmour;
@@ -210,6 +211,8 @@ public class Player : KinematicBody
             _game.World.RewindPlayers(diff, delta);
         }
 
+        this.ProcessDebuffs(delta);
+
         this.ProcessImpulse(pCmd);
         this.ProcessAttack(pCmd, delta);
 
@@ -219,6 +222,39 @@ public class Player : KinematicBody
         }
 
         this.ProcessMovementCmd(_predictedState, pCmd, delta);
+    }
+
+    private void ProcessDebuffs(float delta)
+    {
+        List<Debuff> agedBuffs = new List<Debuff>();
+        foreach (Debuff d in Debuffs)
+        {
+            if (d.TimeLeft <= 0)
+            {
+                agedBuffs.Add(d);
+                continue;
+            }
+
+            if (d.NextThink <= 0)
+            {
+                switch (d.Type)
+                {
+                    case WEAPON.CONCUSSION:
+                        ApplyConcussion(d);
+                        break;
+                }
+            }
+            
+            d.TimeLeft -= delta;
+            d.NextThink -= delta;
+        }
+
+        Debuffs.RemoveAll(d => agedBuffs.Contains(d));
+    }
+
+    private void ApplyConcussion(Debuff d)
+    {
+        // TODO - figure out what effect we want
     }
 
     private void ProcessImpulse(PlayerCmd pCmd)
@@ -343,6 +379,27 @@ public class Player : KinematicBody
     {
         PrimingGren.Throw(dir);
         this.PrimingGren = null;
+    }
+
+    public void Inflict(WEAPON inflictorType, float inflictLength, Player attacker)
+    {
+        switch (inflictorType)
+        {
+            /*case "tranquiliser":
+                this.Tranquilised = true;
+                _tranquilisedLength = inflictLength;
+            break;
+            case "syringe":
+                _diseasedBy.Add(new DiseasedData(attacker, inflictorType, 0f));
+                _diseasedInterval = inflictLength;
+            break;*/
+            case WEAPON.CONCUSSION:
+                Debuffs.Add(new Debuff{
+                    Type = WEAPON.CONCUSSION,
+                    TimeLeft = inflictLength
+                });
+            break;
+        }
     }
 
     private void DeadProcess(PlayerCmd pCmd, float delta)
