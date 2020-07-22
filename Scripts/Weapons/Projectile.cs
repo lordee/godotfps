@@ -56,6 +56,7 @@ public class Projectile : KinematicBody
         this.LookAt(vel * 1000, _game.World.Up);
         _playerOwner = shooter;
         _moveType = MOVETYPE.FLY;
+        Weapon = weapon;
         switch (weapon)
         {
             case WEAPON.NAILGUN:
