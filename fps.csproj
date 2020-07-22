@@ -82,6 +82,7 @@
     <Compile Include="Scripts\UI\Console\Console.cs" />
     <Compile Include="Scripts\UI\Console\Commands.cs" />
     <Compile Include="Scripts\Settings.cs" />
+    <Compile Include="Scripts\Debuff.cs" />
     <Compile Include="Scripts\PlayerClass\PlayerClasses.cs" />
     <Compile Include="Scripts\Weapons\RocketExplosion.cs" />
     <Compile Include="Scripts\Weapons\Weapon.cs" />
@@ -93,6 +94,7 @@
     <Compile Include="Scripts\Weapons\Axe.cs" />
     <Compile Include="Scripts\Weapons\HandGrenades\HandGrenade.cs" />
     <Compile Include="Scripts\Weapons\HandGrenades\ConcussionGrenade.cs" />
+    <Compile Include="Scripts\Weapons\HandGrenades\FlashGrenade.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

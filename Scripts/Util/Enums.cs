@@ -124,6 +124,7 @@ public class ProjectileInfo
 
     static public Dictionary<PROJECTILE, string> Scenes = new Dictionary<PROJECTILE, string> {
         {ProjectileInfo.PROJECTILE.NAIL, "res://Scenes/Weapons/Nail.tscn"},
-        {ProjectileInfo.PROJECTILE.CONCUSSION, "res://Scenes/Weapons/ConcussionGrenade.tscn"}
+        {ProjectileInfo.PROJECTILE.CONCUSSION, "res://Scenes/Weapons/HandGrenades/ConcussionGrenade.tscn"},
+        {ProjectileInfo.PROJECTILE.FLASH, "res://Scenes/Weapons/HandGrenades/FlashGrenade.tscn"},
     };
 }

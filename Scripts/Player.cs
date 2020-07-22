@@ -237,12 +237,7 @@ public class Player : KinematicBody
 
             if (d.NextThink <= 0)
             {
-                switch (d.Type)
-                {
-                    case WEAPON.CONCUSSION:
-                        ApplyConcussion(d);
-                        break;
-                }
+                d.ApplyDebuff();
             }
             
             d.TimeLeft -= delta;
@@ -250,11 +245,6 @@ public class Player : KinematicBody
         }
 
         Debuffs.RemoveAll(d => agedBuffs.Contains(d));
-    }
-
-    private void ApplyConcussion(Debuff d)
-    {
-        // TODO - figure out what effect we want
     }
 
     private void ProcessImpulse(PlayerCmd pCmd)
@@ -383,23 +373,13 @@ public class Player : KinematicBody
 
     public void Inflict(WEAPON inflictorType, float inflictLength, Player attacker)
     {
-        switch (inflictorType)
-        {
-            /*case "tranquiliser":
-                this.Tranquilised = true;
-                _tranquilisedLength = inflictLength;
-            break;
-            case "syringe":
-                _diseasedBy.Add(new DiseasedData(attacker, inflictorType, 0f));
-                _diseasedInterval = inflictLength;
-            break;*/
-            case WEAPON.CONCUSSION:
-                Debuffs.Add(new Debuff{
-                    Type = WEAPON.CONCUSSION,
-                    TimeLeft = inflictLength
-                });
-            break;
-        }
+        Debuffs.Add(
+            new Debuff {
+                Type = inflictorType,
+                TimeLeft = inflictLength,
+                Owner = this,
+                Attacker = attacker,
+        });
     }
 
     private void DeadProcess(PlayerCmd pCmd, float delta)

@@ -36,6 +36,7 @@ public class Projectile : KinematicBody
     protected MOVETYPE _moveType;
     public MOVETYPE MoveType { get { return _moveType; }}
 
+    protected Dictionary<Player, float> _explodedPlayers = new Dictionary<Player, float>();
 
     public override void _Ready()
     {
@@ -85,6 +86,7 @@ public class Projectile : KinematicBody
 
                         // inflict damage
                         pl.TakeDamage(_playerOwner, this.GlobalTransform.origin, d);
+                        _explodedPlayers.Add(pl, pc);
                     }
                 }
             }

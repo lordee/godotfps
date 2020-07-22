@@ -25,7 +25,7 @@ abstract public class HandGrenade : Projectile
         _particleResource = "res://Scenes/Weapons/RocketExplosion.tscn";
         base.Init(shooter, vel, weapon, game);
         
-        _areaOfEffectRadius = 5f;
+        _areaOfEffectRadius = 10f;
         _moveType = MOVETYPE.BOUNCE;
         _areaOfEffect = true;
         _speed = 40;
@@ -84,7 +84,25 @@ abstract public class HandGrenade : Projectile
         {
             _playerOwner.PrimingGren = null;
         }
+
+        this.Debuff();
+
         _game.World.ProjectileManager.Projectiles.Remove(this);
         GetTree().QueueDelete(this);
+    }
+
+    virtual public void Debuff()
+    {
+        foreach (KeyValuePair<Player, float> kvp in _explodedPlayers)
+        {
+            if (_grenadeType == WEAPON.CONCUSSION)
+            {
+                float dist = this.Transform.origin.DistanceTo(kvp.Key.Transform.origin);
+                dist = dist > this._areaOfEffectRadius ? (this._areaOfEffectRadius*.99f) : dist;
+                float pc = ((this._areaOfEffectRadius - dist) / this._areaOfEffectRadius);
+                kvp.Key.AddVelocity(this.GlobalTransform.origin, ConcussionGrenade.BlastPower * (1 - pc));
+            }
+            kvp.Key.Inflict(_grenadeType, _inflictLength * kvp.Value, _playerOwner);
+        }
     }
 }
