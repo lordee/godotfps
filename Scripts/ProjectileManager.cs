@@ -132,7 +132,6 @@ public class ProjectileManager : Node
         }
         
         KinematicCollision c = proj.MoveAndCollide(motion);
-        
         if (c != null)
         {
             switch (proj.MoveType)

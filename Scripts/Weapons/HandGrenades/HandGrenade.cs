@@ -76,7 +76,7 @@ abstract public class HandGrenade : Projectile
     protected void FinishExplode()
     {
         Particles p = (Particles)_particleScene.Instance();
-        p.Transform = this.GlobalTransform;
+        p.GlobalTransform = this.GlobalTransform;
         this.GetParent().AddChild(p);
         p.Emitting = true;
 
