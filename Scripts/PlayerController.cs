@@ -157,9 +157,7 @@ public class PlayerController : Camera
     [InputWithArg(typeof(PlayerController), nameof(Attack))]
     public static void Attack(float val)
     {
-        // FIXME
-        // setinputashandle is not working on closing of UI, breaks the game when in lobby and click with mouse to close something
-        // sets off an attack command while client is null
+        // FIXME - setinputashandle is not working on closing of UI, breaks the game when in lobby and click with mouse to close something, it sets off an attack command while client is null
         if (Game.Client != null)
         {
             Game.Client.attack = val;
