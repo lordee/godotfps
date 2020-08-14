@@ -786,6 +786,41 @@ public class Player : KinematicBody
         }
     }
 
+    private Weapon SetupWeapon(WEAPONTYPE weapon)
+    {
+        Weapon weap = null;
+        switch (weapon)
+        {
+            case WEAPONTYPE.AXE:
+                weap = new Axe();
+                break;
+            case WEAPONTYPE.SHOTGUN:
+                weap = new Shotgun();
+                break;
+            case WEAPONTYPE.SUPERSHOTGUN:
+                weap = new SuperShotgun();
+                break;
+            case WEAPONTYPE.NAILGUN:
+                weap = new NailGun();
+                break;
+            case WEAPONTYPE.ROCKETLAUNCHER:
+                weap = new RocketLauncher();
+                break;
+            case WEAPONTYPE.NONE:
+            default:
+
+                break;
+        }
+
+        if (weap != null)
+        {
+            weap.Init(_game);
+            weap.Spawn(this, nameof(weap));
+        }
+
+        return weap;
+    }
+
     public void SetupClass()
     {
         // remove old weapon nodes for readd
@@ -794,6 +829,7 @@ public class Player : KinematicBody
         Delete(_weapon3);
         Delete(_weapon4);
 
+        // TODO - maybe one day use reflection to clean this up or do types properly
         switch (PlayerClass)
         {
             case PLAYERCLASS.NONE:
@@ -802,22 +838,15 @@ public class Player : KinematicBody
             case PLAYERCLASS.SCOUT:
                 _maxHealth = Scout.Health;
                 _maxArmour = Scout.Armour;
-                _weapon1 = new NailGun();
-                _weapon1.Init(_game);
-                _weapon1.Spawn(this, nameof(Weapon1));
-                _weapon2 = new Shotgun();
-                _weapon2.Init(_game);
-                _weapon2.Spawn(this, nameof(Weapon2));
-                _weapon3 = new Axe();
-                _weapon3.Init(_game);
-                _weapon3.Spawn(this, nameof(Weapon3));
-                _weapon4 = null;
+                _weapon1 = SetupWeapon(Scout.Weapon1);
+                _weapon2 = SetupWeapon(Scout.Weapon2);
+                _weapon3 = SetupWeapon(Scout.Weapon3);
+                _weapon4 = SetupWeapon(Scout.Weapon4);
                 _weapon1.WeaponMesh.Visible = true;
                 _activeWeapon = _weapon1;
                 _moveSpeed = Scout.MoveSpeed;
-
-                _gren1Type = WEAPONTYPE.FLASH;
-                _gren2Type = WEAPONTYPE.CONCUSSION;
+                _gren1Type = Scout.Gren1Type;
+                _gren2Type = Scout.Gren2Type;
                 _gren1Count = Scout.MaxGren1;
                 _gren2Count = Scout.MaxGren2;
                 break;
@@ -825,7 +854,19 @@ public class Player : KinematicBody
 
                 break;
             case PLAYERCLASS.SOLDIER:
-
+                _maxHealth = Soldier.Health;
+                _maxArmour = Soldier.Armour;
+                _weapon1 = SetupWeapon(Soldier.Weapon1);
+                _weapon2 = SetupWeapon(Soldier.Weapon2);
+                _weapon3 = SetupWeapon(Soldier.Weapon3);
+                _weapon4 = SetupWeapon(Soldier.Weapon4);
+                _weapon1.WeaponMesh.Visible = true;
+                _activeWeapon = _weapon1;
+                _moveSpeed = Soldier.MoveSpeed;
+                _gren1Type = Soldier.Gren1Type;
+                _gren2Type = Soldier.Gren2Type;
+                _gren1Count = Soldier.MaxGren1;
+                _gren2Count = Soldier.MaxGren2;
                 break;
             case PLAYERCLASS.DEMOMAN:
 
@@ -846,6 +887,7 @@ public class Player : KinematicBody
 
                 break;
         }
+        
         
     }
 

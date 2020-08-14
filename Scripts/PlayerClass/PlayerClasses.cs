@@ -1,11 +1,17 @@
 using Godot;
 using System;
 
-public class Scout
+public class TFClass
+{
+    static public int Health;
+    static public int Armour;
+}
+
+public class Scout : TFClass
 {
 
-    static public int Health = 100;
-    static public int Armour = 25;
+    new static public int Health = 100;
+    new static public int Armour = 25;
     //static public IHandGrenade Gren1;
     //static public IHandGrenade Gren2;
     static public int Shells = 50;
@@ -15,7 +21,12 @@ public class Scout
     static public int MaxGren1 = 3;
     static public int MaxGren2 = 4;
     static public int MoveSpeed = 45;
-    static public WEAPON 
+    static public WEAPONTYPE Gren1Type = WEAPONTYPE.FLASH;
+    static public WEAPONTYPE Gren2Type = WEAPONTYPE.CONCUSSION;
+    static public WEAPONTYPE Weapon1 = WEAPONTYPE.NAILGUN;
+    static public WEAPONTYPE Weapon2 = WEAPONTYPE.SHOTGUN;
+    static public WEAPONTYPE Weapon3 = WEAPONTYPE.AXE;
+    static public WEAPONTYPE Weapon4 = WEAPONTYPE.NONE;
 }
 
 public class Soldier
@@ -31,6 +42,12 @@ public class Soldier
     static public int MaxGren1 = 4;
     static public int MaxGren2 = 1;
     static public int MoveSpeed = 24;
+    static public WEAPONTYPE Gren1Type = WEAPONTYPE.FRAG;
+    static public WEAPONTYPE Gren2Type = WEAPONTYPE.SHOCK;
+    static public WEAPONTYPE Weapon1 = WEAPONTYPE.ROCKETLAUNCHER;
+    static public WEAPONTYPE Weapon2 = WEAPONTYPE.SUPERSHOTGUN;
+    static public WEAPONTYPE Weapon3 = WEAPONTYPE.SHOTGUN;
+    static public WEAPONTYPE Weapon4 = WEAPONTYPE.AXE;
 }
 
 /*

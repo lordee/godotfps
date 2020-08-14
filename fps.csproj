@@ -92,6 +92,9 @@
     <Compile Include="Scripts\Weapons\Shotgun.cs" />
     <Compile Include="Scripts\Weapons\Puff.cs" />
     <Compile Include="Scripts\Weapons\Axe.cs" />
+    <Compile Include="Scripts\Weapons\SuperShotgun.cs" />
+    <Compile Include="Scripts\Weapons\RocketLauncher.cs" />
+    <Compile Include="Scripts\Weapons\Rocket.cs" />
     <Compile Include="Scripts\Weapons\HandGrenades\HandGrenade.cs" />
     <Compile Include="Scripts\Weapons\HandGrenades\ConcussionGrenade.cs" />
     <Compile Include="Scripts\Weapons\HandGrenades\FlashGrenade.cs" />

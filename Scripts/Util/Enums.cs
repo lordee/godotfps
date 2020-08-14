@@ -86,11 +86,14 @@ public enum WEAPONTYPE
 {
     NONE,
     AXE,
-    NAILGUN,
     SHOTGUN,
+    SUPERSHOTGUN,
+    NAILGUN,
+    ROCKETLAUNCHER,
     FRAG,
     FLASH,
     CONCUSSION,
+    SHOCK,
 }
 
 public enum AMMUNITION 
@@ -116,6 +119,7 @@ public class ProjectileInfo
 
     static public Dictionary<WEAPONTYPE, PROJECTILE> Weapons = new Dictionary<WEAPONTYPE, PROJECTILE> {
         {WEAPONTYPE.NAILGUN, ProjectileInfo.PROJECTILE.NAIL},
+        {WEAPONTYPE.ROCKETLAUNCHER, ProjectileInfo.PROJECTILE.ROCKET},
         {WEAPONTYPE.FRAG, ProjectileInfo.PROJECTILE.FRAG},
         {WEAPONTYPE.FLASH, ProjectileInfo.PROJECTILE.FLASH},
         {WEAPONTYPE.CONCUSSION, ProjectileInfo.PROJECTILE.CONCUSSION},
@@ -124,6 +128,7 @@ public class ProjectileInfo
 
     static public Dictionary<PROJECTILE, string> Scenes = new Dictionary<PROJECTILE, string> {
         {ProjectileInfo.PROJECTILE.NAIL, "res://Scenes/Weapons/Nail.tscn"},
+        {ProjectileInfo.PROJECTILE.ROCKET, "res://Scenes/Weapons/Rocket.tscn"},
         {ProjectileInfo.PROJECTILE.CONCUSSION, "res://Scenes/Weapons/HandGrenades/ConcussionGrenade.tscn"},
         {ProjectileInfo.PROJECTILE.FLASH, "res://Scenes/Weapons/HandGrenades/FlashGrenade.tscn"},
     };

@@ -63,6 +63,11 @@ public class Projectile : KinematicBody
                 _damage = NailGun.Damage;
                 _speed = NailGun.Speed;
                 break;
+            case WEAPONTYPE.ROCKETLAUNCHER:
+                _damage = RocketLauncher.Damage;
+                _speed = RocketLauncher.Speed;
+                break;
+            
         }
 
         _particleScene = (PackedScene)ResourceLoader.Load(_particleResource);
