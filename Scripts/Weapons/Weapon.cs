@@ -9,8 +9,8 @@ abstract public class Weapon : MeshInstance
     protected int _minAmmoRequired;
     protected int _clipSize;
     protected float _coolDown;
-    protected WEAPON _weapon;
-    protected WEAPONTYPE _weaponType;
+    protected WEAPONTYPE _weapon;
+    protected WEAPONSHOTTYPE _weaponShotType;
     protected AMMUNITION _ammoType;
     protected int _weaponRange;
     protected float _reloadTime;
@@ -112,20 +112,20 @@ abstract public class Weapon : MeshInstance
                 TimeSinceLastShot = 0;
 
                 // TODO - should we move to weapon classes? Maybe for pipebomb launcher at least
-                switch (_weaponType)
+                switch (_weaponShotType)
                 {
-                    case WEAPONTYPE.HITSCAN:
-                    case WEAPONTYPE.MELEE:
+                    case WEAPONSHOTTYPE.HITSCAN:
+                    case WEAPONSHOTTYPE.MELEE:
                         this.DoHit(pCmd.attackDir.Normalized() * _weaponRange);
                         break;
-                    case WEAPONTYPE.SPREAD:
+                    case WEAPONSHOTTYPE.SPREAD:
                         Random ran = new Random();
                         
                         float pc = _pelletCount;
                         while (pc > 0)
                         {
                             Vector3 newTo = pCmd.attackDir.Normalized();
-                            if (_weaponType == WEAPONTYPE.SPREAD)
+                            if (_weaponShotType == WEAPONSHOTTYPE.SPREAD)
                             {
                                 float ranX = (float)ran.Next(0,1) == 0 ? -1 : 1;
                                 float ranY = (float)ran.Next(0,1) == 0 ? -1 : 1;
@@ -140,8 +140,8 @@ abstract public class Weapon : MeshInstance
                             pc -= 1;
                         }
                         break;
-                    case WEAPONTYPE.PROJECTILE:
-                    case WEAPONTYPE.GRENADE:
+                    case WEAPONSHOTTYPE.PROJECTILE:
+                    case WEAPONSHOTTYPE.GRENADE:
                         // FIXME - i think attack button is set still and due to sync differences the client attack time is still useable?  projname is empty because client never used it.
                         // this will be an issue for hitscan weapons?
                         if (_game.Network.ID == 1 && pCmd.playerID != 1 && pCmd.projName.Length <= 2)
@@ -238,7 +238,7 @@ abstract public class Weapon : MeshInstance
         }
         
         // projectile mesh
-        if (_weaponType == WEAPONTYPE.PROJECTILE || _weaponType == WEAPONTYPE.GRENADE)
+        if (_weaponShotType == WEAPONSHOTTYPE.PROJECTILE || _weaponShotType == WEAPONSHOTTYPE.GRENADE)
         {
             _projectileScene = (PackedScene)ResourceLoader.Load(_projectileResource);
         }

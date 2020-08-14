@@ -33,7 +33,7 @@ public class ProjectileManager : Node
     }
 
     // when a player attacks
-    public string AddProjectile(Player shooter, Vector3 dest, string projName, WEAPON weapon)
+    public string AddProjectile(Player shooter, Vector3 dest, string projName, WEAPONTYPE weapon)
     {
         ProjectileInfo.PROJECTILE projType = ProjectileInfo.Weapons[weapon];
         Projectile proj = (Projectile)ProjectileScenes[projType].Instance();
@@ -67,7 +67,7 @@ public class ProjectileManager : Node
         return proj.Name;
     }
 
-    public void AddNetworkedProjectile(string name, string pID, Vector3 org, Vector3 vel, Vector3 rot, WEAPON weapon)
+    public void AddNetworkedProjectile(string name, string pID, Vector3 org, Vector3 vel, Vector3 rot, WEAPONTYPE weapon)
     {
         Projectile proj = _projectiles.Where(p => p.Name.Replace("@", "") == name).SingleOrDefault();
         

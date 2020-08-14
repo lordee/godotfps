@@ -356,7 +356,7 @@ public class Network : Node
     {
         string pName = split[i++];
         string pID = split[i++];
-        WEAPON weapon = (WEAPON)Convert.ToInt16(split[i++]);
+        WEAPONTYPE weapon = (WEAPONTYPE)Convert.ToInt16(split[i++]);
         Vector3 porg = new Vector3(
             float.Parse(split[i++],  System.Globalization.CultureInfo.InvariantCulture)
             , float.Parse(split[i++],  System.Globalization.CultureInfo.InvariantCulture)

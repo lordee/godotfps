@@ -1,6 +1,6 @@
 public class Debuff
 {
-    public WEAPON Type;
+    public WEAPONTYPE Type;
     public float TimeLeft;
     public float NextThink;
     public Player Owner;
@@ -10,10 +10,10 @@ public class Debuff
     {
         switch (Type)
         {
-            case WEAPON.CONCUSSION:
+            case WEAPONTYPE.CONCUSSION:
                 ApplyConcussion();
                 break;
-            case WEAPON.FLASH:
+            case WEAPONTYPE.FLASH:
                 ApplyFlash();
                 break;
         }

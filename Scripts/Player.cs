@@ -40,8 +40,8 @@ public class Player : KinematicBody
         set { _activeWeapon = value; }
     }
     private HandGrenade _activeGrenade;
-    private WEAPON _gren1Type;
-    private WEAPON _gren2Type;
+    private WEAPONTYPE _gren1Type;
+    private WEAPONTYPE _gren2Type;
     private int _gren1Count = 0;
     private int _gren2Count = 0;
     public HandGrenade PrimingGren = null;
@@ -321,7 +321,7 @@ public class Player : KinematicBody
                     _grenTimer.Play();
                 }
 
-                WEAPON grenType = WEAPON.NONE;
+                WEAPONTYPE grenType = WEAPONTYPE.NONE;
 
                 switch ((IMPULSE)pCmd.impulse)
                 {
@@ -349,7 +349,7 @@ public class Player : KinematicBody
     private void PrintGrenCount(IMPULSE imp)
     {
         int grenCount = 0;
-        WEAPON grenType = WEAPON.NONE;
+        WEAPONTYPE grenType = WEAPONTYPE.NONE;
 
         switch (imp)
         {
@@ -371,7 +371,7 @@ public class Player : KinematicBody
         this.PrimingGren = null;
     }
 
-    public void Inflict(WEAPON inflictorType, float inflictLength, Player attacker)
+    public void Inflict(WEAPONTYPE inflictorType, float inflictLength, Player attacker)
     {
         Debuffs.Add(
             new Debuff {
@@ -814,9 +814,10 @@ public class Player : KinematicBody
                 _weapon4 = null;
                 _weapon1.WeaponMesh.Visible = true;
                 _activeWeapon = _weapon1;
+                _moveSpeed = Scout.MoveSpeed;
 
-                _gren1Type = WEAPON.FLASH;
-                _gren2Type = WEAPON.CONCUSSION;
+                _gren1Type = WEAPONTYPE.FLASH;
+                _gren2Type = WEAPONTYPE.CONCUSSION;
                 _gren1Count = Scout.MaxGren1;
                 _gren2Count = Scout.MaxGren2;
                 break;

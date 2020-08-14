@@ -7,7 +7,7 @@ public class Axe : Weapon
         _ammoType = AMMUNITION.NONE;
         _weaponResource = "res://Scenes/Weapons/Axe.tscn";
         _coolDown = 0.5f;
-        _weaponType = WEAPONTYPE.MELEE;
+        _weaponShotType = WEAPONSHOTTYPE.MELEE;
         _weaponRange = 10;
     }
 }

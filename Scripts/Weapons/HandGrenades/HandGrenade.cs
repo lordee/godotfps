@@ -13,14 +13,14 @@ abstract public class HandGrenade : Projectile
     protected int _stage = 1;
     public int Stage { get { return _stage; }}
 
-    protected WEAPON _grenadeType;
-    public WEAPON GrenadeType { get { return _grenadeType; }}
+    protected WEAPONTYPE _grenadeType;
+    public WEAPONTYPE GrenadeType { get { return _grenadeType; }}
 
     public HandGrenade()
     {
     }
 
-    public override void Init(Player shooter, Vector3 vel, WEAPON weapon, Game game)
+    public override void Init(Player shooter, Vector3 vel, WEAPONTYPE weapon, Game game)
     {
         _particleResource = "res://Scenes/Weapons/RocketExplosion.tscn";
         base.Init(shooter, vel, weapon, game);
@@ -95,7 +95,7 @@ abstract public class HandGrenade : Projectile
     {
         foreach (KeyValuePair<Player, float> kvp in _explodedPlayers)
         {
-            if (_grenadeType == WEAPON.CONCUSSION)
+            if (_grenadeType == WEAPONTYPE.CONCUSSION)
             {
                 float dist = this.Transform.origin.DistanceTo(kvp.Key.Transform.origin);
                 dist = dist > this._areaOfEffectRadius ? (this._areaOfEffectRadius*.99f) : dist;

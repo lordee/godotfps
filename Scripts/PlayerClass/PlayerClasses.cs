@@ -3,6 +3,7 @@ using System;
 
 public class Scout
 {
+
     static public int Health = 100;
     static public int Armour = 25;
     //static public IHandGrenade Gren1;
@@ -11,9 +12,27 @@ public class Scout
     static public int Nails = 200;
     static public int Rockets = 50;
     static public int Cells = 100;
-    static public int MaxGren1 = 4;
+    static public int MaxGren1 = 3;
     static public int MaxGren2 = 4;
+    static public int MoveSpeed = 45;
+    static public WEAPON 
 }
+
+public class Soldier
+{
+    static public int Health = 100;
+    static public int Armour = 200;
+    //static public IHandGrenade Gren1;
+    //static public IHandGrenade Gren2;
+    static public int Shells = 100;
+    static public int Nails = 100;
+    static public int Rockets = 50;
+    static public int Cells = 50;
+    static public int MaxGren1 = 4;
+    static public int MaxGren2 = 1;
+    static public int MoveSpeed = 24;
+}
+
 /*
 public class Observer : TFClass
 {

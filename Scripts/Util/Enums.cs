@@ -73,7 +73,7 @@ public enum PUFFTYPE
     PUFF
 }
 
-public enum WEAPONTYPE
+public enum WEAPONSHOTTYPE
 {
     MELEE,
     SPREAD,
@@ -82,7 +82,7 @@ public enum WEAPONTYPE
     GRENADE,
 }
 
-public enum WEAPON
+public enum WEAPONTYPE
 {
     NONE,
     AXE,
@@ -114,11 +114,11 @@ public class ProjectileInfo
         CONCUSSION = 6,
     }
 
-    static public Dictionary<WEAPON, PROJECTILE> Weapons = new Dictionary<WEAPON, PROJECTILE> {
-        {WEAPON.NAILGUN, ProjectileInfo.PROJECTILE.NAIL},
-        {WEAPON.FRAG, ProjectileInfo.PROJECTILE.FRAG},
-        {WEAPON.FLASH, ProjectileInfo.PROJECTILE.FLASH},
-        {WEAPON.CONCUSSION, ProjectileInfo.PROJECTILE.CONCUSSION},
+    static public Dictionary<WEAPONTYPE, PROJECTILE> Weapons = new Dictionary<WEAPONTYPE, PROJECTILE> {
+        {WEAPONTYPE.NAILGUN, ProjectileInfo.PROJECTILE.NAIL},
+        {WEAPONTYPE.FRAG, ProjectileInfo.PROJECTILE.FRAG},
+        {WEAPONTYPE.FLASH, ProjectileInfo.PROJECTILE.FLASH},
+        {WEAPONTYPE.CONCUSSION, ProjectileInfo.PROJECTILE.CONCUSSION},
         
     };
 

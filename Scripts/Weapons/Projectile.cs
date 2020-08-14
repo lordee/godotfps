@@ -32,7 +32,7 @@ public class Projectile : KinematicBody
     public State PredictedState;
     public Vector3 Velocity = new Vector3();
 
-    public WEAPON Weapon;
+    public WEAPONTYPE Weapon;
     protected MOVETYPE _moveType;
     public MOVETYPE MoveType { get { return _moveType; }}
 
@@ -47,7 +47,7 @@ public class Projectile : KinematicBody
     {
     }
 
-    virtual public void Init(Player shooter, Vector3 vel, WEAPON weapon, Game game)
+    virtual public void Init(Player shooter, Vector3 vel, WEAPONTYPE weapon, Game game)
     {   
         _game = game;
         this.AddCollisionExceptionWith(shooter);
@@ -59,7 +59,7 @@ public class Projectile : KinematicBody
         Weapon = weapon;
         switch (weapon)
         {
-            case WEAPON.NAILGUN:
+            case WEAPONTYPE.NAILGUN:
                 _damage = NailGun.Damage;
                 _speed = NailGun.Speed;
                 break;

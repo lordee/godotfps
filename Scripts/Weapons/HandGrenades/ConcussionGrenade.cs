@@ -11,11 +11,11 @@ public class ConcussionGrenade : HandGrenade
     {
     }
 
-    public override void Init(Player shooter, Vector3 vel, WEAPON weapon, Game game)
+    public override void Init(Player shooter, Vector3 vel, WEAPONTYPE weapon, Game game)
     {
         base.Init(shooter, vel, weapon, game);
         _damage = 0;
         _inflictLength = 10;
-        _grenadeType = WEAPON.CONCUSSION;
+        _grenadeType = WEAPONTYPE.CONCUSSION;
     }
 }
