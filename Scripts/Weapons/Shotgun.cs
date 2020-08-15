@@ -4,7 +4,7 @@ public class Shotgun : Weapon
 {
     public Shotgun()
     {
-        Damage = 25;
+        _damage = 25;
         _minAmmoRequired = 1;
         _clipSize = 8;
         _clipLeft = _clipSize;

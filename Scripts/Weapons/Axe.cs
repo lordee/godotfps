@@ -2,7 +2,7 @@ using Godot;
 public class Axe : Weapon
 {
     public Axe() {
-        Damage = 25;
+        _damage = 25;
         _minAmmoRequired = 0;
         _ammoType = AMMUNITION.NONE;
         _weaponResource = "res://Scenes/Weapons/Axe.tscn";

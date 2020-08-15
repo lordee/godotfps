@@ -4,8 +4,8 @@ public class NailGun : Weapon
 {
     public NailGun()
     {
-        Damage = 9;
-        Speed = 150;
+        _damage = 9;
+        _speed = 150;
         _minAmmoRequired = 1;
         _clipSize = -1;
         _coolDown = 0.2f;

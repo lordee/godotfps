@@ -4,8 +4,10 @@ using System.Collections.Generic;
 
 abstract public class Weapon : MeshInstance
 {
-    static public float Damage;
-    static public float Speed;
+    protected float _damage;
+    public float Damage { get { return _damage; }}
+    protected float _speed;
+    public float Speed { get { return _speed; }}
     protected int _minAmmoRequired;
     protected int _clipSize;
     protected float _coolDown;

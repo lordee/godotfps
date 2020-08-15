@@ -3,7 +3,7 @@ using Godot;
 public class SuperShotgun : Weapon
 {
     public SuperShotgun() {
-        Damage = 50;
+        _damage = 50;
         _minAmmoRequired = 2;
         _clipSize = 16;
         _clipLeft = _clipSize;

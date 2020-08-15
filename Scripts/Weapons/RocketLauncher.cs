@@ -1,7 +1,7 @@
 public class RocketLauncher : Weapon
 {
     public RocketLauncher() {
-        Damage = 100;
+        _damage = 100;
         _minAmmoRequired = 1;
         _clipSize = 4;
         _clipLeft = _clipSize;
@@ -13,6 +13,6 @@ public class RocketLauncher : Weapon
         _weaponResource = "res://Scenes/Weapons/RocketLauncher.tscn";
         _projectileResource = "res://Scenes/Weapons/Rocket.tscn";
         _weapon = WEAPONTYPE.ROCKETLAUNCHER;
-        Speed = 100;
+        _speed = 100;
     }
 }

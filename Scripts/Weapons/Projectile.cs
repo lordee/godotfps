@@ -40,7 +40,6 @@ public class Projectile : KinematicBody
 
     public override void _Ready()
     {
-        //_game = GetTree().Root.GetNode("Game") as Game;
     }
 
     public Projectile()
@@ -57,18 +56,10 @@ public class Projectile : KinematicBody
         _playerOwner = shooter;
         _moveType = MOVETYPE.FLY;
         Weapon = weapon;
-        switch (weapon)
-        {
-            case WEAPONTYPE.NAILGUN:
-                _damage = NailGun.Damage;
-                _speed = NailGun.Speed;
-                break;
-            case WEAPONTYPE.ROCKETLAUNCHER:
-                _damage = RocketLauncher.Damage;
-                _speed = RocketLauncher.Speed;
-                break;
-            
-        }
+        
+        // do we need to check if shooter weapon on host matches reported weapon?
+        _damage = shooter.ActiveWeapon.Damage;
+        _speed = shooter.ActiveWeapon.Speed;
 
         _particleScene = (PackedScene)ResourceLoader.Load(_particleResource);
     }
