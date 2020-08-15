@@ -98,6 +98,7 @@
     <Compile Include="Scripts\Weapons\HandGrenades\HandGrenade.cs" />
     <Compile Include="Scripts\Weapons\HandGrenades\ConcussionGrenade.cs" />
     <Compile Include="Scripts\Weapons\HandGrenades\FlashGrenade.cs" />
+    <Compile Include="Scripts\Weapons\HandGrenades\FragGrenade.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -131,5 +131,6 @@ public class ProjectileInfo
         {ProjectileInfo.PROJECTILE.ROCKET, "res://Scenes/Weapons/Rocket.tscn"},
         {ProjectileInfo.PROJECTILE.CONCUSSION, "res://Scenes/Weapons/HandGrenades/ConcussionGrenade.tscn"},
         {ProjectileInfo.PROJECTILE.FLASH, "res://Scenes/Weapons/HandGrenades/FlashGrenade.tscn"},
+        {ProjectileInfo.PROJECTILE.FRAG, "res://Scenes/Weapons/HandGrenades/FragGrenade.tscn"},
     };
 }
