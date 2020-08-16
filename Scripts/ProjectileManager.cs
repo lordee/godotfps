@@ -123,7 +123,7 @@ public class ProjectileManager : Node
             case MOVETYPE.BOUNCE:
                 if (proj is HandGrenade h)
                 {
-                    if (h.Thrown && h.Stage == 1)
+                    if (h.Thrown)
                     {
                         motion = h.Velocity * delta;
                     }

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 abstract public class HandGrenade : Projectile
 {
     protected float _activeTime = 0;
-    private float _maxPrimedTime = 3.0f;
+    protected float _maxPrimedTime = 3.0f;
     protected float _inflictLength = 0;
     private bool _thrown = false;
     public bool Thrown { get { return _thrown; }}
@@ -35,13 +35,17 @@ abstract public class HandGrenade : Projectile
     public override void _PhysicsProcess(float delta)
     {
         _activeTime += delta;
-        StageTwoPhysicsProcess(delta);
        
         // after 3 seconds, explode
         if (_activeTime > _maxPrimedTime)
         {
             if (_thrown)
             {
+                if (_grenadeType == WEAPONTYPE.SHOCK)
+                {
+                    this.StageTwoPhysicsProcess(delta);
+                    return;
+                }
                 this.PrimeTimeFinished();
             }
             else
@@ -58,7 +62,7 @@ abstract public class HandGrenade : Projectile
 
     public void Throw(Vector3 dir)
     {
-        this.Transform = PlayerOwner.Head.GlobalTransform;
+        this.GlobalTransform = PlayerOwner.Head.GlobalTransform;
         Velocity = dir.Normalized();
         Velocity.x *= Speed;
         Velocity.z *= Speed;

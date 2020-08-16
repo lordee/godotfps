@@ -40,7 +40,7 @@ public class Soldier
     static public int Rockets = 50;
     static public int Cells = 50;
     static public int MaxGren1 = 4;
-    static public int MaxGren2 = 1;
+    static public int MaxGren2 = 9;
     static public int MoveSpeed = 24;
     static public WEAPONTYPE Gren1Type = WEAPONTYPE.FRAG;
     static public WEAPONTYPE Gren2Type = WEAPONTYPE.SHOCK;
@@ -72,29 +72,6 @@ public class Observer : TFClass
     }
 }
 
-
-public class Scout : TFClass
-{
-    public Scout()
-    {
-        _weapon1 = new NailGun();
-        _weapon2 = new Shotgun();
-        _weapon3 = new Axe();
-        _weapon4 = null;
-        _gren1 = Ammunition.MFTGrenade;
-        _gren2 = Ammunition.ConcussionGrenade;
-        _health = 75;
-        _armour = 50;
-        _maxShells = 50;
-        _maxNails = 200;
-        _maxRockets = 50;
-        _maxCells = 50;
-        _maxGren1 = 4;
-        _maxGren2 = 4;
-    }
-}
-
-
 public class Sniper : TFClass
 {
     public Sniper()
@@ -113,27 +90,6 @@ public class Sniper : TFClass
         _maxCells = 50;
         _maxGren1 = 4;
         _maxGren2 = 4;
-    }
-}
-
-public class Soldier : TFClass
-{
-    public Soldier()
-    {
-        _weapon1 = new RocketLauncher();
-        _weapon2 = new SuperShotgun();
-        _weapon3 = new Shotgun();
-        _weapon4 = new Axe();
-        _gren1 = Ammunition.FragGrenade;
-        _gren2 = Ammunition.NailGrenade;
-        _health = 100;
-        _armour = 200;
-        _maxShells = 100;
-        _maxNails = 50;
-        _maxRockets = 50;
-        _maxCells = 50;
-        _maxGren1 = 4;
-        _maxGren2 = 200;
     }
 }
 

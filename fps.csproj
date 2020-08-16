@@ -65,6 +65,7 @@
     <Compile Include="Scripts\UI\TeamMenu.cs" />
     <Compile Include="Scripts\UI\UIManager.cs" />
     <Compile Include="Scripts\UI\IUIItem.cs" />
+    <Compile Include="Scripts\Weapons\HandGrenades\ShockGrenade.cs" />
     <Compile Include="Scripts\Weapons\NailTink.cs" />
     <Compile Include="Scripts\World.cs" />
     <Compile Include="Scripts\Util\Math.cs" />

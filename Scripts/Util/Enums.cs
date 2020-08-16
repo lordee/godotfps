@@ -115,6 +115,7 @@ public class ProjectileInfo
         FRAG = 4,
         FLASH = 5,
         CONCUSSION = 6,
+        SHOCK = 7,
     }
 
     static public Dictionary<WEAPONTYPE, PROJECTILE> Weapons = new Dictionary<WEAPONTYPE, PROJECTILE> {
@@ -123,6 +124,7 @@ public class ProjectileInfo
         {WEAPONTYPE.FRAG, ProjectileInfo.PROJECTILE.FRAG},
         {WEAPONTYPE.FLASH, ProjectileInfo.PROJECTILE.FLASH},
         {WEAPONTYPE.CONCUSSION, ProjectileInfo.PROJECTILE.CONCUSSION},
+        {WEAPONTYPE.SHOCK, ProjectileInfo.PROJECTILE.SHOCK},
         
     };
 
@@ -132,5 +134,6 @@ public class ProjectileInfo
         {ProjectileInfo.PROJECTILE.CONCUSSION, "res://Scenes/Weapons/HandGrenades/ConcussionGrenade.tscn"},
         {ProjectileInfo.PROJECTILE.FLASH, "res://Scenes/Weapons/HandGrenades/FlashGrenade.tscn"},
         {ProjectileInfo.PROJECTILE.FRAG, "res://Scenes/Weapons/HandGrenades/FragGrenade.tscn"},
+        {ProjectileInfo.PROJECTILE.SHOCK, "res://Scenes/Weapons/HandGrenades/ShockGrenade.tscn"},
     };
 }
