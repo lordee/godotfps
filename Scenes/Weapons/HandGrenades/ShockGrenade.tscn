@@ -1,9 +1,13 @@
-[gd_scene load_steps=4 format=2]
+[gd_scene load_steps=6 format=2]
 
 [ext_resource path="res://Scripts/Weapons/HandGrenades/ShockGrenade.cs" type="Script" id=1]
 [ext_resource path="res://Assets/Models/Guns/grenade.obj" type="ArrayMesh" id=2]
 
 [sub_resource type="CapsuleShape" id=1]
+
+[sub_resource type="CapsuleMesh" id=2]
+
+[sub_resource type="CapsuleShape" id=3]
 
 [node name="KinematicBody" type="KinematicBody"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.0504482 )
@@ -42,3 +46,12 @@ material/25 = null
 [node name="CollisionShape" type="CollisionShape" parent="."]
 transform = Transform( 0.06, -4.26326e-16, -2.41501e-12, -1.81125e-12, -2.07183e-05, -0.08, -4.26326e-16, 0.06, -2.76244e-05, 0, 0, 0 )
 shape = SubResource( 1 )
+
+[node name="CSGMesh" type="CSGMesh" parent="."]
+transform = Transform( 0.1, 0, 0, 0, 0.1, 0, 0, 0, 1, 0, 0, 1.51368 )
+mesh = SubResource( 2 )
+
+[node name="Area" type="Area" parent="CSGMesh"]
+
+[node name="CollisionShape" type="CollisionShape" parent="CSGMesh/Area"]
+shape = SubResource( 3 )

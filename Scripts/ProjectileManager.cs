@@ -9,6 +9,10 @@ public class ProjectileManager : Node
     public List<Projectile> Projectiles { get { return _projectiles; }}
     HashSet<Projectile> _remove = new HashSet<Projectile>();
     Dictionary<ProjectileInfo.PROJECTILE, PackedScene> ProjectileScenes = new Dictionary<ProjectileInfo.PROJECTILE, PackedScene>();
+
+    // FIXME - should we be preloading all projectile resources etc ready for instancing?
+
+    
     private Game _game;
 
     public override void _Ready()
