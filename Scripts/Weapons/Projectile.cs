@@ -57,7 +57,6 @@ public class Projectile : KinematicBody
         _moveType = MOVETYPE.FLY;
         Weapon = weapon;
         
-        // do we need to check if shooter weapon on host matches reported weapon?
         _damage = shooter.ActiveWeapon.Damage;
         _speed = shooter.ActiveWeapon.Speed;
 

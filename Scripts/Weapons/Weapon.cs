@@ -12,6 +12,7 @@ abstract public class Weapon : MeshInstance
     protected int _clipSize;
     protected float _coolDown;
     protected WEAPONTYPE _weapon;
+    public WEAPONTYPE WeaponType { get { return _weapon; }}
     protected WEAPONSHOTTYPE _weaponShotType;
     protected AMMUNITION _ammoType;
     protected int _weaponRange;
@@ -113,7 +114,7 @@ abstract public class Weapon : MeshInstance
                 _shootSound.Play();
                 TimeSinceLastShot = 0;
 
-                // TODO - should we move to weapon classes? Maybe for pipebomb launcher at least
+                // TODO - should we move to weapon classes? Maybe for pipebomb launcher?
                 switch (_weaponShotType)
                 {
                     case WEAPONSHOTTYPE.HITSCAN:

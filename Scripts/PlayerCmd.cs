@@ -1,4 +1,5 @@
 using Godot;
+using System.Collections.Generic;
 
 public class PlayerCmd
 {
@@ -17,5 +18,5 @@ public class PlayerCmd
         get { return _projName; }
         set { _projName = value; }
         }
-    public float impulse;
+    public List<float> impulses = new List<float>();
 }

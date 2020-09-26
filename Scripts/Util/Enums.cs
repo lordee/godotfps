@@ -1,5 +1,20 @@
 using System.Collections.Generic;
 
+public class PACKET
+{
+    public const string IMPULSE = @"\p";
+    public const string HEADER = @"\h";
+    public const string END = @"\e";
+}
+
+public enum PACKETSTATE
+{
+    UNINITIALISED,
+    HEADER,
+    IMPULSE,
+    END,
+}
+
 public enum STATE
 {
     TOP = 0,

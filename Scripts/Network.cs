@@ -136,7 +136,6 @@ public class Network : Node
                     p.Die();
                 }
                 p.Team = teamID;
-                //SendPlayerInfo(p);
             }
         }
     }
@@ -173,10 +172,7 @@ public class Network : Node
         {
             pe.Player.Team = teamID;
             pe.Player.PlayerClass = (PLAYERCLASS)classNum;
-            if (peerID == _id)
-            {
-                pe.Player.SetupClass();
-            }
+            pe.Player.SetupClass();
             pe.Player.MoveType = (MOVETYPE)moveType;
         }
     }
@@ -198,8 +194,7 @@ public class Network : Node
                     spawn = true;
                 }
                 p.PlayerClass = (PLAYERCLASS)classNum;
-                // FIXME - this should be on spawning
-                //SendPlayerInfo(p);
+
                 if (spawn)
                 {
                     _game.World.Spawn(p);
@@ -244,13 +239,14 @@ public class Network : Node
     {
         foreach(Peer p in PeerList)
         {
-            RpcId(id, nameof(SyncWorldReceive), _game.World.LocalSnapNum, ENTITYTYPE.PLAYER, p.ID);
+            RpcId(id, nameof(SyncWorldReceive), _game.World.LocalSnapNum, ENTITYTYPE.PLAYER, p.ID
+                    , p.Player.Team, (int)p.Player.PlayerClass, (int)p.Player.MoveType);
         }
     }
 
     // only clients receive this, only on first connect?
     [Remote]
-    public void SyncWorldReceive(int serverSnapNum, ENTITYTYPE entType, int id)
+    public void SyncWorldReceive(int serverSnapNum, ENTITYTYPE entType, int id, int team, int playerClass, int moveType)
     {
         _game.World.ServerSnapNum = serverSnapNum;
         switch (entType)
@@ -267,6 +263,7 @@ public class Network : Node
                 {
                     AddPlayer(id, false);
                 }
+                ReceivePlayerInfo(id, team, playerClass, moveType);
                 break;
         }
     }
@@ -287,37 +284,69 @@ public class Network : Node
         }
         p.Ping = (_game.World.LocalSnapNum - serverSnapNumAck) * _game.World.FrameDelta;
 
+        PACKETSTATE pState = PACKETSTATE.UNINITIALISED;
+        PlayerCmd pCmd = new PlayerCmd();
         for (int i = 2; i < split.Length; i++)
         {
-            PlayerCmd pCmd = new PlayerCmd();
-            pCmd.playerID = id;
-            pCmd.snapshot = Convert.ToInt32(split[i++]);
-            pCmd.move_forward = float.Parse(split[i++]);
-            pCmd.move_right = float.Parse(split[i++]);
-            pCmd.move_up = float.Parse(split[i++]);
-            pCmd.aim = new Basis(
-                                new Vector3(float.Parse(split[i++]), float.Parse(split[i++]), float.Parse(split[i++])),
-                                new Vector3(float.Parse(split[i++]), float.Parse(split[i++]), float.Parse(split[i++])),
-                                new Vector3(float.Parse(split[i++]), float.Parse(split[i++]), float.Parse(split[i++]))
-                                );
-            pCmd.cam_angle = float.Parse(split[i++]);
-            pCmd.rotation = new Vector3(float.Parse(split[i++]), float.Parse(split[i++]), float.Parse(split[i++]));
-            pCmd.attack = float.Parse(split[i++]);
-            pCmd._projName = split[i++];
-            pCmd.attackDir = new Vector3(float.Parse(split[i++]), float.Parse(split[i++]), float.Parse(split[i]));
-            if (pCmd.snapshot > p.LastSnapshot)
+            switch(split[i])
             {
-                p.Player.pCmdQueue.Add(pCmd);
+                case PACKET.IMPULSE:
+                    pState = PACKETSTATE.IMPULSE;
+                    i++;
+                    break;
+                case PACKET.HEADER:
+                    pCmd = new PlayerCmd();
+                    pState = PACKETSTATE.HEADER;
+                    i++;
+                    break;
+                case PACKET.END:
+                    pState = PACKETSTATE.END;
+                    break;
             }
+
+            switch (pState)
+            {
+                case PACKETSTATE.UNINITIALISED:
+                    GD.Print("PACKETSTATE.UNINITIALISED");
+                    Console.Log("PACKETSTATE.UNINITIALISED");
+                    break;
+                case PACKETSTATE.HEADER:
+                    pCmd.playerID = id;
+                    pCmd.snapshot = Int32.Parse(split[i++]);
+                    pCmd.move_forward = float.Parse(split[i++]);
+                    pCmd.move_right = float.Parse(split[i++]);
+                    pCmd.move_up = float.Parse(split[i++]);
+                    pCmd.aim = new Basis(
+                                        new Vector3(float.Parse(split[i++]), float.Parse(split[i++]), float.Parse(split[i++])),
+                                        new Vector3(float.Parse(split[i++]), float.Parse(split[i++]), float.Parse(split[i++])),
+                                        new Vector3(float.Parse(split[i++]), float.Parse(split[i++]), float.Parse(split[i++]))
+                                        );
+                    pCmd.cam_angle = float.Parse(split[i++]);
+                    pCmd.rotation = new Vector3(float.Parse(split[i++]), float.Parse(split[i++]), float.Parse(split[i++]));
+                    pCmd.attack = float.Parse(split[i++]);
+                    pCmd._projName = split[i++];
+                    pCmd.attackDir = new Vector3(float.Parse(split[i++]), float.Parse(split[i++]), float.Parse(split[i]));
+                    break;
+                case PACKETSTATE.IMPULSE:
+                    pCmd.impulses.Add(float.Parse(split[i]));
+                    break;
+                case PACKETSTATE.END:
+                    if (pCmd.snapshot > p.LastSnapshot)
+                    {
+                        p.Player.pCmdQueue.Add(pCmd);
+                    }
+                    break;
+            } 
         }
     }
 
     // FIXME - only h/a of owning player
-    public void UpdatePlayer(int id, float ping, float health, float armour, Vector3 org, Vector3 velo, Vector3 rot)
+    public void UpdatePlayer(int id, float ping, float health, float armour, Vector3 org, Vector3 velo
+        , Vector3 rot, WEAPONTYPE activeWeapon)
     {
         Peer p = PeerList.Where(p2 => p2.ID == id).First();
         p.Ping = ping;
-        p.Player.SetServerState(org, velo, rot, health, armour);
+        p.Player.SetServerState(org, velo, rot, health, armour, activeWeapon);
     }
 
     public void SendPMovement(int RecID, int id, List<PlayerCmd> pCmdQueue)
@@ -396,9 +425,11 @@ public class Network : Node
         Vector3 rot = new Vector3(
             float.Parse(split[i++],  System.Globalization.CultureInfo.InvariantCulture)
             , float.Parse(split[i++],  System.Globalization.CultureInfo.InvariantCulture)
-            , float.Parse(split[i],  System.Globalization.CultureInfo.InvariantCulture)
+            , float.Parse(split[i++],  System.Globalization.CultureInfo.InvariantCulture)
         );
-        UpdatePlayer(id, ping, health, armour, org, vel, rot);
+        WEAPONTYPE activeWeapon = (WEAPONTYPE)float.Parse(split[i], System.Globalization.CultureInfo.InvariantCulture);
+
+        UpdatePlayer(id, ping, health, armour, org, vel, rot, activeWeapon);
     }
 
     private string BuildPacketString(SnapShot sn)
@@ -449,7 +480,11 @@ public class Network : Node
             sb.Append(",");
             sb.Append(rot.z);
             sb.Append(",");
+            float weaponType = (float)((p.Player.ActiveWeapon == null) ? WEAPONTYPE.NONE : p.Player.ActiveWeapon.WeaponType);
+            sb.Append(weaponType);
+            sb.Append(",");
         }
+
         // projectiles
         foreach(Projectile p in _game.World.ProjectileManager.Projectiles)
         {
@@ -497,6 +532,8 @@ public class Network : Node
         sb.Append(",");
         foreach(PlayerCmd pCmd in pCmdQueue)
         {
+            sb.Append(PACKET.HEADER);
+            sb.Append(",");
             sb.Append(pCmd.snapshot);
             sb.Append(",");
             sb.Append(pCmd.move_forward);
@@ -540,6 +577,19 @@ public class Network : Node
             sb.Append(pCmd.attackDir.y);
             sb.Append(",");
             sb.Append(pCmd.attackDir.z);
+            sb.Append(",");
+
+            if (pCmd.impulses.Count > 0)
+            {
+                sb.Append(PACKET.IMPULSE);
+                sb.Append(",");
+                foreach(float imp in pCmd.impulses)
+                {
+                    sb.Append(imp);
+                    sb.Append(",");
+                }
+            }
+            sb.Append(PACKET.END);
             sb.Append(",");
         }
         if (pCmdQueue.Count > 0)

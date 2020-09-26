@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 
 
 public class PlayerController : Camera
@@ -16,7 +17,7 @@ public class PlayerController : Camera
     private float _cameraAngle = 0f;
     private Vector3 shootTo = new Vector3();
     private float _shootRange = 100000f;
-    private float impulse = 0;
+    List<float> impulses = new List<float>();
 
     private Sprite _crosshair;
     public Sprite Crosshair {
@@ -31,9 +32,17 @@ public class PlayerController : Camera
 
     private Node2D _aimAt;
 
+    // viewmodels, eventually
+    private MeshInstance _weapon1Mesh;
+    private MeshInstance _weapon2Mesh;
+    private MeshInstance _weapon3Mesh;
+    private MeshInstance _weapon4Mesh;
+
     public override void _Ready()
     {
         _game = GetTree().Root.GetNode("Game") as Game;
+        //_weapon1Mesh = GetNode("Weapon1Mesh") as MeshInstance;
+        //_weapon1Mesh.
         _aimAt = _game.HUD.AimAt;
     }
 
@@ -67,15 +76,16 @@ public class PlayerController : Camera
         pCmd.attack = attack;
         pCmd.attackDir = shootTo;
         pCmd._projName = "";
-        pCmd.impulse = impulse;
-        impulse = 0;
+        pCmd.impulses = impulses;
+        impulses.Clear();
         _player.pCmdQueue.Add(pCmd);
     }
 
     // FIXME - network packet to change weapons
     public void ChangeWeapon(int arg)
     {
-        switch (arg)
+        impulses.Add(arg);
+/*        switch (arg)
         {
             case 1:
                 impulse = (float)IMPULSE.WEAPONONE;
@@ -89,7 +99,7 @@ public class PlayerController : Camera
             case 4:
                 impulse = (float)IMPULSE.WEAPONFOUR;
                 break;
-        }
+        }*/
     }
 
     // TODO - implement
@@ -98,10 +108,12 @@ public class PlayerController : Camera
         switch (arg)
         {
             case 1:
-                impulse = (float)IMPULSE.GRENONE;
+                impulses.Add((float)IMPULSE.GRENONE);
+                //impulse = (float)IMPULSE.GRENONE;
                 break;
             case 2:
-                impulse = (float)IMPULSE.GRENTWO;
+                impulses.Add((float)IMPULSE.GRENTWO);
+                //impulse = (float)IMPULSE.GRENTWO;
                 break;
             default:
                 GD.Print("Grenade type does not exist");

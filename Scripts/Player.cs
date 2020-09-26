@@ -14,6 +14,7 @@ public class Player : KinematicBody
     RayCast _feet;
     MeshInstance _mesh;
     AudioStreamPlayer3D _dieSound;
+    AudioStreamPlayer3D _jumpSound;
     public MeshInstance Mesh {get { return _mesh; }}
     public Peer Peer;
 
@@ -21,6 +22,7 @@ public class Player : KinematicBody
     public PlayerController PlayerController = null;
     public bool PlayerControlled = false;
     AudioStreamPlayer _grenTimer = null;
+    
 
     // fields
     public int Team;
@@ -37,9 +39,20 @@ public class Player : KinematicBody
     public Weapon Weapon4 { get { return _weapon4; }}
     public Weapon ActiveWeapon { 
         get { return _activeWeapon; }
-        set { _activeWeapon = value; }
+        set { 
+                if (_activeWeapon != null)
+                {
+                    if (_activeWeapon == value)
+                    {
+                        return;
+                    }
+                    _activeWeapon.WeaponMesh.Visible = false;
+                }
+                
+                _activeWeapon = value; 
+                _activeWeapon.WeaponMesh.Visible = true;
+            }
     }
-    private HandGrenade _activeGrenade;
     private WEAPONTYPE _gren1Type;
     private WEAPONTYPE _gren2Type;
     private int _gren1Count = 0;
@@ -101,6 +114,7 @@ public class Player : KinematicBody
         _feet = GetNode("Feet") as RayCast;
         _dieSound = GetNode("DieSound") as AudioStreamPlayer3D;
         _grenTimer = GetNode("GrenTimer") as AudioStreamPlayer;
+        _jumpSound = GetNode("JumpSound") as AudioStreamPlayer3D;
     }
 
     public override void _PhysicsProcess(float delta)
@@ -184,7 +198,8 @@ public class Player : KinematicBody
 
         if (IsNetworkMaster())
         {
-            SetServerState(_predictedState.Origin, _predictedState.Velocity, _predictedState.Rotation, _currentHealth, _currentArmour);
+            WEAPONTYPE wt = (ActiveWeapon == null) ? WEAPONTYPE.NONE : ActiveWeapon.WeaponType;
+            SetServerState(_predictedState.Origin, _predictedState.Velocity, _predictedState.Rotation, _currentHealth, _currentArmour, wt);
         }
         else
         {
@@ -213,7 +228,7 @@ public class Player : KinematicBody
 
         this.ProcessDebuffs(delta);
 
-        this.ProcessImpulse(pCmd);
+        this.ProcessImpulses(pCmd);
         this.ProcessAttack(pCmd, delta);
 
         if (IsNetworkMaster())
@@ -247,54 +262,46 @@ public class Player : KinematicBody
         Debuffs.RemoveAll(d => agedBuffs.Contains(d));
     }
 
-    private void ProcessImpulse(PlayerCmd pCmd)
+    private void ProcessImpulses(PlayerCmd pCmd)
     {
-        if (pCmd.impulse > 0)
+        foreach (float i in pCmd.impulses)
         {
-            IMPULSE i = (IMPULSE)pCmd.impulse;
-            switch (i)
+            IMPULSE imp = (IMPULSE)i;
+            switch (imp)
             {
                 case IMPULSE.WEAPONONE:
                     if (_weapon1 != null)
                     {
-                        ActiveWeapon.WeaponMesh.Visible = false;
                         ActiveWeapon = Weapon1;
-                        ActiveWeapon.WeaponMesh.Visible = true;
                     }
                     break;
                 case IMPULSE.WEAPONTWO:
                     if (Weapon2 != null)
                     {
-                        ActiveWeapon.WeaponMesh.Visible = false;
                         ActiveWeapon = Weapon2;
-                        ActiveWeapon.WeaponMesh.Visible = true;
                     }
                     break;
                 case IMPULSE.WEAPONTHREE:
                     if (Weapon3 != null)
                     {
-                        ActiveWeapon.WeaponMesh.Visible = false;
                         ActiveWeapon = Weapon3;
-                        ActiveWeapon.WeaponMesh.Visible = true;
                     }
                     break;
                 case IMPULSE.WEAPONFOUR:
                     if (Weapon4 != null)
                     {
-                        ActiveWeapon.WeaponMesh.Visible = false;
                         ActiveWeapon = Weapon4;
-                        ActiveWeapon.WeaponMesh.Visible = true;
                     }
                     break;
                 case IMPULSE.GRENONE:
                 case IMPULSE.GRENTWO:
-                    UseHandGrenade(pCmd);
+                    UseHandGrenade(imp, pCmd);
                     break;
             }
         }
     }
 
-    private void UseHandGrenade(PlayerCmd pCmd)
+    private void UseHandGrenade(IMPULSE imp, PlayerCmd pCmd)
     {
         if (PrimingGren != null)
         {
@@ -303,7 +310,7 @@ public class Player : KinematicBody
         else
         {
             int grenCount = 0;
-            switch ((IMPULSE)pCmd.impulse)
+            switch (imp)
             {
                 case IMPULSE.GRENONE:
                     grenCount = _gren1Count;
@@ -323,7 +330,7 @@ public class Player : KinematicBody
 
                 WEAPONTYPE grenType = WEAPONTYPE.NONE;
 
-                switch ((IMPULSE)pCmd.impulse)
+                switch (imp)
                 {
                     case IMPULSE.GRENONE:
                         _gren1Count -= 1;
@@ -341,7 +348,7 @@ public class Player : KinematicBody
             }
             else
             {
-                PrintGrenCount((IMPULSE)pCmd.impulse);
+                PrintGrenCount(imp);
             }
         }
     }
@@ -433,7 +440,7 @@ public class Player : KinematicBody
     {
         if (pCmd.attack == 1)
         {
-            _activeWeapon.Shoot(pCmd, delta);
+            ActiveWeapon.Shoot(pCmd, delta);
         }
     }
 
@@ -460,14 +467,38 @@ public class Player : KinematicBody
             AirMove(delta, pCmd);
         }
     }
+// TODO - combine/fix via get/set? don't need double checks at the least
+    private void SetActiveWeapon(WEAPONTYPE weaponType)
+    {
+        if (weaponType != WEAPONTYPE.NONE)
+        {
+            if (Weapon1 != null && weaponType == Weapon1.WeaponType)
+            {
+                ActiveWeapon = Weapon1;
+            }
+            else if (Weapon2 != null && weaponType == Weapon2.WeaponType)
+            {
+                ActiveWeapon = Weapon2;
+            }
+            else if (Weapon3 != null && weaponType == Weapon3.WeaponType)
+            {
+                ActiveWeapon = Weapon3;
+            }
+            else if (Weapon4 != null && weaponType == Weapon4.WeaponType)
+            {
+                ActiveWeapon = Weapon4;
+            }
+        }
+    }
 
-    public void SetServerState(Vector3 org, Vector3 velo, Vector3 rot, float health, float armour)
+    public void SetServerState(Vector3 org, Vector3 velo, Vector3 rot, float health, float armour, WEAPONTYPE weaponType)
     {
         _serverState.Origin = org;
         _serverState.Velocity = velo;
         _serverState.Rotation = rot;
         _currentHealth = health;
         _currentArmour = armour;
+        SetActiveWeapon(weaponType);
 
         if (!PlayerControlled)
         {
@@ -535,6 +566,7 @@ public class Player : KinematicBody
         {
             // FIXME - if we add jump speed velocity we enable trimping right?
             _playerVelocity.y = _jumpSpeed;
+            _jumpSound.Play();
         }
     }
 
@@ -771,7 +803,8 @@ public class Player : KinematicBody
        
         this.Translation = spawnPoint;
 
-        this.SetServerState(this.GlobalTransform.origin, this._playerVelocity, this._mesh.Rotation, _maxHealth, _maxArmour);
+        this.SetServerState(this.GlobalTransform.origin, this._playerVelocity, this._mesh.Rotation, _maxHealth
+                            , _maxArmour, (_activeWeapon == null) ? WEAPONTYPE.NONE : _activeWeapon.WeaponType);
         _predictedState = _serverState;
         _game.Network.SendPlayerInfo(this);
     }
@@ -842,8 +875,7 @@ public class Player : KinematicBody
                 _weapon2 = SetupWeapon(Scout.Weapon2);
                 _weapon3 = SetupWeapon(Scout.Weapon3);
                 _weapon4 = SetupWeapon(Scout.Weapon4);
-                _weapon1.WeaponMesh.Visible = true;
-                _activeWeapon = _weapon1;
+                ActiveWeapon = _weapon1;
                 _moveSpeed = Scout.MoveSpeed;
                 _gren1Type = Scout.Gren1Type;
                 _gren2Type = Scout.Gren2Type;
@@ -860,8 +892,7 @@ public class Player : KinematicBody
                 _weapon2 = SetupWeapon(Soldier.Weapon2);
                 _weapon3 = SetupWeapon(Soldier.Weapon3);
                 _weapon4 = SetupWeapon(Soldier.Weapon4);
-                _weapon1.WeaponMesh.Visible = true;
-                _activeWeapon = _weapon1;
+                ActiveWeapon = _weapon1;
                 _moveSpeed = Soldier.MoveSpeed;
                 _gren1Type = Soldier.Gren1Type;
                 _gren2Type = Soldier.Gren2Type;
