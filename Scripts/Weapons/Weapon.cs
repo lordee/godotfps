@@ -73,10 +73,6 @@ abstract public class Weapon : MeshInstance
     private Sprite3D _muzzleFlash;
     private AudioStreamPlayer3D _shootSound;
     private AudioStreamPlayer3D _reloadSound;
-    string puffResource = "res://Scenes/Weapons/Puff.tscn";
-    string bloodResource = "res://Scenes/Weapons/BloodPuff.tscn";
-    PackedScene puffScene;
-    PackedScene bloodScene;
 
     // Nodes
     Game _game;
@@ -86,9 +82,6 @@ abstract public class Weapon : MeshInstance
     public void Init(Game game)
     {
         _game = game;
-        // TODO - manage these in projectile manager or some other manager instead of constantly loading the scene
-        puffScene = (PackedScene)ResourceLoader.Load(puffResource);
-        bloodScene = (PackedScene)ResourceLoader.Load(bloodResource);
     }
 
     virtual public void PhysicsProcess(float delta)
@@ -182,7 +175,7 @@ abstract public class Weapon : MeshInstance
                 Vector3 position = pos - rb.GlobalTransform.origin;
                 rb.ApplyImpulse(position, impulse * 10);
 
-                MakePuff(PUFFTYPE.PUFF, pos, (Node)rb);
+                _game.World.ParticleManager.MakePuff(PUFFTYPE.PUFF, pos, (Node)rb);
             } 
             else if (res["collider"] is KinematicBody kb)
             {
@@ -190,11 +183,11 @@ abstract public class Weapon : MeshInstance
                 dam = Damage / _pelletCount;
 
                 pl.TakeDamage(_playerOwner, _playerOwner.GlobalTransform.origin, dam);
-                MakePuff(PUFFTYPE.BLOOD, pos, (Node)kb);
+                _game.World.ParticleManager.MakePuff(PUFFTYPE.BLOOD, pos, (Node)kb);
             }
             else
             {
-                MakePuff(PUFFTYPE.PUFF, pos, null);
+                _game.World.ParticleManager.MakePuff(PUFFTYPE.PUFF, pos, null);
             }
         }
     }
@@ -245,31 +238,5 @@ abstract public class Weapon : MeshInstance
         {
             _projectileScene = (PackedScene)ResourceLoader.Load(_projectileResource);
         }
-    }
-
-    private void MakePuff(PUFFTYPE puff, Vector3 pos, Node puffOwner)
-    {
-        Particles puffPart = null;
-        switch (puff)
-        {
-            case PUFFTYPE.BLOOD:
-                puffPart = (Particles)bloodScene.Instance();
-            break;
-            case PUFFTYPE.PUFF:
-                puffPart = (Particles)puffScene.Instance();
-            break;
-        }
-
-        puffPart.Translation = pos;
-        if (puffOwner != null)
-        {
-            puffOwner.AddChild(puffPart);
-        }
-        else
-        {
-            _game.World.AddChild(puffPart);
-        }
-        
-        puffPart.Emitting = true;
     }
 }

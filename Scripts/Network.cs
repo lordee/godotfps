@@ -340,6 +340,22 @@ public class Network : Node
         }
     }
 
+    public void SendParticle(int playerID, PUFFTYPE puffType, Vector3 pos, Node puffOwner)
+    {
+        RpcId(playerID, nameof(ReceiveParticle), (int)puffType, pos.x, pos.y, pos.z, puffOwner == null ? "" : puffOwner.Name);
+    }
+
+    [Remote]
+    public void ReceiveParticle(int puffType, float posx, float posy, float posz, string nodeID)
+    {
+        Node owner = null;
+        if (nodeID.Length > 0)
+        {
+            owner = _game.World.FindNode(nodeID);
+        }
+        _game.World.ParticleManager.MakePuff((PUFFTYPE)puffType, new Vector3(posx, posy, posz), owner);
+    }
+
     // FIXME - only h/a of owning player
     public void UpdatePlayer(int id, float ping, float health, float armour, Vector3 org, Vector3 velo
         , Vector3 rot, WEAPONTYPE activeWeapon)

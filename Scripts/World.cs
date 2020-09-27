@@ -44,12 +44,15 @@ public class World : Node
     public ProjectileManager ProjectileManager {
         get { return _projectileManager; }
     }
+    private ParticleManager _particleManager;
+    public ParticleManager ParticleManager {
+        get { return _particleManager; }
+    }
     private Player _worldOwner;
 
 
     private float _gameTime = 0f;
     public float GameTime { get { return _gameTime; }}
-
     public float FrameDelta = 0f;
 
     
@@ -73,6 +76,7 @@ public class World : Node
     {
         _game = GetTree().Root.GetNode("Game") as Game;
         _projectileManager = GetNode("ProjectileManager") as ProjectileManager;
+        _particleManager = GetNode("ParticleManager") as ParticleManager;
     }
 
     public override void _PhysicsProcess(float delta)

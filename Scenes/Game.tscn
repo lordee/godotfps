@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=2]
+[gd_scene load_steps=15 format=2]
 
 [ext_resource path="res://Scripts/Network.cs" type="Script" id=1]
 [ext_resource path="res://Scripts/ProjectileManager.cs" type="Script" id=2]
@@ -13,6 +13,7 @@
 [ext_resource path="res://Scenes/UI/OptionsMenu.tscn" type="PackedScene" id=11]
 [ext_resource path="res://Scenes/UI/TeamMenu.tscn" type="PackedScene" id=12]
 [ext_resource path="res://Scenes/UI/ClassMenu.tscn" type="PackedScene" id=13]
+[ext_resource path="res://Scripts/ParticleManager.cs" type="Script" id=14]
 
 [node name="Game" type="Node"]
 script = ExtResource( 4 )
@@ -25,6 +26,9 @@ script = ExtResource( 3 )
 
 [node name="ProjectileManager" type="Node" parent="World"]
 script = ExtResource( 2 )
+
+[node name="ParticleManager" type="Node" parent="World"]
+script = ExtResource( 14 )
 
 [node name="Map" type="Node" parent="."]
 

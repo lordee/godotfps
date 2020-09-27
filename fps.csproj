@@ -55,6 +55,7 @@
     <Compile Include="Scripts\Game.cs" />
     <Compile Include="Scripts\Network.cs" />
     <Compile Include="Scripts\Lobby.cs" />
+    <Compile Include="Scripts\ParticleManager.cs" />
     <Compile Include="Scripts\Player.cs" />
     <Compile Include="Scripts\PlayerController.cs" />
     <Compile Include="Scripts\ProjectileManager.cs" />
