@@ -11,7 +11,7 @@ public class SuperShotgun : Weapon
         _reloadTime = 4.0f;
         _weaponShotType = WEAPONSHOTTYPE.SPREAD;
         _weaponRange = 2048;
-        _pelletCount = 14;
+        _pelletCount = 16;
         _spread = new Vector3(.14f, .08f, 0f);
         _ammoType = AMMUNITION.SHELLS;
         _weaponResource = "res://Scenes/Weapons/SuperShotgun.tscn";

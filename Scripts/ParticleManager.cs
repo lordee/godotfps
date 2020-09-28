@@ -48,9 +48,7 @@ public class ParticleManager : Node
             {
                 if (p.ID != 1)
                 {
-                    // FIXME - send this to network node first
                     _game.Network.SendParticle(p.ID, puff, pos, puffOwner);
-                    //RpcId(p.ID, nameof(MakePuff), puff, pos, puffOwner);
                 }
             }
         }

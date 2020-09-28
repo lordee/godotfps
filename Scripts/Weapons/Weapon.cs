@@ -90,6 +90,26 @@ abstract public class Weapon : MeshInstance
         this.TimeSinceReloaded += delta;
     }
 
+    private void SpreadShoot(int shots, bool up, bool left, Vector3 shotLoc)
+    {
+        Random ran = new Random();
+        Vector3 dir = (shotLoc - this._playerOwner.Head.GlobalTransform.origin).Normalized();
+        Vector3 newDir;
+        while (shots > 0)
+        {
+            newDir = new Vector3(
+                dir.x + (float)ran.Next(0,100) * _spread.x * (left ? -1 : 1) / 100
+                , dir.y + (float)ran.Next(0,100) * _spread.y * (up ? -1 : 1) / 100
+                , dir.z);
+            newDir *= _weaponRange;
+
+            // FIXME - work out damage based on percentage of max weapon range travelled??
+            this.DoHit(newDir);
+
+            shots -= 1;
+        }
+    }
+
     virtual public bool Shoot(PlayerCmd pCmd, float delta)
     {
         bool shot = false;
@@ -115,25 +135,19 @@ abstract public class Weapon : MeshInstance
                         this.DoHit(pCmd.attackDir.Normalized() * _weaponRange);
                         break;
                     case WEAPONSHOTTYPE.SPREAD:
-                        Random ran = new Random();
-                        
-                        float pc = _pelletCount;
-                        while (pc > 0)
+                        // raycast to extremely far away
+                        Vector3 shootTo = _playerOwner.Head.GlobalTransform.origin + pCmd.attackDir; 
+                        PhysicsDirectSpaceState spaceState = _playerOwner.GetWorld().DirectSpaceState;
+                        Godot.Collections.Dictionary res = spaceState.IntersectRay(_playerOwner.Head.GlobalTransform.origin, shootTo, new Godot.Collections.Array { this, _playerOwner }, 1);
+                        // if hits, use that as our far point
+                        Vector3 shotLoc;
+                        if (res.Count > 0)
                         {
-                            Vector3 newTo = pCmd.attackDir.Normalized();
-                            if (_weaponShotType == WEAPONSHOTTYPE.SPREAD)
-                            {
-                                float ranX = (float)ran.Next(0,1) == 0 ? -1 : 1;
-                                float ranY = (float)ran.Next(0,1) == 0 ? -1 : 1;
-                                newTo = new Vector3(
-                                    newTo.x + (float)ran.Next(0,100) * _spread.x * ranX / 100
-                                    , newTo.y + (float)ran.Next(0,100) * _spread.y * ranY / 100
-                                    , newTo.z);
-                            }
-                            newTo *= _weaponRange;
-                            this.DoHit(newTo);
-
-                            pc -= 1;
+                            shotLoc = ((Vector3)res["position"]);
+                            SpreadShoot(_pelletCount / 4, true, true, shotLoc);
+                            SpreadShoot(_pelletCount / 4, true, false, shotLoc);
+                            SpreadShoot(_pelletCount / 4, false, true, shotLoc);
+                            SpreadShoot(_pelletCount / 4, false, false, shotLoc);
                         }
                         break;
                     case WEAPONSHOTTYPE.PROJECTILE:
@@ -160,9 +174,9 @@ abstract public class Weapon : MeshInstance
 
     private void DoHit(Vector3 dir)
     {
-        Vector3 shootTo = _playerOwner.GlobalTransform.origin + dir;
+        Vector3 shootTo = _playerOwner.Head.GlobalTransform.origin + dir; 
         PhysicsDirectSpaceState spaceState = _playerOwner.GetWorld().DirectSpaceState;
-        Godot.Collections.Dictionary res = spaceState.IntersectRay(_playerOwner.GlobalTransform.origin, shootTo, new Godot.Collections.Array { this, _playerOwner }, 1);
+        Godot.Collections.Dictionary res = spaceState.IntersectRay(_playerOwner.Head.GlobalTransform.origin, shootTo, new Godot.Collections.Array { this, _playerOwner }, 1);
         if (res.Count > 0)
         {
             Vector3 pos = (Vector3)res["position"];

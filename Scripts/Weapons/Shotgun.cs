@@ -12,7 +12,7 @@ public class Shotgun : Weapon
         _reloadTime = 2.0f;
         _weaponShotType = WEAPONSHOTTYPE.SPREAD;
         _weaponRange = 2048;
-        _pelletCount = 6;
+        _pelletCount = 8;
         _spread = new Vector3(.04f, .04f, 0f);
         _ammoType = AMMUNITION.SHELLS;
         _weaponResource = "res://Scenes/Weapons/Shotgun.tscn";
