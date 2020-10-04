@@ -38,6 +38,14 @@ public class Projectile : KinematicBody
 
     protected Dictionary<Player, float> _explodedPlayers = new Dictionary<Player, float>();
 
+    protected float _maxLifeTime = 10f;
+    public float MaxLifeTime {
+        get { return _maxLifeTime; }
+    }
+    public float LifeTime = 0f;
+
+    public bool Exploded = false;
+
     public override void _Ready()
     {
     }
@@ -88,13 +96,14 @@ public class Projectile : KinematicBody
             }
         }
         
+        // FIXME - all particles should now be under particles manager
         Particles p = (Particles)_particleScene.Instance();
         p.Transform = this.Transform;
         _game.World.ProjectileManager.AddChild(p);
         p.Emitting = true;
         
         // remove projectile
-        GetTree().QueueDelete(this);
+        Exploded = true;
     }
 
     public void SetServerState(Vector3 org, Vector3 velo, Vector3 rot)

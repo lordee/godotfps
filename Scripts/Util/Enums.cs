@@ -104,11 +104,15 @@ public enum WEAPONTYPE
     SHOTGUN,
     SUPERSHOTGUN,
     NAILGUN,
+    GRENADELAUNCHER,
+    PIPEBOMBLAUNCHER,
     ROCKETLAUNCHER,
     FRAG,
     FLASH,
     CONCUSSION,
     SHOCK,
+    MIRV,
+    MIRVCHILD,
 }
 
 public enum AMMUNITION 
@@ -131,24 +135,36 @@ public class ProjectileInfo
         FLASH = 5,
         CONCUSSION = 6,
         SHOCK = 7,
+        MIRV = 8,
+        MIRVCHILD = 9,
+        PIPEBOMB = 10,
+
     }
 
     static public Dictionary<WEAPONTYPE, PROJECTILE> Weapons = new Dictionary<WEAPONTYPE, PROJECTILE> {
         {WEAPONTYPE.NAILGUN, ProjectileInfo.PROJECTILE.NAIL},
+        {WEAPONTYPE.GRENADELAUNCHER, ProjectileInfo.PROJECTILE.GRENADE},
+        {WEAPONTYPE.PIPEBOMBLAUNCHER, ProjectileInfo.PROJECTILE.PIPEBOMB},
         {WEAPONTYPE.ROCKETLAUNCHER, ProjectileInfo.PROJECTILE.ROCKET},
         {WEAPONTYPE.FRAG, ProjectileInfo.PROJECTILE.FRAG},
         {WEAPONTYPE.FLASH, ProjectileInfo.PROJECTILE.FLASH},
         {WEAPONTYPE.CONCUSSION, ProjectileInfo.PROJECTILE.CONCUSSION},
         {WEAPONTYPE.SHOCK, ProjectileInfo.PROJECTILE.SHOCK},
+        {WEAPONTYPE.MIRV, ProjectileInfo.PROJECTILE.MIRV},
+        {WEAPONTYPE.MIRVCHILD, ProjectileInfo.PROJECTILE.MIRVCHILD},
         
     };
 
     static public Dictionary<PROJECTILE, string> Scenes = new Dictionary<PROJECTILE, string> {
         {ProjectileInfo.PROJECTILE.NAIL, "res://Scenes/Weapons/Nail.tscn"},
+        {ProjectileInfo.PROJECTILE.GRENADE, "res://Scenes/Weapons/Grenade.tscn"},
+        {ProjectileInfo.PROJECTILE.PIPEBOMB, "res://Scenes/Weapons/Pipebomb.tscn"},
         {ProjectileInfo.PROJECTILE.ROCKET, "res://Scenes/Weapons/Rocket.tscn"},
         {ProjectileInfo.PROJECTILE.CONCUSSION, "res://Scenes/Weapons/HandGrenades/ConcussionGrenade.tscn"},
         {ProjectileInfo.PROJECTILE.FLASH, "res://Scenes/Weapons/HandGrenades/FlashGrenade.tscn"},
         {ProjectileInfo.PROJECTILE.FRAG, "res://Scenes/Weapons/HandGrenades/FragGrenade.tscn"},
         {ProjectileInfo.PROJECTILE.SHOCK, "res://Scenes/Weapons/HandGrenades/ShockGrenade.tscn"},
+        {ProjectileInfo.PROJECTILE.MIRV, "res://Scenes/Weapons/HandGrenades/MIRVGrenade.tscn"},
+        {ProjectileInfo.PROJECTILE.MIRVCHILD, "res://Scenes/Weapons/Grenade.tscn"},
     };
 }

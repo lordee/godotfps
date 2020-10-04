@@ -30,8 +30,21 @@ public class ProjectileManager : Node
     {
         foreach (Projectile proj in _projectiles)
         {
+            proj.LifeTime += delta;
+            if (proj.LifeTime >= proj.MaxLifeTime)
+            {
+                // FIXME - need non explode remove for nails etc
+                proj.Explode(null, proj.Damage);
+            }
             ProcessProjectile(proj, delta);
+
+            if (proj.Exploded)
+            {
+                GetTree().QueueDelete(proj);
+                _remove.Add(proj);
+            }
         }
+        
         _projectiles.RemoveAll(p => _remove.Contains(p));
         _remove.Clear();
     }
@@ -132,6 +145,10 @@ public class ProjectileManager : Node
                         motion = h.Velocity * delta;
                     }
                 }
+                else
+                {
+                    motion = proj.Velocity * delta;
+                }
                 break;
         }
         
@@ -142,26 +159,35 @@ public class ProjectileManager : Node
             {
                 case MOVETYPE.FLY:
                     Random ran = new Random();
-                    float damage = proj.Damage + ran.Next(0,20);
                     // if c collider is kinematic body (direct hit)
                     if (c.Collider is Player pl)
                     {
-                        pl.TakeDamage(proj.PlayerOwner, proj.GlobalTransform.origin, damage);
-                        proj.Explode(pl, damage);
+                        pl.TakeDamage(proj.PlayerOwner, proj.GlobalTransform.origin, proj.Damage);
+                        proj.Explode(pl, proj.Damage);
                     }
-                    else {
-                        proj.Explode(null, damage);
+                    else 
+                    {
+                        proj.Explode(null, proj.Damage);
                     }
                     _remove.Add(proj);
                     break;
                 case MOVETYPE.BOUNCE:
-                    proj.Speed *= .95f;
-                    proj.VerticalSpeed *= .95f;
-                    Vector3 v = motion.Bounce(c.Normal);
-                    v.y *= proj.VerticalSpeed;
-                    v.x *= proj.Speed;
-                    v.z *= proj.Speed;
-                    proj.Velocity =  v;
+                    if (c.Collider is Player pl2)
+                    {
+                        pl2.TakeDamage(proj.PlayerOwner, proj.GlobalTransform.origin, proj.Damage);
+                        proj.Explode(pl2, proj.Damage);
+                        _remove.Add(proj);
+                    }
+                    else
+                    {
+                        proj.Speed *= .95f;
+                        proj.VerticalSpeed *= .95f;
+                        Vector3 v = motion.Bounce(c.Normal);
+                        v.y *= proj.VerticalSpeed;
+                        v.x *= proj.Speed;
+                        v.z *= proj.Speed;
+                        proj.Velocity =  v;
+                    }
                     break;
             }
         }

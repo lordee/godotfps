@@ -1,19 +1,11 @@
 using Godot;
 using System;
 
-public class TFClass
-{
-    static public int Health;
-    static public int Armour;
-}
-
-public class Scout : TFClass
+public class Scout
 {
 
-    new static public int Health = 100;
-    new static public int Armour = 25;
-    //static public IHandGrenade Gren1;
-    //static public IHandGrenade Gren2;
+    static public int Health = 100;
+    static public int Armour = 25;
     static public int Shells = 50;
     static public int Nails = 200;
     static public int Rockets = 50;
@@ -33,14 +25,12 @@ public class Soldier
 {
     static public int Health = 100;
     static public int Armour = 200;
-    //static public IHandGrenade Gren1;
-    //static public IHandGrenade Gren2;
     static public int Shells = 100;
     static public int Nails = 100;
     static public int Rockets = 50;
     static public int Cells = 50;
     static public int MaxGren1 = 4;
-    static public int MaxGren2 = 9;
+    static public int MaxGren2 = 1;
     static public int MoveSpeed = 24;
     static public WEAPONTYPE Gren1Type = WEAPONTYPE.FRAG;
     static public WEAPONTYPE Gren2Type = WEAPONTYPE.SHOCK;
@@ -49,6 +39,26 @@ public class Soldier
     static public WEAPONTYPE Weapon3 = WEAPONTYPE.SHOTGUN;
     static public WEAPONTYPE Weapon4 = WEAPONTYPE.AXE;
 }
+
+public class Demoman
+{
+    static public int Health = 100;
+    static public int Armour = 100;
+    static public int Shells = 50;
+    static public int Nails = 50;
+    static public int Rockets = 50;
+    static public int Cells = 50;
+    static public int MaxGren1 = 4;
+    static public int MaxGren2 = 2;
+    static public int MoveSpeed = 28;
+    static public WEAPONTYPE Gren1Type = WEAPONTYPE.FRAG;
+    static public WEAPONTYPE Gren2Type = WEAPONTYPE.MIRV;
+    static public WEAPONTYPE Weapon1 = WEAPONTYPE.GRENADELAUNCHER;
+    static public WEAPONTYPE Weapon2 = WEAPONTYPE.PIPEBOMBLAUNCHER;
+    static public WEAPONTYPE Weapon3 = WEAPONTYPE.SHOTGUN;
+    static public WEAPONTYPE Weapon4 = WEAPONTYPE.AXE;
+}
+
 
 /*
 public class Observer : TFClass

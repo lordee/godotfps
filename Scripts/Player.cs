@@ -836,6 +836,12 @@ public class Player : KinematicBody
             case WEAPONTYPE.NAILGUN:
                 weap = new NailGun();
                 break;
+            case WEAPONTYPE.GRENADELAUNCHER:
+                weap = new GrenadeLauncher();
+                break;
+            case WEAPONTYPE.PIPEBOMBLAUNCHER:
+                weap = new PipebombLauncher();
+                break;
             case WEAPONTYPE.ROCKETLAUNCHER:
                 weap = new RocketLauncher();
                 break;
@@ -900,7 +906,18 @@ public class Player : KinematicBody
                 _gren2Count = Soldier.MaxGren2;
                 break;
             case PLAYERCLASS.DEMOMAN:
-
+                _maxHealth = Demoman.Health;
+                _maxArmour = Demoman.Armour;
+                _weapon1 = SetupWeapon(Demoman.Weapon1);
+                _weapon2 = SetupWeapon(Demoman.Weapon2);
+                _weapon3 = SetupWeapon(Demoman.Weapon3);
+                _weapon4 = SetupWeapon(Demoman.Weapon4);
+                ActiveWeapon = _weapon1;
+                _moveSpeed = Demoman.MoveSpeed;
+                _gren1Type = Demoman.Gren1Type;
+                _gren2Type = Demoman.Gren2Type;
+                _gren1Count = Demoman.MaxGren1;
+                _gren2Count = Demoman.MaxGren2;
                 break;
             case PLAYERCLASS.MEDIC:
 

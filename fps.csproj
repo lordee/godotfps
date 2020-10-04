@@ -66,8 +66,11 @@
     <Compile Include="Scripts\UI\TeamMenu.cs" />
     <Compile Include="Scripts\UI\UIManager.cs" />
     <Compile Include="Scripts\UI\IUIItem.cs" />
+    <Compile Include="Scripts\Weapons\Grenade.cs" />
+    <Compile Include="Scripts\Weapons\HandGrenades\MIRVGrenade.cs" />
     <Compile Include="Scripts\Weapons\HandGrenades\ShockGrenade.cs" />
     <Compile Include="Scripts\Weapons\NailTink.cs" />
+    <Compile Include="Scripts\Weapons\Pipebomb.cs" />
     <Compile Include="Scripts\World.cs" />
     <Compile Include="Scripts\Util\Math.cs" />
     <Compile Include="Scripts\Trigger_Door.cs" />
@@ -101,6 +104,11 @@
     <Compile Include="Scripts\Weapons\HandGrenades\ConcussionGrenade.cs" />
     <Compile Include="Scripts\Weapons\HandGrenades\FlashGrenade.cs" />
     <Compile Include="Scripts\Weapons\HandGrenades\FragGrenade.cs" />
+    <Compile Include="Scripts\Weapons\HandGrenades\MIRVGrenade.cs" />
+    <Compile Include="Scripts\Weapons\Pipebomb.cs" />
+    <Compile Include="Scripts\Weapons\PipebombLauncher.cs" />
+    <Compile Include="Scripts\Weapons\Grenade.cs" />
+    <Compile Include="Scripts\Weapons\GrenadeLauncher.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>
