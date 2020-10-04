@@ -17,7 +17,7 @@ public class ParticleManager : Node
         _game = GetTree().Root.GetNode("Game") as Game;
     }
 
-    public void MakePuff(PUFFTYPE puff, Vector3 pos, Node puffOwner)
+    public Particles MakePuff(PUFFTYPE puff, Vector3 pos, Node puffOwner)
     {
         Particles puffPart = null;
         switch (puff)
@@ -30,7 +30,7 @@ public class ParticleManager : Node
             break;
         }
 
-        puffPart.Translation = pos;
+        //puffPart.Translation = pos;
         if (puffOwner != null)
         {
             puffOwner.AddChild(puffPart);
@@ -39,6 +39,10 @@ public class ParticleManager : Node
         {
             this.AddChild(puffPart);
         }
+
+        Transform t = puffPart.GlobalTransform;
+        t.origin = pos;
+        puffPart.GlobalTransform = t;
         
         puffPart.Emitting = true;
 
@@ -52,5 +56,7 @@ public class ParticleManager : Node
                 }
             }
         }
+
+        return puffPart;
     }
 }

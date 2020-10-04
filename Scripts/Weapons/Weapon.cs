@@ -90,18 +90,24 @@ abstract public class Weapon : MeshInstance
         this.TimeSinceReloaded += delta;
     }
 
-    private void SpreadShoot(int shots, bool up, bool left, Vector3 shotLoc)
+    private void SpreadShoot(int shots, bool up, bool left, Vector3 shotLoc, Vector3 norm)
     {
         Random ran = new Random();
         Vector3 dir = (shotLoc - this._playerOwner.Head.GlobalTransform.origin).Normalized();
+        float range = (shotLoc - this._playerOwner.Head.GlobalTransform.origin).Length();
         Vector3 newDir;
+        // FIXME - in certain directions x seems to always be "0" units away from crosshair, so just a vertical line of puffs
         while (shots > 0)
         {
+            float spreadX = (float)ran.Next(0,100) * _spread.x * (left ? -1 : 1) / 100;
+            float spreadY = (float)ran.Next(0,100) * _spread.y * (up ? -1 : 1) / 100;
             newDir = new Vector3(
-                dir.x + (float)ran.Next(0,100) * _spread.x * (left ? -1 : 1) / 100
-                , dir.y + (float)ran.Next(0,100) * _spread.y * (up ? -1 : 1) / 100
-                , dir.z);
-            newDir *= _weaponRange;
+                dir.x + (spreadX * norm.x)
+                , dir.y + spreadY
+                , dir.z + (spreadX * norm.z)
+                );           
+            
+            newDir *= range;
 
             // FIXME - work out damage based on percentage of max weapon range travelled??
             this.DoHit(newDir);
@@ -140,15 +146,40 @@ abstract public class Weapon : MeshInstance
                         PhysicsDirectSpaceState spaceState = _playerOwner.GetWorld().DirectSpaceState;
                         Godot.Collections.Dictionary res = spaceState.IntersectRay(_playerOwner.Head.GlobalTransform.origin, shootTo, new Godot.Collections.Array { this, _playerOwner }, 1);
                         // if hits, use that as our far point
-                        Vector3 shotLoc;
                         if (res.Count > 0)
                         {
-                            shotLoc = ((Vector3)res["position"]);
-                            SpreadShoot(_pelletCount / 4, true, true, shotLoc);
-                            SpreadShoot(_pelletCount / 4, true, false, shotLoc);
-                            SpreadShoot(_pelletCount / 4, false, true, shotLoc);
-                            SpreadShoot(_pelletCount / 4, false, false, shotLoc);
+                            Vector3 shotLoc = ((Vector3)res["position"]);
+                            Vector3 norm = (Vector3)res["normal"];
+
+                            _game.World.ParticleManager.MakePuff(PUFFTYPE.PUFF, shotLoc, null);
+                            Particles p = _game.World.ParticleManager.MakePuff(PUFFTYPE.PUFF, shotLoc, null);
+                            Transform t = p.GlobalTransform;
+
+                            GD.Print(norm);
+                            t.basis.y = norm;
+                            t.basis.x = -t.basis.z.Cross(norm);
+                            t.basis = t.basis.Orthonormalized();
+                            
+                            p.GlobalTransform = t;
+                            //Vector3 tr = p.Translation;
+                            
+                            //p.Translation = new Vector3(p.Translation.x + 1, p.Translation.y, p.Translation.z);
+
+                            Vector3 trans = new Vector3(0, 1, 1);
+                            p.Translate(p.Transform.basis.Xform(trans));
+
+                            //GD.Print(norm);
+
+                            /*SpreadShoot(_pelletCount / 4, true, true, shotLoc, norm);
+                            SpreadShoot(_pelletCount / 4, true, false, shotLoc, norm);
+                            SpreadShoot(_pelletCount / 4, false, true, shotLoc, norm);
+                            SpreadShoot(_pelletCount / 4, false, false, shotLoc, norm);*/
                         }
+
+                        // trace to plane
+                        // get plane normal
+                        // ???
+                        // move along plane normal
                         break;
                     case WEAPONSHOTTYPE.PROJECTILE:
                     case WEAPONSHOTTYPE.GRENADE:
