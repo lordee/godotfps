@@ -11,7 +11,6 @@ public class MIRVGrenade : HandGrenade
     private static int _MIRVCount = 4;
     List<Projectile> mirvs = new List<Projectile>();
     
-
     public MIRVGrenade()
     {
     }
@@ -21,19 +20,24 @@ public class MIRVGrenade : HandGrenade
         base.Init(shooter, vel, weapon, game);
         _damage = 30;
         _grenadeType = WEAPONTYPE.MIRV;
+        
     }
 
     override protected void PrimeTimeFinished()
     {
         // spawn child grenades
         Random ran = new Random();
-        Vector3 dir = new Vector3(ran.Next(150), ran.Next(150), ran.Next(150));
         for (int i = 0; i < _MIRVCount; i++)
         {
+            // FIXME - direction seems to be a bit iffy, always in a particular dir?
+            Vector3 dir = new Vector3(ran.Next(150), ran.Next(150), ran.Next(150));
             string projName = _game.World.ProjectileManager.AddProjectile(_playerOwner, dir, "", WEAPONTYPE.MIRVCHILD);
             Projectile p = _game.World.ProjectileManager.Projectiles.Find(e => e.Name == projName);
             mirvs.Add(p);
             p.GlobalTransform = this.GlobalTransform;
+            // FIXME - need to dig in to speed, not sure these are being used correctly
+            p.VerticalSpeed = 10;
+            p.Speed = 10;
         }
         
         // make sure they don't just bounce on each other and float in air
