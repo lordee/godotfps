@@ -59,6 +59,7 @@ public class Player : KinematicBody
     private int _gren2Count = 0;
     public HandGrenade PrimingGren = null;
     public List<Debuff> Debuffs = new List<Debuff>();
+    public List<Projectile> ActivePipebombs = new List<Projectile>();
 
     private int _maxArmour = 200;
     private float _currentArmour;
@@ -66,8 +67,6 @@ public class Player : KinematicBody
     private int _maxHealth = 100;
     private float _currentHealth;
     public float CurrentHealth { get { return _currentHealth; }}
-    
-
     
     // movement
     private bool _wishJump;
@@ -297,7 +296,42 @@ public class Player : KinematicBody
                 case IMPULSE.GRENTWO:
                     UseHandGrenade(imp, pCmd);
                     break;
+                case IMPULSE.DETPIPE:
+                    Detpipe();
+                    break;
+                case IMPULSE.SPECIAL:
+                    UseSpecialSkill();
+                    break;
             }
+        }
+    }
+
+    private void UseSpecialSkill()
+    {
+        switch ((PLAYERCLASS)this.PlayerClass)
+        {
+            case PLAYERCLASS.DEMOMAN:
+                Detpipe();
+                break;
+        }
+    }
+
+    private void Detpipe()
+    {
+        if (this.PlayerClass == PLAYERCLASS.DEMOMAN)
+        {
+            if (this.Weapon2.TimeSinceLastShot >= GAMESETTINGS.DETPIPE_DELAY)
+            {
+                foreach (Pipebomb p in ActivePipebombs)
+                {
+                    p.Explode(null, p.Damage);
+                }
+                ActivePipebombs.Clear();
+            }
+        }
+        else
+        {
+            Console.Log("You are not a demoman");
         }
     }
 

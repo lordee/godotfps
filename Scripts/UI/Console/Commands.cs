@@ -238,7 +238,7 @@ public class Commands
 					},
 					Function = (Args) => Commands.Weapon(Args),
 					FunctionName = nameof(Commands.Weapon),
-					CommandType = CT.COMMAND,
+					CommandType = CT.PLAYERCONTROLLER,
 				}
 			},
 			{
@@ -249,7 +249,29 @@ public class Commands
 					},
 					Function = (Args) => Commands.Prime(Args),
 					FunctionName = nameof(Commands.Prime),
-					CommandType = CT.COMMAND,
+					CommandType = CT.PLAYERCONTROLLER,
+				}
+			},
+			{
+				"special",
+				new CommandInfo {
+					HelpMessages = new string[] {
+						"'special' executes class special skill'"
+					},
+					Function = (Args) => Commands.Special(),
+					FunctionName = nameof(Commands.Special),
+					CommandType = CT.PLAYERCONTROLLER,
+				}
+			},
+			{
+				"detpipe",
+				new CommandInfo {
+					HelpMessages = new string[] {
+						"'detpipe' detonates all pipebombs as demoman"
+					},
+					Function = (Args) => Commands.Detpipe(),
+					FunctionName = nameof(Commands.Detpipe),
+					CommandType = CT.PLAYERCONTROLLER,
 				}
 			}
 			// TODO - implement unbind and bind key "" (empty string)
@@ -273,6 +295,19 @@ public class Commands
 		Settings.SaveConfig();
 	}
 
+	[InputWithoutArg(typeof(Commands), nameof(Detpipe))]
+	public static void Detpipe()
+	{
+		Game.Client.Detpipe();
+	}
+
+	[InputWithoutArg(typeof(Commands), nameof(Special))]
+	public static void Special()
+	{
+		Game.Client.Special();
+	}
+
+	// FIXME - just extend inputwitharg instead to take other args to the defaulted 1/-1?
 	[CommandWithArg(typeof(Commands), nameof(Weapon))]
 	public static void Weapon(List<string> Args)
 	{

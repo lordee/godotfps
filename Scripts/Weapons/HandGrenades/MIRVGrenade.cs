@@ -7,7 +7,7 @@ using System.Collections.Generic;
 public class MIRVGrenade : HandGrenade
 {
     public static string ProjectileResource = "res://Scenes/Weapons/HandGrenades/MIRVGrenade.tscn";
-    private static string MIRVResource = "res://Scenes/Weapons/Grenade.tscn";
+    //private static string MIRVResource = "res://Scenes/Weapons/Grenade.tscn";
     private static int _MIRVCount = 4;
     List<Projectile> mirvs = new List<Projectile>();
     
@@ -20,7 +20,6 @@ public class MIRVGrenade : HandGrenade
         base.Init(shooter, vel, weapon, game);
         _damage = 30;
         _grenadeType = WEAPONTYPE.MIRV;
-        
     }
 
     override protected void PrimeTimeFinished()

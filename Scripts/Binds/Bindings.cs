@@ -359,7 +359,8 @@ public class Bindings : Node
 
 	public override void _PhysicsProcess(float Delta)
 	{
-		// UI handling where action only exists for UI interaction
+		// FIXME - change this to use binds system, at least for toggle console?
+		//UI handling where action only exists for UI interaction
 		if(UIManager.UIOpen())
 		{
 			if (Input.IsActionJustPressed("ui_accept"))

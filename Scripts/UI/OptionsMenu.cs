@@ -37,6 +37,7 @@ public class OptionsMenu : Control, IUIItem
         {
             if (kvp.Value.CommandType == CT.PLAYERCONTROLLER)
             {
+                // FIXME - options for arg required commands (so "weapon 1", "weapon 2" etc)
                 AddControl(kvp);
             }
         }

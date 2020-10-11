@@ -7,6 +7,11 @@ public class PACKET
     public const string END = @"\e";
 }
 
+public class GAMESETTINGS
+{
+    public const float DETPIPE_DELAY = 0.5f;
+}
+
 public enum PACKETSTATE
 {
     UNINITIALISED,
@@ -59,12 +64,14 @@ public enum CT
 
 public enum IMPULSE
 {
-    WEAPONONE = 1,
-    WEAPONTWO = 2,
-    WEAPONTHREE = 3,
-    WEAPONFOUR = 4, 
-    GRENONE = 5,
-    GRENTWO = 6,
+    WEAPONONE,
+    WEAPONTWO,
+    WEAPONTHREE,
+    WEAPONFOUR,
+    GRENONE,
+    GRENTWO,
+    DETPIPE,
+    SPECIAL,
 }
 
 public enum PLAYERCLASS

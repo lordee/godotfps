@@ -32,11 +32,11 @@ public class PlayerController : Camera
 
     private Node2D _aimAt;
 
-    // viewmodels, eventually
-    private MeshInstance _weapon1Mesh;
-    private MeshInstance _weapon2Mesh;
-    private MeshInstance _weapon3Mesh;
-    private MeshInstance _weapon4Mesh;
+    // TODO - viewmodels, eventually
+    //private MeshInstance _weapon1Mesh;
+    //private MeshInstance _weapon2Mesh;
+    //private MeshInstance _weapon3Mesh;
+    //private MeshInstance _weapon4Mesh;
 
     public override void _Ready()
     {
@@ -81,8 +81,8 @@ public class PlayerController : Camera
     // FIXME - network packet to change weapons
     public void ChangeWeapon(int arg)
     {
-        impulses.Add(arg);
-/*        switch (arg)
+        float impulse = 0;
+        switch (arg)
         {
             case 1:
                 impulse = (float)IMPULSE.WEAPONONE;
@@ -96,21 +96,32 @@ public class PlayerController : Camera
             case 4:
                 impulse = (float)IMPULSE.WEAPONFOUR;
                 break;
-        }*/
+        }
+        if (impulse != 0)
+        {
+            impulses.Add(impulse);
+        }
     }
 
-    // TODO - implement
+    public void Detpipe()
+    {
+        impulses.Add((float)IMPULSE.DETPIPE);
+    }
+
+    public void Special()
+    {
+        impulses.Add((float)IMPULSE.SPECIAL);
+    }
+
     public void Prime(int arg)
     {
         switch (arg)
         {
             case 1:
                 impulses.Add((float)IMPULSE.GRENONE);
-                //impulse = (float)IMPULSE.GRENONE;
                 break;
             case 2:
                 impulses.Add((float)IMPULSE.GRENTWO);
-                //impulse = (float)IMPULSE.GRENTWO;
                 break;
             default:
                 GD.Print("Grenade type does not exist");

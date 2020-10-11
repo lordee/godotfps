@@ -81,6 +81,10 @@ public class ProjectileManager : Node
         // if this is too slow we need to track unique projectile count on client and set that as name, but i worry about uniqueness still
         proj.Name = proj.Name.Replace("@", "");
 
+        if (weapon == WEAPONTYPE.PIPEBOMBLAUNCHER)
+        {
+            shooter.ActivePipebombs.Add(proj);
+        }
         return proj.Name;
     }
 
@@ -180,8 +184,9 @@ public class ProjectileManager : Node
                     }
                     else
                     {
+                        // FIXME - bounce does not actually bounce off of floor enough, walls seem fine
                         proj.Speed *= .95f;
-                        proj.VerticalSpeed *= .95f;
+                        //proj.VerticalSpeed *= .95f;
                         Vector3 v = motion.Bounce(c.Normal);
                         v.y *= proj.VerticalSpeed;
                         v.x *= proj.Speed;
