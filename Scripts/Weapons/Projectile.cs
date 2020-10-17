@@ -41,6 +41,7 @@ public class Projectile : KinematicBody
     protected float _maxLifeTime = 10f;
     public float MaxLifeTime {
         get { return _maxLifeTime; }
+        set { _maxLifeTime = value; }
     }
     public float LifeTime = 0f;
 

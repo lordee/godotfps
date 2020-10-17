@@ -242,6 +242,50 @@ public class Commands
 				}
 			},
 			{
+				"+det5",
+				new CommandInfo {
+					HelpMessages = new string[] {
+						"place a detpack set to explode in 5 seconds"
+					},
+					Function = (Args) => Commands.Det5(),
+					FunctionName = nameof(Commands.Det5),
+					CommandType = CT.PLAYERCONTROLLER,
+				}
+			},
+			{
+				"+det20",
+				new CommandInfo {
+					HelpMessages = new string[] {
+						"place a detpack set to explode in 20 seconds"
+					},
+					Function = (Args) => Commands.Det20(),
+					FunctionName = nameof(Commands.Det20),
+					CommandType = CT.PLAYERCONTROLLER,
+				}
+			},
+			{
+				"+det50",
+				new CommandInfo {
+					HelpMessages = new string[] {
+						"place a detpack set to explode in 50 seconds"
+					},
+					Function = (Args) => Commands.Det50(),
+					FunctionName = nameof(Commands.Det50),
+					CommandType = CT.PLAYERCONTROLLER,
+				}
+			},
+			{
+				"+det255",
+				new CommandInfo {
+					HelpMessages = new string[] {
+						"place a detpack set to explode in 255 seconds"
+					},
+					Function = (Args) => Commands.Det255(),
+					FunctionName = nameof(Commands.Det255),
+					CommandType = CT.PLAYERCONTROLLER,
+				}
+			},
+			{
 				"prime",
 				new CommandInfo {
 					HelpMessages = new string[] {
@@ -305,6 +349,30 @@ public class Commands
 	public static void Special()
 	{
 		Game.Client.Special();
+	}
+
+	[InputWithoutArg(typeof(Commands), nameof(Det5))]
+	public static void Det5()
+	{
+		Game.Client.Det(5, true);
+	}
+
+	[InputWithoutArg(typeof(Commands), nameof(Det20))]
+	public static void Det20()
+	{
+		Game.Client.Det(20, true);
+	}
+
+	[InputWithoutArg(typeof(Commands), nameof(Det50))]
+	public static void Det50()
+	{
+		Game.Client.Det(50, true);
+	}
+
+	[InputWithoutArg(typeof(Commands), nameof(Det255))]
+	public static void Det255()
+	{
+		Game.Client.Det(255, true);
 	}
 
 	// FIXME - just extend inputwitharg instead to take other args to the defaulted 1/-1?

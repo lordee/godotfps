@@ -337,4 +337,24 @@ public class World : Node
 
         return state.IntersectShape(par, 100);
     }
+
+    // instantly move item to floor
+    public void MoveToFloor(Projectile obj)
+    {
+        // trace downwards
+        Transform t = obj.GlobalTransform;
+        RayCast rc = new RayCast();
+        obj.AddChild(rc);
+        rc.GlobalTransform = t;
+        rc.CastTo = this.Up * -2000;
+        
+        rc.ForceRaycastUpdate();
+
+        if (rc.IsColliding())
+        {
+            t.origin = rc.GetCollisionPoint();
+            obj.GlobalTransform = t;
+        }
+        obj.RemoveChild(rc);
+    }
 }

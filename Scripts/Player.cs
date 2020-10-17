@@ -60,6 +60,7 @@ public class Player : KinematicBody
     public HandGrenade PrimingGren = null;
     public List<Debuff> Debuffs = new List<Debuff>();
     public List<Projectile> ActivePipebombs = new List<Projectile>();
+    
 
     private int _maxArmour = 200;
     private float _currentArmour;
@@ -103,6 +104,10 @@ public class Player : KinematicBody
     
     public MOVETYPE MoveType = MOVETYPE.SPECTATOR;
     private float _timeDead = 0;
+    private bool _settingDetpack = false;
+    private float _detpackTimeRequired = 5;
+    private float _setDetpackTime = 0;
+    private float _detpackTimeSetting = 0;
 
     public override void _Ready()
     {
@@ -184,6 +189,7 @@ public class Player : KinematicBody
                 case MOVETYPE.SPECTATOR:
                     SpectatorProcess(pCmd, delta);
                     break;
+                case MOVETYPE.NONE:
                 case MOVETYPE.NORMAL:
                     NormalProcess(pCmd, delta);
                     break;
@@ -228,6 +234,30 @@ public class Player : KinematicBody
         this.ProcessDebuffs(delta);
 
         this.ProcessImpulses(pCmd);
+
+        if (_settingDetpack)
+        {
+            _setDetpackTime += delta;
+            if (_setDetpackTime >= _detpackTimeRequired)
+            {
+                Projectile proj = _game.World.ProjectileManager.AddProjectile(this, this.GlobalTransform.origin, "Detpack", WEAPONTYPE.DETPACK);
+                Detpack dp = (Detpack)proj;
+                if (_detpackTimeSetting <= 5)
+                {
+                    dp.WarnSound.Play();
+                    dp.WarnSoundPlayed = true;
+                }
+                else
+                {
+                    dp.SetSound.Play();
+                }
+                
+                _settingDetpack = false;
+                dp.MaxLifeTime = _detpackTimeSetting;
+                MoveType = MOVETYPE.NORMAL;
+                ActiveWeapon.WeaponMesh.Visible = true;
+            }
+        }
         this.ProcessAttack(pCmd, delta);
 
         if (IsNetworkMaster())
@@ -235,7 +265,10 @@ public class Player : KinematicBody
             _game.World.FastForwardPlayers();
         }
 
-        this.ProcessMovementCmd(_predictedState, pCmd, delta);
+        if (MoveType == MOVETYPE.NORMAL)
+        {
+            this.ProcessMovementCmd(_predictedState, pCmd, delta);
+        }
     }
 
     private void ProcessDebuffs(float delta)
@@ -302,7 +335,49 @@ public class Player : KinematicBody
                 case IMPULSE.SPECIAL:
                     UseSpecialSkill();
                     break;
+                case IMPULSE.DETPACK5:
+                    Detpack(5, true);
+                    break;
+                case IMPULSE.DETPACK20:
+                    Detpack(20, true);
+                    break;
+                case IMPULSE.DETPACK50:
+                    Detpack(50, true);
+                    break;
+                case IMPULSE.DETPACK255:
+                    Detpack(255, true);
+                    break;
+                case IMPULSE.DETPACKUNSET:
+                    Detpack(0, false);
+                    break;
             }
+        }
+    }
+
+    private void Detpack(int seconds, bool set)
+    {
+        if (set)
+        {
+            if (IsOnFloor())
+            {
+                Console.Log("Setting detpack");
+                _settingDetpack = true;
+                MoveType = MOVETYPE.NONE;
+                // TODO - detpack setting anim (for now hide viewmodel)
+                _detpackTimeSetting = seconds;
+                _setDetpackTime = 0f;
+                ActiveWeapon.WeaponMesh.Visible = false;
+            }
+            else
+            {
+                Console.Log("You must be on the ground to set a detpack!");
+            }
+        }
+        else
+        {
+            Console.Log("Retrieving detpack");
+            MoveType = MOVETYPE.NORMAL;
+            _settingDetpack = false;
         }
     }
 
@@ -376,9 +451,9 @@ public class Player : KinematicBody
                         break;
                 }
 
-                string name = _game.World.ProjectileManager.AddProjectile(this, pCmd.attackDir, pCmd.projName, grenType);
+                Projectile proj = _game.World.ProjectileManager.AddProjectile(this, pCmd.attackDir, pCmd.projName, grenType);
                 // FIXME - need projnames to be an array, shooting + gren on same frame
-                pCmd.projName = name;
+                pCmd.projName = proj.Name;
             }
             else
             {
@@ -831,6 +906,7 @@ public class Player : KinematicBody
         else
         {
             MoveType = MOVETYPE.NORMAL;
+            _settingDetpack = false;
         }
 
         SetupClass();
@@ -978,6 +1054,7 @@ public class Player : KinematicBody
         _currentHealth = 0;
         _currentArmour = 0;
         MoveType = MOVETYPE.DEAD;
+        _settingDetpack = false;
         if (PlayerControlled)
         {
             // orientation change

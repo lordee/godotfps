@@ -31,6 +31,14 @@ public class ProjectileManager : Node
         foreach (Projectile proj in _projectiles)
         {
             proj.LifeTime += delta;
+            if (proj is Detpack d)
+            {
+                if (!d.WarnSoundPlayed && (proj.MaxLifeTime - proj.LifeTime) <= 5)
+                {
+                    d.WarnSound.Play();
+                    d.WarnSoundPlayed = true;
+                }
+            }
             if (proj.LifeTime >= proj.MaxLifeTime)
             {
                 // FIXME - need non explode remove for nails etc
@@ -50,7 +58,7 @@ public class ProjectileManager : Node
     }
 
     // when a player attacks
-    public string AddProjectile(Player shooter, Vector3 dest, string projName, WEAPONTYPE weapon)
+    public Projectile AddProjectile(Player shooter, Vector3 dest, string projName, WEAPONTYPE weapon)
     {
         ProjectileInfo.PROJECTILE projType = ProjectileInfo.Weapons[weapon];
         Projectile proj = (Projectile)ProjectileScenes[projType].Instance();
@@ -81,11 +89,7 @@ public class ProjectileManager : Node
         // if this is too slow we need to track unique projectile count on client and set that as name, but i worry about uniqueness still
         proj.Name = proj.Name.Replace("@", "");
 
-        if (weapon == WEAPONTYPE.PIPEBOMBLAUNCHER)
-        {
-            shooter.ActivePipebombs.Add(proj);
-        }
-        return proj.Name;
+        return proj;
     }
 
     public void AddNetworkedProjectile(string name, string pID, Vector3 org, Vector3 vel, Vector3 rot, WEAPONTYPE weapon)
@@ -126,11 +130,6 @@ public class ProjectileManager : Node
     {
         State predictedState = proj.ServerState;
         predictedState = ProcessMovement(predictedState, delta, proj);
-
-        /*if (IsNetworkMaster())
-        {
-            proj.SetServerState(predictedState.StateNum, predictedState.Origin, predictedState.Velocity, proj.Rotation);
-        }*/
     }
 
     private State ProcessMovement(State newState, float delta, Projectile proj)

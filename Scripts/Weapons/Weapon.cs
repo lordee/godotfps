@@ -189,8 +189,12 @@ abstract public class Weapon : MeshInstance
                         {
                             return false;
                         }
-                        string name = _game.World.ProjectileManager.AddProjectile(_playerOwner, pCmd.attackDir, pCmd.projName, _weapon);
-                        pCmd.projName = name;
+                        Projectile proj = _game.World.ProjectileManager.AddProjectile(_playerOwner, pCmd.attackDir, pCmd.projName, _weapon);
+                        if (_weapon == WEAPONTYPE.PIPEBOMBLAUNCHER)
+                        {
+                            _playerOwner.ActivePipebombs.Add(proj);
+                        }
+                        pCmd.projName = proj.Name;
                         break;
                 }
             }

@@ -72,6 +72,11 @@ public enum IMPULSE
     GRENTWO,
     DETPIPE,
     SPECIAL,
+    DETPACK5,
+    DETPACK20,
+    DETPACK50,
+    DETPACK255,
+    DETPACKUNSET,
 }
 
 public enum PLAYERCLASS
@@ -120,6 +125,7 @@ public enum WEAPONTYPE
     SHOCK,
     MIRV,
     MIRVCHILD,
+    DETPACK,
 }
 
 public enum AMMUNITION 
@@ -145,7 +151,7 @@ public class ProjectileInfo
         MIRV = 8,
         MIRVCHILD = 9,
         PIPEBOMB = 10,
-
+        DETPACK = 11,
     }
 
     static public Dictionary<WEAPONTYPE, PROJECTILE> Weapons = new Dictionary<WEAPONTYPE, PROJECTILE> {
@@ -159,7 +165,7 @@ public class ProjectileInfo
         {WEAPONTYPE.SHOCK, ProjectileInfo.PROJECTILE.SHOCK},
         {WEAPONTYPE.MIRV, ProjectileInfo.PROJECTILE.MIRV},
         {WEAPONTYPE.MIRVCHILD, ProjectileInfo.PROJECTILE.MIRVCHILD},
-        
+        {WEAPONTYPE.DETPACK, ProjectileInfo.PROJECTILE.DETPACK},
     };
 
     static public Dictionary<PROJECTILE, string> Scenes = new Dictionary<PROJECTILE, string> {
@@ -173,5 +179,7 @@ public class ProjectileInfo
         {ProjectileInfo.PROJECTILE.SHOCK, "res://Scenes/Weapons/HandGrenades/ShockGrenade.tscn"},
         {ProjectileInfo.PROJECTILE.MIRV, "res://Scenes/Weapons/HandGrenades/MIRVGrenade.tscn"},
         {ProjectileInfo.PROJECTILE.MIRVCHILD, "res://Scenes/Weapons/Grenade.tscn"},
+        {ProjectileInfo.PROJECTILE.DETPACK, "res://Scenes/Weapons/Detpack.tscn"},
     };
 }
+

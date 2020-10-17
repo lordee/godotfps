@@ -103,6 +103,32 @@ public class PlayerController : Camera
         }
     }
 
+    public void Det(int seconds, bool settingDet)
+    {
+        if (settingDet)
+        {
+            switch(seconds)
+            {
+                case 5:
+                    impulses.Add((float)IMPULSE.DETPACK5);
+                    break;
+                case 20:
+                    impulses.Add((float)IMPULSE.DETPACK20);
+                    break;
+                case 50:
+                    impulses.Add((float)IMPULSE.DETPACK50);
+                    break;
+                case 255:
+                    impulses.Add((float)IMPULSE.DETPACK255);
+                    break;
+            }
+        }
+        else
+        {
+            impulses.Add((float)IMPULSE.DETPACKUNSET);
+        }
+    }
+
     public void Detpipe()
     {
         impulses.Add((float)IMPULSE.DETPIPE);

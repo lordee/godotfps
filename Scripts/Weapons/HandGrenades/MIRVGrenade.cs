@@ -30,8 +30,7 @@ public class MIRVGrenade : HandGrenade
         {
             // FIXME - direction seems to be a bit iffy, always in a particular dir?
             Vector3 dir = new Vector3(ran.Next(150), ran.Next(150), ran.Next(150));
-            string projName = _game.World.ProjectileManager.AddProjectile(_playerOwner, dir, "", WEAPONTYPE.MIRVCHILD);
-            Projectile p = _game.World.ProjectileManager.Projectiles.Find(e => e.Name == projName);
+            Projectile p = _game.World.ProjectileManager.AddProjectile(_playerOwner, dir, "", WEAPONTYPE.MIRVCHILD);
             mirvs.Add(p);
             p.GlobalTransform = this.GlobalTransform;
             // FIXME - need to dig in to speed, not sure these are being used correctly
