@@ -59,7 +59,9 @@ public class Projectile : KinematicBody
     {   
         _game = game;
         this.AddCollisionExceptionWith(shooter);
-        this.GlobalTransform = shooter.Head.GlobalTransform;
+        Transform t = this.GlobalTransform;
+        t.origin = shooter.Head.GlobalTransform.origin;
+        this.GlobalTransform = t;
         Velocity = vel;
         this.LookAt(vel * 1000, _game.World.Up);
         _playerOwner = shooter;
