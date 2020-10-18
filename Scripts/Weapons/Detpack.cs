@@ -17,10 +17,10 @@ public class Detpack : Projectile
     {
         _particleResource = "res://Scenes/Weapons/RocketExplosion.tscn";
         _areaOfEffect = true;
+        
+        base.Init(shooter, vel, weapon, game);
         _areaOfEffectRadius = 500;
         _damage = 500;
-
-        base.Init(shooter, vel, weapon, game);
         
         _moveType = MOVETYPE.NONE;
         _maxLifeTime = 256f;
