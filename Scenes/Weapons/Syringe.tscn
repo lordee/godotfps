@@ -1,0 +1,25 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://Assets/Models/Guns/knife_sharp.obj" type="ArrayMesh" id=1]
+[ext_resource path="res://Assets/Sounds/shots/shotgun.wav" type="AudioStream" id=2]
+
+[node name="Syringe" type="MeshInstance"]
+transform = Transform( -7, 0, -2.28089e-06, 0, 7, 0, 2.28089e-06, 0, -7, 0, 0, 0 )
+mesh = ExtResource( 1 )
+material/0 = null
+material/1 = null
+material/2 = null
+material/3 = null
+material/4 = null
+material/5 = null
+material/6 = null
+material/7 = null
+material/8 = null
+material/9 = null
+material/10 = null
+material/11 = null
+material/12 = null
+
+[node name="ShootSound" type="AudioStreamPlayer3D" parent="."]
+transform = Transform( 0.005, 0, 0, 0, 0.005, 0, 0, 0, 0.05, 8.88178e-16, 0.00717604, 0.0406193 )
+stream = ExtResource( 2 )

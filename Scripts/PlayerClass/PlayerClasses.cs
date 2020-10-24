@@ -3,15 +3,14 @@ using System;
 
 public class Scout
 {
-
     static public int Health = 100;
     static public int Armour = 25;
     static public int Shells = 50;
     static public int Nails = 200;
     static public int Rockets = 50;
     static public int Cells = 100;
-    static public int MaxGren1 = 3;
-    static public int MaxGren2 = 4;
+    static public int MaxGren1 = 2;
+    static public int MaxGren2 = 3;
     static public int MoveSpeed = 45;
     static public WEAPONTYPE Gren1Type = WEAPONTYPE.FLASH;
     static public WEAPONTYPE Gren2Type = WEAPONTYPE.CONCUSSION;
@@ -49,7 +48,7 @@ public class Demoman
     static public int Rockets = 50;
     static public int Cells = 50;
     static public int MaxGren1 = 4;
-    static public int MaxGren2 = 2;
+    static public int MaxGren2 = 1;
     static public int MoveSpeed = 28;
     static public WEAPONTYPE Gren1Type = WEAPONTYPE.FRAG;
     static public WEAPONTYPE Gren2Type = WEAPONTYPE.MIRV;
@@ -59,6 +58,24 @@ public class Demoman
     static public WEAPONTYPE Weapon4 = WEAPONTYPE.AXE;
 }
 
+public class Medic
+{
+    static public int Health = 100;
+    static public int Armour = 80;
+    static public int Shells = 50;
+    static public int Nails = 150;
+    static public int Rockets = 50;
+    static public int Cells = 50;
+    static public int MaxGren1 = 4;
+    static public int MaxGren2 = 2;
+    static public int MoveSpeed = 32;
+    static public WEAPONTYPE Gren1Type = WEAPONTYPE.FRAG;
+    static public WEAPONTYPE Gren2Type = WEAPONTYPE.CONCUSSION;
+    static public WEAPONTYPE Weapon1 = WEAPONTYPE.SUPERNAILGUN;
+    static public WEAPONTYPE Weapon2 = WEAPONTYPE.SUPERSHOTGUN;
+    static public WEAPONTYPE Weapon3 = WEAPONTYPE.SHOTGUN;
+    static public WEAPONTYPE Weapon4 = WEAPONTYPE.SYRINGE;
+}
 
 /*
 public class Observer : TFClass
@@ -100,48 +117,6 @@ public class Sniper : TFClass
         _maxCells = 50;
         _maxGren1 = 4;
         _maxGren2 = 4;
-    }
-}
-
-public class Demoman : TFClass
-{
-    public Demoman()
-    {
-        _weapon1 = new GrenadeLauncher();
-        _weapon2 = new PipebombLauncher();
-        _weapon3 = new Shotgun();
-        _weapon4 = new Axe();
-        _gren1 = Ammunition.FragGrenade;
-        _gren2 = Ammunition.MIRVGrenade;
-        _health = 90;
-        _armour = 120;
-        _maxShells = 50;
-        _maxNails = 50;
-        _maxRockets = 50;
-        _maxCells = 50;
-        _maxGren1 = 4;
-        _maxGren2 = 4;
-    }
-}
-
-public class Medic : TFClass
-{
-    public Medic()
-    {
-        _weapon1 = new SuperNailGun();
-        _weapon2 = new SuperShotgun();
-        _weapon3 = new Shotgun();
-        _weapon4 = new Syringe();
-        _gren1 = Ammunition.FragGrenade;
-        _gren2 = Ammunition.ConcussionGrenade;
-        _health = 100;
-        _armour = 80;
-        _maxShells = 50;
-        _maxNails = 150;
-        _maxRockets = 50;
-        _maxCells = 50;
-        _maxGren1 = 4;
-        _maxGren2 = 100;
     }
 }
 

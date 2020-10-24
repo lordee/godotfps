@@ -60,6 +60,8 @@ public class Player : KinematicBody
     public HandGrenade PrimingGren = null;
     public List<Debuff> Debuffs = new List<Debuff>();
     public List<Projectile> ActivePipebombs = new List<Projectile>();
+    private bool _medicAura = false;
+    public float SyringeHealTime = 0; // game time when next heal can be done by player
     
 
     private int _maxArmour = 200;
@@ -166,6 +168,8 @@ public class Player : KinematicBody
         Transform t = GlobalTransform;
         t.origin = _predictedState.Origin; // by this point it's a new serverstate
         GlobalTransform = t;
+
+        // TODO - implement medic aura health give
 
         foreach(PlayerCmd pCmd in pCmdQueue)
         {
@@ -285,6 +289,7 @@ public class Player : KinematicBody
             if (d.NextThink <= 0)
             {
                 d.ApplyDebuff();
+                d.NextThink = d.NextThinkInterval;
             }
             
             d.TimeLeft -= delta;
@@ -388,6 +393,21 @@ public class Player : KinematicBody
             case PLAYERCLASS.DEMOMAN:
                 Detpipe();
                 break;
+            case PLAYERCLASS.MEDIC:
+                ToggleAura();
+                break;
+        }
+    }
+
+    private void ToggleAura()
+    {
+        if (this.PlayerClass == PLAYERCLASS.MEDIC)
+        {
+            _medicAura = !_medicAura;
+        }
+        else
+        {
+            Console.Log("You are not a medic");
         }
     }
 
@@ -487,15 +507,41 @@ public class Player : KinematicBody
         this.PrimingGren = null;
     }
 
-    public void Inflict(WEAPONTYPE inflictorType, float inflictLength, Player attacker)
+    public void AddDebuff(Player attacker, WEAPONTYPE wt, float debuffLength)
     {
-        Debuffs.Add(
-            new Debuff {
-                Type = inflictorType,
-                TimeLeft = inflictLength,
-                Owner = this,
-                Attacker = attacker,
-        });
+        switch (wt)
+        {
+            case WEAPONTYPE.CONCUSSION:
+            case WEAPONTYPE.FLASH:
+                Debuffs.Add(new Debuff{
+                        Type = wt,
+                        TimeLeft = debuffLength,
+                        Owner = this,
+                        Attacker = attacker
+                    });
+                break;
+            case WEAPONTYPE.SYRINGE:
+                if (attacker.Team != this.Team)
+                {
+                    // enemy, infect
+                    Debuffs.Add(new Debuff{
+                        Type = wt,
+                        TimeLeft = debuffLength,
+                        Owner = this,
+                        Attacker = attacker
+                    });
+                }
+                else
+                {
+                    // friend, heal
+                    if (attacker.SyringeHealTime <= _game.World.GameTime)
+                    {
+                        _currentHealth = _maxHealth + 50;
+                        attacker.SyringeHealTime = _game.World.GameTime + 5;
+                    }
+                }
+                break;
+        }
     }
 
     private void DeadProcess(PlayerCmd pCmd, float delta)
@@ -891,6 +937,13 @@ public class Player : KinematicBody
         _serverState.Velocity += dir;
     }
 
+    private void SetDefaultValues()
+    {
+        _medicAura = false;
+        _settingDetpack = false;
+        Debuffs.Clear();
+    }
+
     public void Spawn(Vector3 spawnPoint)
     {
         if (MoveType == MOVETYPE.DEAD)
@@ -906,11 +959,11 @@ public class Player : KinematicBody
         else
         {
             MoveType = MOVETYPE.NORMAL;
-            _settingDetpack = false;
         }
 
         SetupClass();
-       
+        SetDefaultValues();
+        
         this.Translation = spawnPoint;
 
         this.SetServerState(this.GlobalTransform.origin, this._playerVelocity, this._mesh.Rotation, _maxHealth
@@ -934,6 +987,9 @@ public class Player : KinematicBody
         Weapon weap = null;
         switch (weapon)
         {
+            case WEAPONTYPE.SYRINGE:
+                weap = new Syringe();
+                break;
             case WEAPONTYPE.AXE:
                 weap = new Axe();
                 break;
@@ -945,6 +1001,9 @@ public class Player : KinematicBody
                 break;
             case WEAPONTYPE.NAILGUN:
                 weap = new NailGun();
+                break;
+            case WEAPONTYPE.SUPERNAILGUN:
+                weap = new SuperNailGun();
                 break;
             case WEAPONTYPE.GRENADELAUNCHER:
                 weap = new GrenadeLauncher();
@@ -1030,7 +1089,18 @@ public class Player : KinematicBody
                 _gren2Count = Demoman.MaxGren2;
                 break;
             case PLAYERCLASS.MEDIC:
-
+                _maxHealth = Medic.Health;
+                _maxArmour = Medic.Armour;
+                _weapon1 = SetupWeapon(Medic.Weapon1);
+                _weapon2 = SetupWeapon(Medic.Weapon2);
+                _weapon3 = SetupWeapon(Medic.Weapon3);
+                _weapon4 = SetupWeapon(Medic.Weapon4);
+                ActiveWeapon = _weapon1;
+                _moveSpeed = Medic.MoveSpeed;
+                _gren1Type = Medic.Gren1Type;
+                _gren2Type = Medic.Gren2Type;
+                _gren1Count = Medic.MaxGren1;
+                _gren2Count = Medic.MaxGren2;
                 break;
             case PLAYERCLASS.HWGUY:
 
@@ -1051,10 +1121,10 @@ public class Player : KinematicBody
 
     public void Die()
     {
+        SetDefaultValues();
         _currentHealth = 0;
         _currentArmour = 0;
         MoveType = MOVETYPE.DEAD;
-        _settingDetpack = false;
         if (PlayerControlled)
         {
             // orientation change

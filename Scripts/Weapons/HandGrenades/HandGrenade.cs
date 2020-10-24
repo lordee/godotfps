@@ -6,7 +6,7 @@ abstract public class HandGrenade : Projectile
 {
     protected float _activeTime = 0;
     protected float _maxPrimedTime = 3.0f;
-    protected float _inflictLength = 0;
+    protected float _debuffLength = 0;
     private bool _thrown = false;
     public bool Thrown { get { return _thrown; }}
     // used by nail grenade to indicate if it should be getting affected by gravity, shooting nails etc
@@ -15,6 +15,8 @@ abstract public class HandGrenade : Projectile
 
     protected WEAPONTYPE _grenadeType;
     public WEAPONTYPE GrenadeType { get { return _grenadeType; }}
+
+    // FIXME - this should be a weapon based class
 
     public HandGrenade()
     {
@@ -99,14 +101,16 @@ abstract public class HandGrenade : Projectile
     {
         foreach (KeyValuePair<Player, float> kvp in _explodedPlayers)
         {
+            float debuffTime = _debuffLength * kvp.Value;
             if (_grenadeType == WEAPONTYPE.CONCUSSION)
             {
                 float dist = this.Transform.origin.DistanceTo(kvp.Key.Transform.origin);
                 dist = dist > this._areaOfEffectRadius ? (this._areaOfEffectRadius*.99f) : dist;
                 float pc = ((this._areaOfEffectRadius - dist) / this._areaOfEffectRadius);
                 kvp.Key.AddVelocity(this.GlobalTransform.origin, ConcussionGrenade.BlastPower * (1 - pc));
+                debuffTime = _debuffLength;
             }
-            kvp.Key.Inflict(_grenadeType, _inflictLength * kvp.Value, _playerOwner);
+            kvp.Key.AddDebuff(_playerOwner, _grenadeType, debuffTime);
         }
     }
 }

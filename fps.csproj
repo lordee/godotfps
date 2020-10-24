@@ -107,6 +107,8 @@
     <Compile Include="Scripts\Weapons\PipebombLauncher.cs" />
     <Compile Include="Scripts\Weapons\Grenade.cs" />
     <Compile Include="Scripts\Weapons\GrenadeLauncher.cs" />
+    <Compile Include="Scripts\Weapons\SuperNailGun.cs" />
+    <Compile Include="Scripts\Weapons\Syringe.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

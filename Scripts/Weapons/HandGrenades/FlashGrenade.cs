@@ -14,7 +14,7 @@ public class FlashGrenade : HandGrenade
     {
         base.Init(shooter, vel, weapon, game);
         _damage = 10;
-        _inflictLength = 5;
+        _debuffLength = 5;
         _grenadeType = WEAPONTYPE.FLASH;
     }
 }

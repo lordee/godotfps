@@ -62,7 +62,7 @@ abstract public class Weapon : MeshInstance
             }
         }
     }
-
+    protected float _debuffLength = 0;
 
     protected string _weaponResource;
     protected MeshInstance _weaponMesh;
@@ -73,6 +73,8 @@ abstract public class Weapon : MeshInstance
     private Sprite3D _muzzleFlash;
     private AudioStreamPlayer3D _shootSound;
     private AudioStreamPlayer3D _reloadSound;
+
+    
 
     // Nodes
     Game _game;
@@ -226,13 +228,15 @@ abstract public class Weapon : MeshInstance
 
                 _game.World.ParticleManager.MakePuff(PUFFTYPE.PUFF, pos, (Node)rb);
             } 
-            else if (res["collider"] is KinematicBody kb)
+            else if (res["collider"] is Player pl)
             {
-                Player pl = (Player)kb;
+                //Player pl = (Player)kb;
                 dam = Damage / _pelletCount;
 
                 pl.TakeDamage(_playerOwner, _playerOwner.GlobalTransform.origin, dam);
-                _game.World.ParticleManager.MakePuff(PUFFTYPE.BLOOD, pos, (Node)kb);
+                _game.World.ParticleManager.MakePuff(PUFFTYPE.BLOOD, pos, (Node)pl);
+
+                pl.AddDebuff(_playerOwner, WeaponType, _debuffLength);
             }
             else
             {

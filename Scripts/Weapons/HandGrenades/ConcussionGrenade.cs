@@ -15,7 +15,7 @@ public class ConcussionGrenade : HandGrenade
     {
         base.Init(shooter, vel, weapon, game);
         _damage = 0;
-        _inflictLength = 10;
+        _debuffLength = 10;
         _grenadeType = WEAPONTYPE.CONCUSSION;
     }
 }
