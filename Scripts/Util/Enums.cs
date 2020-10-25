@@ -64,6 +64,7 @@ public enum CT
 
 public enum IMPULSE
 {
+    NONE = 0,
     WEAPONONE,
     WEAPONTWO,
     WEAPONTHREE,
