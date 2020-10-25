@@ -13,6 +13,6 @@ public class SuperNailGun : Weapon
         _ammoType = AMMUNITION.NAILS;
         _weaponResource = "res://Scenes/Weapons/SuperNailGun.tscn";
         _projectileResource = "res://Scenes/Weapons/Nail.tscn";
-        _weapon = WEAPONTYPE.SUPERNAILGUN;
+        _weaponType = WEAPONTYPE.SUPERNAILGUN;
     }
 }

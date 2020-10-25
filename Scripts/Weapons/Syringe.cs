@@ -12,5 +12,6 @@ public class Syringe : Weapon
         _weaponShotType = WEAPONSHOTTYPE.MELEE;
         _weaponRange = 10;
         _debuffLength = 999;
+        _weaponType = WEAPONTYPE.SYRINGE;
     }
 }

@@ -11,8 +11,8 @@ abstract public class Weapon : MeshInstance
     protected int _minAmmoRequired;
     protected int _clipSize;
     protected float _coolDown;
-    protected WEAPONTYPE _weapon;
-    public WEAPONTYPE WeaponType { get { return _weapon; }}
+    protected WEAPONTYPE _weaponType;
+    public WEAPONTYPE WeaponType { get { return _weaponType; }}
     protected WEAPONSHOTTYPE _weaponShotType;
     protected AMMUNITION _ammoType;
     protected int _weaponRange;
@@ -191,8 +191,8 @@ abstract public class Weapon : MeshInstance
                         {
                             return false;
                         }
-                        Projectile proj = _game.World.ProjectileManager.AddProjectile(_playerOwner, pCmd.attackDir, pCmd.projName, _weapon);
-                        if (_weapon == WEAPONTYPE.PIPEBOMBLAUNCHER)
+                        Projectile proj = _game.World.ProjectileManager.AddProjectile(_playerOwner, pCmd.attackDir, pCmd.projName, _weaponType);
+                        if (_weaponType == WEAPONTYPE.PIPEBOMBLAUNCHER)
                         {
                             _playerOwner.ActivePipebombs.Add(proj);
                         }

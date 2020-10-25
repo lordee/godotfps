@@ -15,6 +15,6 @@ public class SuperShotgun : Weapon
         _spread = new Vector3(.14f, .08f, 0f);
         _ammoType = AMMUNITION.SHELLS;
         _weaponResource = "res://Scenes/Weapons/SuperShotgun.tscn";
-        _weapon = WEAPONTYPE.SUPERSHOTGUN;
+        _weaponType = WEAPONTYPE.SUPERSHOTGUN;
     }
 }

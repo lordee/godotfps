@@ -12,7 +12,7 @@ public class PipebombLauncher : Weapon
         
         _weaponResource = "res://Scenes/Weapons/PipebombLauncher.tscn";
         _projectileResource = "res://Scenes/Weapons/Pipebomb.tscn";
-        _weapon = WEAPONTYPE.PIPEBOMBLAUNCHER;
+        _weaponType = WEAPONTYPE.PIPEBOMBLAUNCHER;
         _speed = 60;
     }
 }

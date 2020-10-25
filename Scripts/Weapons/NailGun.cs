@@ -13,6 +13,6 @@ public class NailGun : Weapon
         _ammoType = AMMUNITION.NAILS;
         _weaponResource = "res://Scenes/Weapons/NailGun.tscn";
         _projectileResource = "res://Scenes/Weapons/Nail.tscn";
-        _weapon = WEAPONTYPE.NAILGUN;
+        _weaponType = WEAPONTYPE.NAILGUN;
     }
 }

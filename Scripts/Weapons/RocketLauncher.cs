@@ -12,7 +12,7 @@ public class RocketLauncher : Weapon
         
         _weaponResource = "res://Scenes/Weapons/RocketLauncher.tscn";
         _projectileResource = "res://Scenes/Weapons/Rocket.tscn";
-        _weapon = WEAPONTYPE.ROCKETLAUNCHER;
+        _weaponType = WEAPONTYPE.ROCKETLAUNCHER;
         _speed = 100;
     }
 }

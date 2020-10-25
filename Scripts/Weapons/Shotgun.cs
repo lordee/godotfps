@@ -16,6 +16,6 @@ public class Shotgun : Weapon
         _spread = new Vector3(.04f, .04f, 0f);
         _ammoType = AMMUNITION.SHELLS;
         _weaponResource = "res://Scenes/Weapons/Shotgun.tscn";
-        _weapon = WEAPONTYPE.SHOTGUN;
+        _weaponType = WEAPONTYPE.SHOTGUN;
     }
 }

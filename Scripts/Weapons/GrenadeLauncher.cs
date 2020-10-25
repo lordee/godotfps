@@ -12,7 +12,7 @@ public class GrenadeLauncher : Weapon
         
         _weaponResource = "res://Scenes/Weapons/GrenadeLauncher.tscn";
         _projectileResource = "res://Scenes/Weapons/Grenade.tscn";
-        _weapon = WEAPONTYPE.GRENADELAUNCHER;
+        _weaponType = WEAPONTYPE.GRENADELAUNCHER;
         _speed = 60;
     }
 }

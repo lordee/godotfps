@@ -9,5 +9,6 @@ public class Axe : Weapon
         _coolDown = 0.5f;
         _weaponShotType = WEAPONSHOTTYPE.MELEE;
         _weaponRange = 10;
+        _weaponType = WEAPONTYPE.AXE;
     }
 }
