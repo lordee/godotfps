@@ -107,9 +107,21 @@ public class Player : KinematicBody
     public MOVETYPE MoveType = MOVETYPE.SPECTATOR;
     private float _timeDead = 0;
     private bool _settingDetpack = false;
+    public bool SettingDetpack {
+        get { return _settingDetpack; }
+        set { _settingDetpack = value; }
+    }
     private float _detpackTimeRequired = 5;
     private float _setDetpackTime = 0;
+    public float SetDetpackTime {
+        get { return _setDetpackTime; }
+        set { _setDetpackTime = value; }
+    }
     private float _detpackTimeSetting = 0;
+    public float DetpackTimeSetting {
+        get { return _detpackTimeSetting; }
+        set { _detpackTimeSetting = value; }
+    }
 
     public override void _Ready()
     {
@@ -335,54 +347,27 @@ public class Player : KinematicBody
                     UseHandGrenade(imp, pCmd);
                     break;
                 case IMPULSE.DETPIPE:
-                    Detpipe();
+                    Demoman.Detpipe(this);
                     break;
                 case IMPULSE.SPECIAL:
                     UseSpecialSkill();
                     break;
                 case IMPULSE.DETPACK5:
-                    Detpack(5, true);
+                    Demoman.Detpack(this, 5, true);
                     break;
                 case IMPULSE.DETPACK20:
-                    Detpack(20, true);
+                    Demoman.Detpack(this, 20, true);
                     break;
                 case IMPULSE.DETPACK50:
-                    Detpack(50, true);
+                    Demoman.Detpack(this, 50, true);
                     break;
                 case IMPULSE.DETPACK255:
-                    Detpack(255, true);
+                    Demoman.Detpack(this, 255, true);
                     break;
                 case IMPULSE.DETPACKUNSET:
-                    Detpack(0, false);
+                    Demoman.Detpack(this, 0, false);
                     break;
             }
-        }
-    }
-
-    private void Detpack(int seconds, bool set)
-    {
-        if (set)
-        {
-            if (IsOnFloor())
-            {
-                Console.Log("Setting detpack");
-                _settingDetpack = true;
-                MoveType = MOVETYPE.NONE;
-                // TODO - detpack setting anim (for now hide viewmodel)
-                _detpackTimeSetting = seconds;
-                _setDetpackTime = 0f;
-                ActiveWeapon.WeaponMesh.Visible = false;
-            }
-            else
-            {
-                Console.Log("You must be on the ground to set a detpack!");
-            }
-        }
-        else
-        {
-            Console.Log("Retrieving detpack");
-            MoveType = MOVETYPE.NORMAL;
-            _settingDetpack = false;
         }
     }
 
@@ -391,7 +376,7 @@ public class Player : KinematicBody
         switch ((PLAYERCLASS)this.PlayerClass)
         {
             case PLAYERCLASS.DEMOMAN:
-                Detpipe();
+                Demoman.Detpipe(this);
                 break;
             case PLAYERCLASS.MEDIC:
                 ToggleAura();
@@ -408,25 +393,6 @@ public class Player : KinematicBody
         else
         {
             Console.Log("You are not a medic");
-        }
-    }
-
-    private void Detpipe()
-    {
-        if (this.PlayerClass == PLAYERCLASS.DEMOMAN)
-        {
-            if (this.Weapon2.TimeSinceLastShot >= GAMESETTINGS.DETPIPE_DELAY)
-            {
-                foreach (Pipebomb p in ActivePipebombs)
-                {
-                    p.Explode(null, p.Damage);
-                }
-                ActivePipebombs.Clear();
-            }
-        }
-        else
-        {
-            Console.Log("You are not a demoman");
         }
     }
 
