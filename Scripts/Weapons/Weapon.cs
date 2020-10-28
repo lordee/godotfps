@@ -191,6 +191,7 @@ abstract public class Weapon : MeshInstance
                         {
                             return false;
                         }
+                        
                         Projectile proj = _game.World.ProjectileManager.AddProjectile(_playerOwner, pCmd.attackDir, pCmd.projName, _weaponType);
                         if (_weaponType == WEAPONTYPE.PIPEBOMBLAUNCHER)
                         {

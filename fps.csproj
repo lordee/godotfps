@@ -66,6 +66,7 @@
     <Compile Include="Scripts\UI\TeamMenu.cs" />
     <Compile Include="Scripts\UI\UIManager.cs" />
     <Compile Include="Scripts\UI\IUIItem.cs" />
+    <Compile Include="Scripts\Weapons\Bullet.cs" />
     <Compile Include="Scripts\Weapons\Detpack.cs" />
     <Compile Include="Scripts\Weapons\HandGrenades\MIRVGrenade.cs" />
     <Compile Include="Scripts\Weapons\HandGrenades\ShockGrenade.cs" />
@@ -109,7 +110,9 @@
     <Compile Include="Scripts\Weapons\GrenadeLauncher.cs" />
     <Compile Include="Scripts\Weapons\SuperNailGun.cs" />
     <Compile Include="Scripts\Weapons\Syringe.cs" />
+    <Compile Include="Scripts\Weapons\Minigun.cs" />
     <Compile Include="Scripts\PlayerClass\Demoman.cs" />
+    <Compile Include="Scripts\PlayerClass\HWGuy.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

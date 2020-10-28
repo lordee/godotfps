@@ -122,6 +122,7 @@ public enum WEAPONTYPE
     GRENADELAUNCHER,
     PIPEBOMBLAUNCHER,
     ROCKETLAUNCHER,
+    MINIGUN,
     FRAG,
     FLASH,
     CONCUSSION,
@@ -155,6 +156,7 @@ public class ProjectileInfo
         MIRVCHILD = 9,
         PIPEBOMB = 10,
         DETPACK = 11,
+        BULLET
     }
 
     static public Dictionary<WEAPONTYPE, PROJECTILE> Weapons = new Dictionary<WEAPONTYPE, PROJECTILE> {
@@ -174,6 +176,7 @@ public class ProjectileInfo
 
     static public Dictionary<PROJECTILE, string> Scenes = new Dictionary<PROJECTILE, string> {
         {ProjectileInfo.PROJECTILE.NAIL, "res://Scenes/Weapons/Nail.tscn"},
+        {ProjectileInfo.PROJECTILE.BULLET, "res://Scenes/Weapons/Bullet.tscn"},
         {ProjectileInfo.PROJECTILE.GRENADE, "res://Scenes/Weapons/Grenade.tscn"},
         {ProjectileInfo.PROJECTILE.PIPEBOMB, "res://Scenes/Weapons/Pipebomb.tscn"},
         {ProjectileInfo.PROJECTILE.ROCKET, "res://Scenes/Weapons/Rocket.tscn"},

@@ -101,27 +101,6 @@ public class Sniper : TFClass
     }
 }
 
-public class HWGuy : TFClass
-{
-    public HWGuy()
-    {
-        _weapon1 = new MiniGun();
-        _weapon2 = new SuperShotgun();
-        _weapon3 = new Shotgun();
-        _weapon4 = new Axe();
-        _gren1 = Ammunition.FragGrenade;
-        _gren2 = Ammunition.MIRVGrenade;
-        _health = 100;
-        _armour = 300;
-        _maxShells = 200;
-        _maxNails = 50;
-        _maxRockets = 50;
-        _maxCells = 50;
-        _maxGren1 = 4;
-        _maxGren2 = 2;
-    }
-}
-
 public class Pyro : TFClass
 {
     public Pyro()

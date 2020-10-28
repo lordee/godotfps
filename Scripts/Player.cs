@@ -980,6 +980,9 @@ public class Player : KinematicBody
             case WEAPONTYPE.ROCKETLAUNCHER:
                 weap = new RocketLauncher();
                 break;
+            case WEAPONTYPE.MINIGUN:
+                weap = new Minigun();
+                break;
             case WEAPONTYPE.NONE:
             default:
 
@@ -1069,7 +1072,18 @@ public class Player : KinematicBody
                 _gren2Count = Medic.MaxGren2;
                 break;
             case PLAYERCLASS.HWGUY:
-
+                _maxHealth = HWGuy.Health;
+                _maxArmour = HWGuy.Armour;
+                _weapon1 = SetupWeapon(HWGuy.Weapon1);
+                _weapon2 = SetupWeapon(HWGuy.Weapon2);
+                _weapon3 = SetupWeapon(HWGuy.Weapon3);
+                _weapon4 = SetupWeapon(HWGuy.Weapon4);
+                ActiveWeapon = _weapon1;
+                _moveSpeed = HWGuy.MoveSpeed;
+                _gren1Type = HWGuy.Gren1Type;
+                _gren2Type = HWGuy.Gren2Type;
+                _gren1Count = HWGuy.MaxGren1;
+                _gren2Count = HWGuy.MaxGren2;
                 break;
             case PLAYERCLASS.PYRO:
 
