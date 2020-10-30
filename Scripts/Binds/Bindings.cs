@@ -49,7 +49,9 @@ public class Bindings : Node
 	private static List<WithoutArgInfo> WithoutArgMethods = null;
 
 	public static List<BindingObject> BindingsWithArg = new List<BindingObject>();
+	public static List<BindingObject> BindingsWithArgDistinct = new List<BindingObject>();
 	private static List<BindingObject> BindingsWithoutArg = new List<BindingObject>();
+	private static List<BindingObject> BindingsWithoutArgDistinct = new List<BindingObject>();
 
 	private static Bindings Self;
 	private static Game _game;
@@ -284,15 +286,32 @@ public class Bindings : Node
 		if(NewBind.FuncWithArg != null || NewBind.CommandWithArg != null)
 		{
 			BindingsWithArg.Add(NewBind);
+			AddDistinctBind(BindingsWithArgDistinct, NewBind);
 		}
 		else if(NewBind.FuncWithoutArg != null)
 		{
 			BindingsWithoutArg.Add(NewBind);
+			AddDistinctBind(BindingsWithoutArgDistinct, NewBind);
 		}
 
 		return true;
 	}
 
+	private static void AddDistinctBind(List<BindingObject> lst, BindingObject bind)
+	{
+		bool found = false;
+		foreach(BindingObject b in lst)
+		{
+			if (b.Name == bind.Name)
+			{
+				found = true;
+			}
+		}
+		if (!found)
+		{
+			lst.Add(bind);
+		}
+	}
 
 	public static void UnBind(string KeyName)
 	{
@@ -313,32 +332,10 @@ public class Bindings : Node
 						{
 							InputMap.ActionEraseEvent(a, iek);
 
-							List<BindingObject> Removing = new List<BindingObject>();
-							foreach(BindingObject Bind in BindingsWithArg)
-							{
-								if(Bind.Name == a)
-								{
-									Removing.Add(Bind);
-								}
-							}
-							foreach(BindingObject Bind in Removing)
-							{
-								BindingsWithArg.Remove(Bind);
-							}
-
-							Removing.Clear();
-
-							foreach(BindingObject Bind in BindingsWithoutArg)
-							{
-								if(Bind.Name == KeyName)
-								{
-									Removing.Add(Bind);
-								}
-							}
-							foreach(BindingObject Bind in Removing)
-							{
-								BindingsWithoutArg.Remove(Bind);
-							}
+							RemoveBind(BindingsWithArg, a);
+							RemoveBind(BindingsWithArgDistinct, a);
+							RemoveBind(BindingsWithoutArg, a);
+							RemoveBind(BindingsWithoutArgDistinct, a);
 						}
 					}
 				}
@@ -346,6 +343,21 @@ public class Bindings : Node
 		}
 	}
 
+	private static void RemoveBind(List<BindingObject> lst, string action)
+	{
+		List<BindingObject> Removing = new List<BindingObject>();
+		foreach(BindingObject Bind in lst)
+		{
+			if(Bind.Name == action)
+			{
+				Removing.Add(Bind);
+			}
+		}
+		foreach(BindingObject Bind in Removing)
+		{
+			lst.Remove(Bind);
+		}
+	}
 
 	private static float GreaterEqualZero(float In)
 	{
@@ -387,6 +399,7 @@ public class Bindings : Node
 			return;
 		}
 
+		// FIXME - needs to use distinct based on binding type
 		foreach(BindingObject Binding in BindingsWithArg)
 		{
 			if (Binding.CommandWithArg != null)
@@ -476,7 +489,7 @@ public class Bindings : Node
 			}
 		}
 
-		foreach(BindingObject Binding in BindingsWithoutArg)
+		foreach(BindingObject Binding in BindingsWithoutArgDistinct)
 		{
 			if(Binding.Type == ButtonInfo.TYPE.SCANCODE || Binding.Type == ButtonInfo.TYPE.MOUSEBUTTON || Binding.Type == ButtonInfo.TYPE.CONTROLLERBUTTON)
 			{
@@ -523,7 +536,7 @@ public class Bindings : Node
 					}
 				}
 
-				foreach(BindingObject Binding in BindingsWithoutArg)
+				foreach(BindingObject Binding in BindingsWithoutArgDistinct)
 				{
 					if(Binding.Type == ButtonInfo.TYPE.MOUSEAXIS)
 					{
