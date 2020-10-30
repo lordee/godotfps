@@ -57,8 +57,6 @@ public class Minigun : Weapon
             }
             else
             {
-                _spinUpTime -= delta;
-            
                 _spinUpTime = (_spinUpTime - delta) < 0 ? 0 : _spinUpTime - delta;
 
                 if (_spinSound != SPINSOUND.DOWN)
