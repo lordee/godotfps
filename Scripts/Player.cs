@@ -62,7 +62,6 @@ public class Player : KinematicBody
     public List<Projectile> ActivePipebombs = new List<Projectile>();
     private bool _medicAura = false;
     public float SyringeHealTime = 0; // game time when next heal can be done by player
-    
 
     private int _maxArmour = 200;
     private float _currentArmour;
@@ -82,6 +81,20 @@ public class Player : KinematicBody
     private Vector3 _moveDirectionNorm = new Vector3();
     private float _jumpSpeed = 27.0f;                // The speed at which the character's up axis gains when hitting jump
     private float _moveSpeed = 15.0f;               // Ground move speed
+    private float MoveSpeed {
+        get {
+            float val = _moveSpeed;
+            if (this.PlayerClass == PLAYERCLASS.HWGUY)
+            {
+                Minigun mg = (Minigun)Weapon1;
+                if (mg.SpinUpTime != 0)
+                {
+                    val = val / 2;
+                }
+            }
+            return val;
+        }
+    }
     private float _runAcceleration = 14.0f;         // Ground accel
     private float _runDeacceleration = 10.0f;       // Deacceleration that occurs when running on the ground
     private float _friction = 6;
@@ -381,6 +394,9 @@ public class Player : KinematicBody
             case PLAYERCLASS.MEDIC:
                 ToggleAura();
                 break;
+            case PLAYERCLASS.HWGUY:
+                HWGuy.ToggleSpin(this);
+                break;
         }
     }
 
@@ -561,8 +577,12 @@ public class Player : KinematicBody
     {
         if (pCmd.attack == 1)
         {
+            ActiveWeapon.ShootPressed = true;
             ActiveWeapon.Shoot(pCmd, delta);
+            return;
         }
+
+        ActiveWeapon.ShootPressed = false;
     }
 
     public void ProcessMovementCmd(State predState, PlayerCmd pCmd, float delta)
@@ -652,7 +672,7 @@ public class Player : KinematicBody
         _moveDirectionNorm = wishDir;
 
         float wishSpeed = wishDir.Length();
-        wishSpeed *= _moveSpeed;
+        wishSpeed *= MoveSpeed;
         Accelerate(wishDir, wishSpeed, _runAcceleration, delta);
        
         if (_climbLadder)
@@ -704,7 +724,7 @@ public class Player : KinematicBody
         wishdir -= pCmd.aim.z * pCmd.move_forward;
 
         float wishspeed = wishdir.Length();
-        wishspeed *= _moveSpeed;
+        wishspeed *= MoveSpeed;
 
         wishdir = wishdir.Normalized();
         _moveDirectionNorm = wishdir;
@@ -852,7 +872,7 @@ public class Player : KinematicBody
             return 0;
 
         total = Mathf.Sqrt(pCmd.move_forward * pCmd.move_forward + pCmd.move_right * pCmd.move_right);
-        scale = _moveSpeed * max / (_moveScale * total);
+        scale = MoveSpeed * max / (_moveScale * total);
 
         return scale;
     }

@@ -1,8 +1,11 @@
-[gd_scene load_steps=4 format=2]
+[gd_scene load_steps=7 format=2]
 
 [ext_resource path="res://Assets/Models/Guns/machinegun.obj" type="ArrayMesh" id=1]
 [ext_resource path="res://Assets/Sounds/shots/cg1.wav" type="AudioStream" id=2]
 [ext_resource path="res://Assets/Sprites/muzzleflash/muzzleflash.png" type="Texture" id=3]
+[ext_resource path="res://Assets/Sounds/Weapons/MinigunSpinDown.wav" type="AudioStream" id=4]
+[ext_resource path="res://Assets/Sounds/Weapons/MinigunSpinUp.wav" type="AudioStream" id=5]
+[ext_resource path="res://Assets/Sounds/Weapons/MinigunIdle.wav" type="AudioStream" id=6]
 
 [node name="MiniGun" type="MeshInstance"]
 transform = Transform( -8, 2.60673e-06, 0, 2.60673e-06, 8, 2.60673e-06, 8.49381e-13, 2.60673e-06, -8, 0.497061, -0.490857, -0.921065 )
@@ -60,3 +63,12 @@ stream = ExtResource( 2 )
 transform = Transform( 0.005, 7.54979e-10, -2.5411e-21, -7.54979e-10, 0.005, 0, -2.64698e-22, 0, -0.05, 0.00232688, 0.00684905, 0.0469985 )
 visible = false
 texture = ExtResource( 3 )
+
+[node name="SpinDownSound" type="AudioStreamPlayer3D" parent="."]
+stream = ExtResource( 4 )
+
+[node name="SpinUpSound" type="AudioStreamPlayer3D" parent="."]
+stream = ExtResource( 5 )
+
+[node name="IdleSound" type="AudioStreamPlayer3D" parent="."]
+stream = ExtResource( 6 )

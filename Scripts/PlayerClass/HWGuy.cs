@@ -18,4 +18,10 @@ public class HWGuy
     static public WEAPONTYPE Weapon2 = WEAPONTYPE.SUPERSHOTGUN;
     static public WEAPONTYPE Weapon3 = WEAPONTYPE.SHOTGUN;
     static public WEAPONTYPE Weapon4 = WEAPONTYPE.AXE;
+
+    static public void ToggleSpin(Player pl)
+    {
+        Minigun mg = pl.Weapon1 as Minigun;
+        mg.Idle = !mg.Idle;
+    }
 }

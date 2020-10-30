@@ -35,6 +35,7 @@ abstract public class Weapon : MeshInstance
     public bool Reloading = false;
     protected int _pelletCount = 1;
     protected Vector3 _spread = new Vector3();
+    public bool ShootPressed = false;
 
     protected int _clipLeft = 0;
     public int ClipLeft
@@ -71,14 +72,12 @@ abstract public class Weapon : MeshInstance
     protected PackedScene _projectileScene;
     private Vector3 _weaponPosition = new Vector3(.5f, -.3f, -1f);
     private Sprite3D _muzzleFlash;
-    private AudioStreamPlayer3D _shootSound;
-    private AudioStreamPlayer3D _reloadSound;
-
-    
+    protected AudioStreamPlayer3D _shootSound;
+    protected AudioStreamPlayer3D _reloadSound;   
 
     // Nodes
     Game _game;
-    Player _playerOwner;
+    protected Player _playerOwner;
 
     // FIXME - there has to be a better way than this? values aren't being stored if i use godot nodes
     public void Init(Game game)
@@ -92,7 +91,7 @@ abstract public class Weapon : MeshInstance
         this.TimeSinceReloaded += delta;
     }
 
-    private void SpreadShoot(int shots, bool up, bool left, Vector3 shotLoc, Vector3 norm)
+    protected void SpreadShoot(int shots, bool up, bool left, Vector3 shotLoc, Vector3 norm)
     {
         Random ran = new Random();
         Vector3 dir = (shotLoc - this._playerOwner.Head.GlobalTransform.origin).Normalized();
@@ -268,7 +267,7 @@ abstract public class Weapon : MeshInstance
         }
     }
 
-    public void Spawn(Player p, string nodeName)
+    virtual public void Spawn(Player p, string nodeName)
     {
         PackedScene PackedScene = (PackedScene)ResourceLoader.Load(_weaponResource);
         _weaponMesh = (MeshInstance)PackedScene.Instance();
