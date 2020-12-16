@@ -76,7 +76,7 @@ abstract public class Weapon : MeshInstance
     protected AudioStreamPlayer3D _reloadSound;   
 
     // Nodes
-    Game _game;
+    protected Game _game;
     protected Player _playerOwner;
 
     // FIXME - there has to be a better way than this? values aren't being stored if i use godot nodes
@@ -152,8 +152,8 @@ abstract public class Weapon : MeshInstance
                             Vector3 shotLoc = ((Vector3)res["position"]);
                             Vector3 norm = (Vector3)res["normal"];
 
-                            _game.World.ParticleManager.MakePuff(PUFFTYPE.PUFF, shotLoc, null);
-                            Particles p = _game.World.ParticleManager.MakePuff(PUFFTYPE.PUFF, shotLoc, null);
+                            _game.World.ParticleManager.MakePuff(PARTICLE.PUFF, shotLoc, null);
+                            Particles p = _game.World.ParticleManager.MakePuff(PARTICLE.PUFF, shotLoc, null);
                             Transform t = p.GlobalTransform;
 
                             GD.Print(norm);
@@ -226,7 +226,7 @@ abstract public class Weapon : MeshInstance
                 Vector3 position = pos - rb.GlobalTransform.origin;
                 rb.ApplyImpulse(position, impulse * 10);
 
-                _game.World.ParticleManager.MakePuff(PUFFTYPE.PUFF, pos, (Node)rb);
+                _game.World.ParticleManager.MakePuff(PARTICLE.PUFF, pos, (Node)rb);
             } 
             else if (res["collider"] is Player pl)
             {
@@ -234,13 +234,13 @@ abstract public class Weapon : MeshInstance
                 dam = Damage / _pelletCount;
 
                 pl.TakeDamage(_playerOwner, _playerOwner.GlobalTransform.origin, dam);
-                _game.World.ParticleManager.MakePuff(PUFFTYPE.BLOOD, pos, (Node)pl);
+                _game.World.ParticleManager.MakePuff(PARTICLE.BLOOD, pos, (Node)pl);
 
                 pl.AddDebuff(_playerOwner, WeaponType, _debuffLength);
             }
             else
             {
-                _game.World.ParticleManager.MakePuff(PUFFTYPE.PUFF, pos, null);
+                _game.World.ParticleManager.MakePuff(PARTICLE.PUFF, pos, null);
             }
         }
     }

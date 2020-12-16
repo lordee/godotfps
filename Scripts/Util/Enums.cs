@@ -95,10 +95,11 @@ public enum PLAYERCLASS
 
 }
 
-public enum PUFFTYPE
+public enum PARTICLE
 {
     BLOOD,
-    PUFF
+    PUFF,
+    FLAMETHROWER
 }
 
 public enum WEAPONSHOTTYPE
@@ -122,6 +123,8 @@ public enum WEAPONTYPE
     GRENADELAUNCHER,
     PIPEBOMBLAUNCHER,
     ROCKETLAUNCHER,
+    FLAMETHROWER,
+    INCENDIARYCANNON,
     MINIGUN,
     FRAG,
     FLASH,
@@ -129,6 +132,7 @@ public enum WEAPONTYPE
     SHOCK,
     MIRV,
     MIRVCHILD,
+    NAPALM,
     DETPACK,
 }
 
@@ -156,7 +160,9 @@ public class ProjectileInfo
         MIRVCHILD = 9,
         PIPEBOMB = 10,
         DETPACK = 11,
-        BULLET
+        BULLET,
+        NAPALM,
+        INCENDIARYROCKET
     }
 
     static public Dictionary<WEAPONTYPE, PROJECTILE> Weapons = new Dictionary<WEAPONTYPE, PROJECTILE> {
@@ -165,12 +171,14 @@ public class ProjectileInfo
         {WEAPONTYPE.GRENADELAUNCHER, ProjectileInfo.PROJECTILE.GRENADE},
         {WEAPONTYPE.PIPEBOMBLAUNCHER, ProjectileInfo.PROJECTILE.PIPEBOMB},
         {WEAPONTYPE.ROCKETLAUNCHER, ProjectileInfo.PROJECTILE.ROCKET},
+        {WEAPONTYPE.INCENDIARYCANNON, ProjectileInfo.PROJECTILE.INCENDIARYROCKET},
         {WEAPONTYPE.FRAG, ProjectileInfo.PROJECTILE.FRAG},
         {WEAPONTYPE.FLASH, ProjectileInfo.PROJECTILE.FLASH},
         {WEAPONTYPE.CONCUSSION, ProjectileInfo.PROJECTILE.CONCUSSION},
         {WEAPONTYPE.SHOCK, ProjectileInfo.PROJECTILE.SHOCK},
         {WEAPONTYPE.MIRV, ProjectileInfo.PROJECTILE.MIRV},
         {WEAPONTYPE.MIRVCHILD, ProjectileInfo.PROJECTILE.MIRVCHILD},
+        {WEAPONTYPE.NAPALM, ProjectileInfo.PROJECTILE.NAPALM},
         {WEAPONTYPE.DETPACK, ProjectileInfo.PROJECTILE.DETPACK},
     };
 
@@ -180,13 +188,14 @@ public class ProjectileInfo
         {ProjectileInfo.PROJECTILE.GRENADE, "res://Scenes/Weapons/Grenade.tscn"},
         {ProjectileInfo.PROJECTILE.PIPEBOMB, "res://Scenes/Weapons/Pipebomb.tscn"},
         {ProjectileInfo.PROJECTILE.ROCKET, "res://Scenes/Weapons/Rocket.tscn"},
+        {ProjectileInfo.PROJECTILE.INCENDIARYROCKET, "res://Scenes/Weapons/IncendiaryRocket.tscn"},
         {ProjectileInfo.PROJECTILE.CONCUSSION, "res://Scenes/Weapons/HandGrenades/ConcussionGrenade.tscn"},
         {ProjectileInfo.PROJECTILE.FLASH, "res://Scenes/Weapons/HandGrenades/FlashGrenade.tscn"},
         {ProjectileInfo.PROJECTILE.FRAG, "res://Scenes/Weapons/HandGrenades/FragGrenade.tscn"},
         {ProjectileInfo.PROJECTILE.SHOCK, "res://Scenes/Weapons/HandGrenades/ShockGrenade.tscn"},
         {ProjectileInfo.PROJECTILE.MIRV, "res://Scenes/Weapons/HandGrenades/MIRVGrenade.tscn"},
+        {ProjectileInfo.PROJECTILE.NAPALM, "res://Scenes/Weapons/HandGrenades/Napalm.tscn"},
         {ProjectileInfo.PROJECTILE.MIRVCHILD, "res://Scenes/Weapons/Grenade.tscn"},
         {ProjectileInfo.PROJECTILE.DETPACK, "res://Scenes/Weapons/Detpack.tscn"},
     };
 }
-

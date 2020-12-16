@@ -340,7 +340,7 @@ public class Network : Node
         }
     }
 
-    public void SendParticle(int playerID, PUFFTYPE puffType, Vector3 pos, Node puffOwner)
+    public void SendParticle(int playerID, PARTICLE puffType, Vector3 pos, Node puffOwner)
     {
         RpcId(playerID, nameof(ReceiveParticle), (int)puffType, pos.x, pos.y, pos.z, puffOwner == null ? "" : puffOwner.Name);
     }
@@ -353,7 +353,7 @@ public class Network : Node
         {
             owner = _game.World.FindNode(nodeID);
         }
-        _game.World.ParticleManager.MakePuff((PUFFTYPE)puffType, new Vector3(posx, posy, posz), owner);
+        _game.World.ParticleManager.MakePuff((PARTICLE)puffType, new Vector3(posx, posy, posz), owner);
     }
 
     // FIXME - only h/a of owning player

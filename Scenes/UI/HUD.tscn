@@ -41,6 +41,8 @@ position = Vector2( 377.171, 569.539 )
 texture = ExtResource( 5 )
 
 [node name="ArmourLabel" type="Label" parent="Manager"]
+anchor_top = -0.025
+anchor_bottom = -0.025
 margin_left = 419.0
 margin_top = 533.0
 margin_right = 483.0
@@ -51,13 +53,12 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Crosshair" type="Sprite" parent="Manager"]
-position = Vector2( 512, 300 )
-scale = Vector2( 0.1, 0.1 )
-texture = ExtResource( 2 )
-
 [node name="AimAt" type="Node2D" parent="Manager"]
 position = Vector2( 512, 300 )
+
+[node name="Crosshair" type="Sprite" parent="Manager/AimAt"]
+scale = Vector2( 0.1, 0.1 )
+texture = ExtResource( 2 )
 
 [node name="FPS" type="Label" parent="Manager"]
 margin_right = 40.0

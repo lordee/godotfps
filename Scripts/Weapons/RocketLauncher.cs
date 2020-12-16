@@ -5,7 +5,7 @@ public class RocketLauncher : Weapon
         _minAmmoRequired = 1;
         _clipSize = 4;
         _clipLeft = _clipSize;
-        _coolDown = 1.0f;
+        _coolDown = 0.1f;
         _reloadTime = 4.0f;
         _weaponShotType = WEAPONSHOTTYPE.PROJECTILE;
         _ammoType = AMMUNITION.ROCKETS;

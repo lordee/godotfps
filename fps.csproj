@@ -68,7 +68,9 @@
     <Compile Include="Scripts\UI\IUIItem.cs" />
     <Compile Include="Scripts\Weapons\Bullet.cs" />
     <Compile Include="Scripts\Weapons\Detpack.cs" />
+    <Compile Include="Scripts\Weapons\Flame.cs" />
     <Compile Include="Scripts\Weapons\HandGrenades\MIRVGrenade.cs" />
+    <Compile Include="Scripts\Weapons\HandGrenades\Napalm.cs" />
     <Compile Include="Scripts\Weapons\HandGrenades\ShockGrenade.cs" />
     <Compile Include="Scripts\Weapons\NailTink.cs" />
     <Compile Include="Scripts\World.cs" />
@@ -100,6 +102,9 @@
     <Compile Include="Scripts\Weapons\SuperShotgun.cs" />
     <Compile Include="Scripts\Weapons\RocketLauncher.cs" />
     <Compile Include="Scripts\Weapons\Rocket.cs" />
+    <Compile Include="Scripts\Weapons\IncendiaryCannon.cs" />
+    <Compile Include="Scripts\Weapons\IncendiaryRocket.cs" />
+    <Compile Include="Scripts\Weapons\Flamethrower.cs" />
     <Compile Include="Scripts\Weapons\HandGrenades\HandGrenade.cs" />
     <Compile Include="Scripts\Weapons\HandGrenades\ConcussionGrenade.cs" />
     <Compile Include="Scripts\Weapons\HandGrenades\FlashGrenade.cs" />
@@ -113,6 +118,7 @@
     <Compile Include="Scripts\Weapons\Minigun.cs" />
     <Compile Include="Scripts\PlayerClass\Demoman.cs" />
     <Compile Include="Scripts\PlayerClass\HWGuy.cs" />
+    <Compile Include="Scripts\PlayerClass\Pyro.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

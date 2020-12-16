@@ -1,0 +1,24 @@
+[gd_scene load_steps=5 format=2]
+
+[ext_resource path="res://Assets/Models/Guns/firethrower.obj" type="ArrayMesh" id=1]
+[ext_resource path="res://Assets/Sprites/muzzleflash/muzzleflash.png" type="Texture" id=2]
+[ext_resource path="res://Assets/Sounds/shots/rocket.wav" type="AudioStream" id=3]
+[ext_resource path="res://Assets/Sounds/shots/pistol.wav" type="AudioStream" id=4]
+
+[node name="Flamethrower" type="MeshInstance"]
+transform = Transform( 0.01, 0, 0, 0, 0.01, 0, 0, 0, 0.01, 0, 0, 0.232331 )
+mesh = ExtResource( 1 )
+material/0 = null
+
+[node name="MuzzleFlash" type="Sprite3D" parent="."]
+transform = Transform( 0.005, 0, 0, 0, 0.005, 0, 1.11022e-16, 0, 0.05, -1.56816e-08, 0.00909746, 0.0887458 )
+visible = false
+texture = ExtResource( 2 )
+
+[node name="ShootSound" type="AudioStreamPlayer3D" parent="."]
+transform = Transform( 0.005, 0, 0, 0, 0.005, 0, 0, 0, 0.05, 8.88178e-16, 0.00717604, 0.0406193 )
+stream = ExtResource( 3 )
+
+[node name="ReloadSound" type="AudioStreamPlayer3D" parent="."]
+transform = Transform( 0.005, 0, 0, 0, 0.005, 0, 1.11022e-16, 0, 0.05, 1.77636e-15, 0.00717604, 0.0406193 )
+stream = ExtResource( 4 )

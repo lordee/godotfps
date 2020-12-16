@@ -22,7 +22,6 @@ public class Player : KinematicBody
     public PlayerController PlayerController = null;
     public bool PlayerControlled = false;
     AudioStreamPlayer _grenTimer = null;
-    
 
     // fields
     public int Team;
@@ -397,6 +396,9 @@ public class Player : KinematicBody
             case PLAYERCLASS.HWGUY:
                 HWGuy.ToggleSpin(this);
                 break;
+            case PLAYERCLASS.PYRO:
+                Pyro.AirBlast(this);
+                break;
         }
     }
 
@@ -493,6 +495,8 @@ public class Player : KinematicBody
     {
         switch (wt)
         {
+            case WEAPONTYPE.NAPALM:
+            case WEAPONTYPE.FLAMETHROWER:
             case WEAPONTYPE.CONCUSSION:
             case WEAPONTYPE.FLASH:
                 Debuffs.Add(new Debuff{
@@ -1003,6 +1007,12 @@ public class Player : KinematicBody
             case WEAPONTYPE.MINIGUN:
                 weap = new Minigun();
                 break;
+            case WEAPONTYPE.INCENDIARYCANNON:
+                weap = new IncendiaryCannon();
+                break;
+            case WEAPONTYPE.FLAMETHROWER:
+                weap = new Flamethrower();
+                break;
             case WEAPONTYPE.NONE:
             default:
 
@@ -1106,7 +1116,18 @@ public class Player : KinematicBody
                 _gren2Count = HWGuy.MaxGren2;
                 break;
             case PLAYERCLASS.PYRO:
-
+                _maxHealth = Pyro.Health;
+                _maxArmour = Pyro.Armour;
+                _weapon1 = SetupWeapon(Pyro.Weapon1);
+                _weapon2 = SetupWeapon(Pyro.Weapon2);
+                _weapon3 = SetupWeapon(Pyro.Weapon3);
+                _weapon4 = SetupWeapon(Pyro.Weapon4);
+                ActiveWeapon = _weapon1;
+                _moveSpeed = Pyro.MoveSpeed;
+                _gren1Type = Pyro.Gren1Type;
+                _gren2Type = Pyro.Gren2Type;
+                _gren1Count = Pyro.MaxGren1;
+                _gren2Count = Pyro.MaxGren2;
                 break;
             case PLAYERCLASS.SPY:
 

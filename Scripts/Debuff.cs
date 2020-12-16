@@ -20,6 +20,12 @@ public class Debuff
             case WEAPONTYPE.SYRINGE:
                 ApplySyringe();
                 break;
+            case WEAPONTYPE.NAPALM:
+                ApplyBurn(Napalm.BurnDamage);
+                break;
+            case WEAPONTYPE.FLAMETHROWER:
+                ApplyBurn(Flamethrower.BurnDamage);
+                break;
         }
     }
 
@@ -38,5 +44,10 @@ public class Debuff
         // heals are taken care of in initial swing, so this is only ever damage
         // TODO - on player touch (so not this think function), spread disease
         Owner.TakeDamage(Attacker, Owner.GlobalTransform.origin, Syringe.BioDamage);
+    }
+
+    private void ApplyBurn(float damage)
+    {
+        Owner.TakeDamage(Attacker, Owner.GlobalTransform.origin, damage);
     }
 }
